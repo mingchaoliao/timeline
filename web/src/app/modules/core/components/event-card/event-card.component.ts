@@ -1,0 +1,51 @@
+import {Component, Input, OnInit} from '@angular/core';
+import {DomSanitizer} from '@angular/platform-browser';
+import {CommonService} from '../../shared/services/common.service';
+import {UserService} from '../../shared/services/user.service';
+import {User} from '../../shared/models/user';
+import {Url} from '../../shared/classes/url';
+import {EventService} from '../../shared/services/event.service';
+
+@Component({
+  selector: 'app-event-card',
+  templateUrl: './event-card.component.html',
+  styleUrls: ['./event-card.component.css']
+})
+export class EventCardComponent implements OnInit {
+
+  @Input() data;
+  @Input() isPreview = false;
+  public isDeleted = false;
+
+  constructor(
+    public sanitizer: DomSanitizer,
+    public common: CommonService,
+    private eventService: EventService) {
+
+  }
+
+  getImageUrl(path: string): string {
+    return Url.getImageByPath(
+      path,
+      UserService.getUser() === null ? false : UserService.getUser().isAdmin
+    );
+  }
+
+  public getUser(): User {
+    return UserService.getUser();
+  }
+
+  ngOnInit() {
+  }
+
+  public onDelete(id: number) {
+    this.eventService.deleteById(id).subscribe(
+      success => {
+        this.isDeleted = true;
+      },
+      error => {
+        // TODO: handle error
+      }
+    );
+  }
+}

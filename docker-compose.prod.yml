@@ -1,0 +1,42 @@
+version: '2'
+services:
+  api:
+    build:
+      context: api
+      dockerfile: Dockerfile
+    user: apiuser
+    ports:
+      - 5002:80
+    volumes:
+      - ./api/storage:/usr/share/nginx/api/storage
+    depends_on:
+      - mysql
+      - elasticsearch
+    environment:
+      DB_HOST: mysql
+  mysql:
+    image: mysql:5.7.22
+    command: --disable-partition-engine-check
+    ports:
+      - 5003:3306
+    volumes:
+      - ./mysql:/var/lib/mysql
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_DATABASE: timeline
+      MYSQL_USER: timeline_user
+      MYSQL_PASSWORD: timeline_user_pwd
+  elasticsearch:
+    build: elasticsearch
+    volumes:
+      - ./elasticsearch/data:/usr/share/elasticsearch/data
+    ports:
+      - 5004:9200
+    environment:
+      TAKE_FILE_OWNERSHIP: 1
+  web:
+    build:
+      context: web
+      dockerfile: Dockerfile
+    ports:
+      - 5001:80

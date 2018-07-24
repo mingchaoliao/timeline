@@ -1,0 +1,30 @@
+FROM php:7.1-fpm-alpine
+
+RUN apk update && apk add build-base \
+  wget \
+  curl \
+  git \
+  grep \
+  zlib-dev \
+  zip \
+  libmcrypt-dev \
+  freetype-dev \
+  libjpeg-turbo-dev \
+  libpng-dev
+
+RUN docker-php-ext-install mysqli mbstring pdo pdo_mysql mcrypt tokenizer gd
+
+RUN curl -sS https://getcomposer.org/installer | php \
+        && mv composer.phar /usr/local/bin/ \
+        && ln -s /usr/local/bin/composer.phar /usr/local/bin/composer
+
+RUN adduser -h /home/apiuser -s /bin/sh -D apiuser apiuser
+
+USER root
+RUN mkdir -p /timeline/api && chown apiuser:apiuser /timeline/api
+
+USER apiuser
+WORKDIR /timeline/api
+COPY . /timeline/api
+
+CMD if ! test -d vendor; then composer install; fi; if ! test -f .env; then cp .env.dev.example .env; php artisan key:generate; fi; php-fpm

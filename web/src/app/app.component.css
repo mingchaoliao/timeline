@@ -1,0 +1,13 @@
+header {
+  width: 100%;
+  background: white;
+}
+
+#headerContainer {
+  max-width: 960px;
+}
+
+#headerContainer > .row {
+  line-height: 1rem;
+  padding: 1rem;
+}

@@ -1,0 +1,26 @@
+<div class="container">
+  <app-search-event-form></app-search-event-form>
+  <div class="row">
+    <div class="col-12" style="margin-top: 15px" *ngFor="let event of events">
+      <app-event-card
+        [data]="event"
+      ></app-event-card>
+    </div>
+  </div>
+  <div class="row" style="margin-top: 15px;">
+    <div class="col-12">
+      <ngb-pagination
+        class="d-flex justify-content-center"
+        [collectionSize]="total"
+        [(page)]="page"
+        [maxSize]="5"
+        [boundaryLinks]="true"
+        [rotate]="true"
+        (pageChange)="onPageChange($event)"
+        [pageSize]="pageSize"
+        aria-label="Default pagination"
+      ></ngb-pagination>
+    </div>
+  </div>
+
+</div>

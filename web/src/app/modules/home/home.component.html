@@ -1,0 +1,43 @@
+<div [class]="displayMethod === 'timeline' ? 'container-fluid' : 'container'">
+  <div class="row">
+    <div class="col">
+      <div class="btn-group btn-group-sm btn-group-toggle" ngbRadioGroup [(ngModel)]="displayMethod"
+           (change)="onDisplayMethodChange()">
+        <label ngbButtonLabel class="btn-outline-primary">
+          <input ngbButton type="radio" value="timeline">
+          <ng-container i18n>Timeline</ng-container>
+        </label>
+        <label ngbButtonLabel class="btn-outline-primary">
+          <input ngbButton type="radio" value="list">
+          <ng-container i18n>List</ng-container>
+        </label>
+      </div>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <div id="timeline" style="width: 100%; height: 600px;" [hidden]="displayMethod !== 'timeline'"></div>
+
+      <div class="row" [hidden]="displayMethod !== 'list'">
+        <div class="col-12" *ngFor="let event of events">
+          <app-event-card
+            [data]="event"
+          ></app-event-card>
+        </div>
+        <div class="col-12">
+          <ngb-pagination
+            class="d-flex justify-content-center"
+            [collectionSize]="total"
+            [(page)]="page"
+            [maxSize]="5"
+            [boundaryLinks]="true"
+            [rotate]="true"
+            (pageChange)="onPageChange($event)"
+            [pageSize]="pageSize"
+            aria-label="Default pagination"
+          ></ngb-pagination>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

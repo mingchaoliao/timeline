@@ -1,0 +1,138 @@
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <form [formGroup]="createEventForm">
+        <div class="row">
+          <div class="col">
+            <div class="form-group">
+              <label for="startDate">
+                <ng-container i18n="start date">Start Date</ng-container>
+                <span class="form-field-required-indicator">*</span></label>
+              <input class="form-control"
+                     type="text"
+                     id="startDate"
+                     (change)="onStartDateChange()"
+                     formControlName="startDate"
+              >
+              <div class="error-container" *ngIf="(isSubmitted || createEventForm.controls.startDate.dirty) && !createEventForm.controls.startDate.valid">
+                <div *ngIf="!createEventForm.controls.startDate.errors.required && (createEventForm.controls.startDate.errors.invalidDate || createEventForm.controls.startDate.errors.pattern)">Start date is invalid</div>
+                <div *ngIf="createEventForm.controls.startDate.errors.required">Start date is required</div>
+              </div>
+            </div>
+          </div>
+          <div class="col-3"
+               [hidden]="createEventForm.value.startDate == null || createEventForm.value.startDate.length != 4 || !createEventForm.controls.startDate.valid">
+            <div class="form-group">
+              <label for="startDateAttributeId" i18n="attribute">Attribute</label>
+              <ng-select [items]="dateAttributeOptions"
+                         bindLabel="value"
+                         bindValue="id"
+                         formControlName="startDateAttributeId"
+                         id="startDateAttributeId">
+              </ng-select>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col">
+            <div class="form-group">
+              <label for="endDate" i18n="end date">End Date</label>
+              <input class="form-control"
+                     type="text"
+                     (change)="onEndDateChange()"
+                     id="endDate"
+                     formControlName="endDate">
+            </div>
+            <div class="error-container" *ngIf="(isSubmitted || createEventForm.controls.endDate.dirty) && !createEventForm.controls.endDate.valid">
+              <div>End date is invalid</div>
+            </div>
+          </div>
+          <div class="col-3"
+               [hidden]="createEventForm.value.endDate == null || createEventForm.value.endDate.length != 4 || !createEventForm.controls.endDate.valid">
+            <div class="form-group">
+              <label for="endDateAttributeId" i18n="attribute">Attribute</label>
+              <ng-select [items]="dateAttributeOptions"
+                         bindLabel="value"
+                         bindValue="id"
+                         formControlName="endDateAttributeId"
+                         id="endDateAttributeId">
+              </ng-select>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="periodId" i18n="period">Period</label>
+          <ng-select [items]="periodOptions"
+                     bindLabel="value"
+                     bindValue="id"
+                     [loading]="addPeriodLoading"
+                     [hideSelected]="true"
+                     [addTag]="addPeriod"
+                     formControlName="periodId"
+                     id="periodId">
+          </ng-select>
+        </div>
+
+        <div class="form-group">
+          <label for="catalogs" i18n="catalog">Catalogs</label>
+          <ng-select [items]="catalogOptions"
+                     bindLabel="value"
+                     bindValue="id"
+                     [hideSelected]="true"
+                     [addTag]="addCatalog"
+                     [multiple]="true"
+                     [loading]="addCatalogLoading"
+                     formControlName="catalogs"
+                     id="catalogs">
+          </ng-select>
+        </div>
+
+        <div class="form-group">
+          <label for="content">
+            <ng-container i18n="content">Content</ng-container>
+            <span class="form-field-required-indicator">*</span></label>
+          <app-rich-text-editor id="content" formControlName="content"></app-rich-text-editor>
+          <div class="error-container" *ngIf="(isSubmitted || createEventForm.controls.content.dirty) && !createEventForm.controls.content.valid">
+            <div>Content is required</div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="images" i18n="image">Images</label>
+          <app-event-image-input
+            id="images"
+            formControlName="images"
+          ></app-event-image-input>
+          <div class="error-container" *ngIf="(isSubmitted || createEventForm.controls.images.dirty) && !createEventForm.controls.images.valid">
+            <div>Image file is required</div>
+          </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 15px;">
+          <button class="btn btn-outline-primary" (click)="onPreview(previewModal)" i18n="preview">Preview</button>
+          <label for="submit" class="sr-only" i18n="submit">Submit</label>
+          <input class="btn btn-outline-primary" type="submit" id="submit" (click)="onSubmit()" i18n-value="submit"
+                 value="Submit">
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <ng-template #previewModal let-c="close" let-d="dismiss">
+    <div class="modal-header">
+      <h4 class="modal-title" i18n>Event Preview</h4>
+      <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <app-event-card
+        [data]="previewData"
+        [isPreview]="true"
+      ></app-event-card>
+    </div>
+  </ng-template>
+
+</div>

@@ -1,0 +1,81 @@
+<div class="row">
+  <div class="col-12">
+    <form [formGroup]="searchEventForm">
+      <div class="row">
+        <div class="col">
+          <div class="form-group">
+            <label for="content" i18n="content">Content</label>
+            <input type="text"
+                   class="form-control"
+                   id="content"
+                   formControlName="content">
+          </div>
+        </div>
+        <div class="col">
+          <div class="form-group">
+            <label for="startDate" i18n="start date">Start Date</label>
+            <div class="input-group">
+              <input
+                class="form-control"
+                type="text"
+                ngbDatepicker
+                i18n-placeholder
+                [autoClose]="true"
+                placeholder="Format: YYYY-MM-DD. e.g. 1969-11-04"
+                #startDate="ngbDatepicker"
+                [startDate]="{year: 1900, month: 1, day: 1}"
+                [minDate]="{year: 1800, month: 1, day: 1}"
+                [maxDate]="{year: 2010, month: 1, day: 1}"
+                formControlName="startDate"
+                id="startDate"
+              />
+              <div class="input-group-append">
+                <button class="btn btn-outline-secondary" (click)="startDate.toggle()" type="button"
+                        style="border-color: #ced4da">
+                  <i class="far fa-calendar-alt"></i>
+                </button>
+              </div>
+            </div>
+            <div class="error-container" *ngIf="searchEventForm.controls.startDate.dirty && !searchEventForm.controls.startDate.valid">
+              <div>Start date is invalid</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <div class="row">
+        <div class="col">
+          <div class="form-group">
+            <label for="period" i18n="period">Period</label>
+            <ng-select [items]="periodOptions"
+                       bindLabel="value"
+                       bindValue="id"
+                       [hideSelected]="true"
+                       formControlName="period"
+                       id="period">
+            </ng-select>
+          </div>
+        </div>
+        <div class="col">
+          <div class="form-group">
+            <label for="catalogs" i18n="catalog">Catalogs</label>
+            <ng-select [items]="catalogOptions"
+                       bindLabel="value"
+                       bindValue="id"
+                       [hideSelected]="true"
+                       [multiple]="true"
+                       formControlName="catalogs"
+                       id="catalogs">
+            </ng-select>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top: 15px;">
+        <button class="btn btn-outline-primary" (click)="onSearch()" i18n="search">Search</button>
+      </div>
+    </form>
+
+  </div>
+</div>

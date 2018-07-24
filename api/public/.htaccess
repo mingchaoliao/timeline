@@ -1,0 +1,26 @@
+Header set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Headers "X-Requested-With,X-Total-Count,Content-Type,Origin,Authorization,Accept,Client-Security-Token,Accept-Encoding"
+Header always set Access-Control-Expose-Headers "X-Total-Count"
+Header set Access-Control-Allow-Methods "GET,OPTIONS,DELETE,POST,PUT"
+
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Handle Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>

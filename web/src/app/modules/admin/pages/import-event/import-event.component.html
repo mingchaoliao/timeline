@@ -1,0 +1,36 @@
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <p>Drag/Select a excel/csv file and multiple photos</p>
+      <form [formGroup]="importEventForm">
+        <div class="form-group">
+          <label for="files" class="sr-only" i18n="file">Files</label>
+          <input #files
+                 type="file"
+                 multiple="multiple"
+                 formControlName="files"
+                 [hidden]="isUploading"
+                 class="form-control"
+                 style="padding: 50% 0 15px 15px;"
+                 id="files"
+                 (change)="filesChanged($event)">
+        </div>
+      </form>
+      <p *ngIf="errorMessage !== null" style="color: red;">
+        <ng-container i18n="error">Error</ng-container>
+        : {{errorMessage}}
+      </p>
+    </div>
+    <div class="col-12" *ngIf="eventsData.length > 0">
+      <p>Total {{eventsData.length}} events will be uploaded.</p>
+      <button class="btn btn-outline-primary"
+              (click)="onSubmit()"
+              *ngIf="!isUploading"
+              i18n="save">Save
+      </button>
+      <ngb-progressbar *ngIf="isUploading" type="success" [value]="percentage" [striped]="true"
+                       [animated]="true"></ngb-progressbar>
+    </div>
+  </div>
+
+</div>

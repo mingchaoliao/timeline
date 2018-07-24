@@ -1,0 +1,42 @@
+<div class="container">
+  <div class="row">
+    <div class="col">
+      <form [formGroup]="signupForm">
+        <div class="form-group">
+          <label for="name" i18n="name">Name</label>
+          <input type="text"
+                 class="form-control"
+                 id="name"
+                 i18n-placeholder
+                 formControlName="name"
+                 placeholder="Enter full name">
+        </div>
+        <div class="form-group">
+          <label for="email" i18n="email">Email</label>
+          <input type="text"
+                 class="form-control"
+                 id="email"
+                 i18n-placeholder="email placeholder"
+                 formControlName="email"
+                 placeholder="Enter email">
+        </div>
+        <div class="form-group">
+          <label for="password" i18n>Password</label>
+          <input type="password"
+                 class="form-control"
+                 id="password"
+                 i18n-placeholder="password placeholder"
+                 formControlName="password"
+                 placeholder="Password">
+        </div>
+        <button type="submit" class="btn btn-primary" (click)="onSubmit()" i18n="sign up">Sign up</button>
+      </form>
+    </div>
+  </div>
+  <div class="row mt-3">
+    <div class="col">
+      <ng-container i18n>Already have an account?</ng-container>
+      <a routerLink="/account/login" i18n="sign in">Sign in</a>
+    </div>
+  </div>
+</div>
