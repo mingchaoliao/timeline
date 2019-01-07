@@ -4,8 +4,8 @@
 
 export const environment = {
   production: false,
-  wsRoot: 'https://api.timeline',
-  whitelistedDomains: ['api.timeline', 'api.timeline:443'],
+  wsRoot: 'https://localhost:9443/timeline-api',
+  whitelistedDomains: ['localhost:9443'],
   company: {
     name: 'Mingchao Liao',
     url: 'https://somethine'

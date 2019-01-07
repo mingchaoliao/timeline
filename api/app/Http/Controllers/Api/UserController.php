@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Input;
 use Laravel\Passport\Http\Controllers\AccessTokenController;
 
 class UserController extends Controller
@@ -78,10 +79,21 @@ class UserController extends Controller
 
     public function getCurrentUser()
     {
-
         $user = $this->userRepository->getCurrentUser();
 
         return response()->json($user);
+    }
+
+    public function grantOrRevokeAdminPrivilege(Request $request) {
+        $this->validate($request,[
+            'id' => 'integer|gt:0',
+            'isAdmin' => 'boolean'
+        ]);
+
+        return response()->json($this->userRepository->grantOrRevokeAdminPrivilege(
+            Input::get('id'),
+            Input::get('isAdmin')
+        ));
     }
 
     public function login(Request $request)
@@ -114,6 +126,10 @@ class UserController extends Controller
         } catch (\Exception $e) {
             return response()->json(['message' => $e->getMessage()], 500);
         }
+    }
+
+    public function getAllUser() {
+        return response()->json($this->userRepository->getAll()->toJsonArray());
     }
 
     /**

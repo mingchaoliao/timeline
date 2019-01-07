@@ -27,12 +27,12 @@ export class EventCardComponent implements OnInit {
   getImageUrl(path: string): string {
     return Url.getImageByPath(
       path,
-      UserService.getUser() === null ? false : UserService.getUser().isAdmin
+      UserService.getCurrentUser() === null ? false : UserService.getCurrentUser().isAdmin
     );
   }
 
   public getUser(): User {
-    return UserService.getUser();
+    return UserService.getCurrentUser();
   }
 
   ngOnInit() {

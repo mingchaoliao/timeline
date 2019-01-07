@@ -42,6 +42,7 @@ Route::group(['middleware' => ['auth:api', 'admin']], function () {
 
     Route::post('/period/bulkCreate', 'PeriodController@bulkCreate');
     Route::post('/period', 'PeriodController@createPeriod');
+    Route::get('/period/detail', 'PeriodController@getDetail');
 
     Route::post('/catalog/bulkCreate', 'CatalogController@bulkCreate');
     Route::post('/catalog', 'CatalogController@createCatalog');
@@ -50,4 +51,7 @@ Route::group(['middleware' => ['auth:api', 'admin']], function () {
     Route::post('/dateAttribute', 'DateAttributeController@createDateAttribute');
 
     Route::post('/image', 'ImageController@uploadImage');
+
+    Route::get('/user/all', 'UserController@getAllUser');
+    Route::put('/user/grantOrRevokeAdminPrivilege', 'UserController@grantOrRevokeAdminPrivilege');
 });

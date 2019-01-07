@@ -8,9 +8,11 @@
 
 namespace App\Repositories;
 
+use App\DomainModels\Collections\UserCollection;
 use App\DomainModels\User;
 use App\EloquentModels\EloquentUser;
 use App\Exceptions\UserNotFoundException;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Auth;
 
 class UserRepository extends BaseRepository
@@ -19,6 +21,11 @@ class UserRepository extends BaseRepository
     public function getCurrentUser()
     {
         return $this->constructUser(Auth::user());
+    }
+
+    public function getAll(): UserCollection
+    {
+        return $this->constructUserCollection(EloquentUser::all());
     }
 
     public function constructUser(EloquentUser $eloquentUser): User
@@ -32,6 +39,28 @@ class UserRepository extends BaseRepository
             $eloquentUser->getCreatedAt(),
             $eloquentUser->getUpdatedAt()
         );
+    }
+
+    public function constructUserCollection(Collection $eloquentUsers): UserCollection
+    {
+        return new UserCollection($eloquentUsers->map(function (EloquentUser $eloquentUser) {
+            return $this->constructUser($eloquentUser);
+        })->toArray());
+    }
+
+    public function grantOrRevokeAdminPrivilege(int $id, bool $isAdmin): bool {
+        $user = EloquentUser::where('id', '=', $id)->first();
+
+        if($user === null) {
+            throw new \InvalidArgumentException(sprintf(
+                'User with ID "%d" not found',
+                $id
+            ));
+        }
+
+        return $user->update([
+            'is_admin' => $isAdmin
+        ]);
     }
 
     public function createUser(string $name, string $email, string $password, bool $isAdmin = false): User
@@ -55,7 +84,7 @@ class UserRepository extends BaseRepository
     {
         $eloquentUser = EloquentUser::where('email', $email)->first();
 
-        if($eloquentUser === null) {
+        if ($eloquentUser === null) {
             throw new UserNotFoundException();
         }
 

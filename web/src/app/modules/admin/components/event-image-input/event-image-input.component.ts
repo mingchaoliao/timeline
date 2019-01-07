@@ -32,7 +32,7 @@ export class EventImageInputComponent
   getImageUrl(path: string): string {
     return Url.getImageByPath(
       path,
-      UserService.getUser() === null ? false : UserService.getUser().isAdmin
+      UserService.getCurrentUser() === null ? false : UserService.getCurrentUser().isAdmin
     );
   }
 

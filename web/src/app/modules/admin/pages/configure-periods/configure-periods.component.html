@@ -1,0 +1,33 @@
+<div class="container">
+    <div class="card">
+        <div class="card-body">
+            adsf
+        </div>
+    </div>
+    <div class="row">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Periods</th>
+                <th scope="col"># of associated events</th>
+                <th scope="col">Created At</th>
+                <th scope="col">Created By</th>
+                <th scope="col">Updated At</th>
+                <th scope="col">Updated By</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr *ngFor="let period of periods">
+                <td>{{ period.id }}</td>
+                <td>{{ period.value }}</td>
+                <td></td>
+                <td>{{ period.createdAt |  }}</td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

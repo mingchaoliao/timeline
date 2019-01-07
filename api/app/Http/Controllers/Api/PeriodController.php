@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\EloquentModels\EloquentPeriod;
 use App\Exceptions\PeriodNotFoundException;
 use App\Repositories\PeriodRepository;
 use Illuminate\Http\Request;
@@ -15,6 +16,11 @@ class PeriodController extends Controller
     public function __construct(PeriodRepository $periodRepository)
     {
         $this->periodRepository = $periodRepository;
+    }
+
+    public function typeahead() {
+        $options = $this->periodRepository->getTypeahead();
+        return response()->json($options);
     }
 
     public function get() {

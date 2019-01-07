@@ -71,6 +71,10 @@
                      [hideSelected]="true"
                      [addTag]="addPeriod"
                      formControlName="periodId"
+                     notFoundText="No item found. Type to create a new one."
+                     i18n-notFoundText
+                     addTagText="Add Item"
+                     i18n-addTagText
                      id="periodId">
           </ng-select>
         </div>
@@ -85,6 +89,10 @@
                      [multiple]="true"
                      [loading]="addCatalogLoading"
                      formControlName="catalogs"
+                     notFoundText="No item found. Type to create a new one."
+                     i18n-notFoundText
+                     addTagText="Add Item"
+                     i18n-addTagText
                      id="catalogs">
           </ng-select>
         </div>
@@ -113,7 +121,7 @@
         <div class="form-group" style="margin-top: 15px;">
           <button class="btn btn-outline-primary" (click)="onPreview(previewModal)" i18n="preview">Preview</button>
           <label for="submit" class="sr-only" i18n="submit">Submit</label>
-          <input class="btn btn-outline-primary" type="submit" id="submit" (click)="onSubmit()" i18n-value="submit"
+          <input class="btn btn-outline-primary m-2" type="submit" id="submit" (click)="onSubmit()" i18n-value="submit"
                  value="Submit">
         </div>
       </form>

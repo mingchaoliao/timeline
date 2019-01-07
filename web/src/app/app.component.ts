@@ -26,7 +26,7 @@ export class AppComponent {
   }
 
   getUser() {
-    return UserService.getUser();
+    return UserService.getCurrentUser();
   }
 
   public logout() {

@@ -18,8 +18,12 @@ use Illuminate\Support\Facades\Auth;
 
 class PeriodRepository extends BaseRepository
 {
+    public function getTypeahead() {
+        return EloquentPeriod::select(['id', 'value'])->get();
+    }
+
     public function getCollection(): PeriodCollection {
-        $eloquentCollection = EloquentPeriod::all();
+        $eloquentCollection = EloquentPeriod::with(['create_user', 'update_user'])->get();
         return $this->constructPeriodCollection($eloquentCollection);
     }
 
@@ -77,8 +81,11 @@ class PeriodRepository extends BaseRepository
         return new Period(
             $eloquentPeriod->getId(),
             $eloquentPeriod->getValue(),
+            $eloquentPeriod->getNumberOfEvents(),
             $eloquentPeriod->getCreateUserId(),
+            $eloquentPeriod->getCreateUser() === null ? null : $eloquentPeriod->getCreateUser()->getName(),
             $eloquentPeriod->getUpdateUserId(),
+            $eloquentPeriod->getUpdateUser() === null ? null : $eloquentPeriod->getUpdateUser()->getName(),
             $eloquentPeriod->getCreatedAt(),
             $eloquentPeriod->getUpdatedAt()
         );

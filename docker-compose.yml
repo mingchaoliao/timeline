@@ -29,7 +29,7 @@ services:
     ports:
       - 13306:3306
     volumes:
-      - ./mysql:/var/lib/mysql
+      - dbdata1:/var/lib/mysql
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       MYSQL_DATABASE: timeline
@@ -38,9 +38,12 @@ services:
   elasticsearch:
     build: elasticsearch
     volumes:
-      - ./elasticsearch/data:/usr/share/elasticsearch/data
+      - esdata1:/usr/share/elasticsearch/data
     ports:
-      - 19200:9200
+      - 9200:9200
+      - 9300:9300
+    environment:
+      discovery.type: single-node
 #  web:
 #    build:
 #      context: web
@@ -49,3 +52,8 @@ services:
 #      - 14200:4200
 #    volumes:
 #      - .:/timeline
+volumes:
+  esdata1:
+    driver: local
+  dbdata1:
+    driver: local

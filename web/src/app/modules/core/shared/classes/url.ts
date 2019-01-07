@@ -17,6 +17,14 @@ export class Url {
     return environment.wsRoot + '/event';
   }
 
+  static getAllUser(): string {
+      return environment.wsRoot + '/user/all';
+  }
+
+  static grantOrRevokeAdminPrivilege(): string {
+    return environment.wsRoot + '/user/grantOrRevokeAdminPrivilege';
+  }
+
   static getImageByPath(path: string, withAdminAccess: boolean = false): string {
     if (withAdminAccess) {
       return environment.wsRoot + '/admin/image/' + path;
