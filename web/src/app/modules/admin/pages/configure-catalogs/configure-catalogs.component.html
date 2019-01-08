@@ -1,0 +1,48 @@
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <button class="btn btn-outline-primary" (click)="createModalRef = modalService.open(createModal)">Create New</button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-6 mt-3" *ngFor="let catalog of catalogs; let index = index">
+      <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-12">
+              <input type="text" #input (change)="catalog['dirty'] = $event.srcElement.value !== catalog.value" class="form-control" id="value_{{ catalog.id }}" [value]="catalog.value">
+            </div>
+            <div class="col-12"># of associated events: {{ catalog.numberOfEvents }}</div>
+            <div class="col-12">
+              Created At: {{ catalog.createdAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }} by {{ catalog.createUserName }}
+            </div>
+            <div class="col-12" *ngIf="catalog.createdAt != catalog.updatedAt">
+              Updated At: {{ catalog.updatedAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }} by {{ catalog.updateUserName }}
+            </div>
+            <div class="col-12">
+              <button class="btn btn-outline-primary mr-2" *ngIf="catalog['dirty']" (click)="update(index, input.value)">Save</button>
+              <button class="btn btn-outline-danger" (click)="delete(index)">Delete</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #createModal let-c="close" let-d="dismiss">
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-12">
+        <div class="form-group">
+          <label for="value">Value:</label>
+          <input #input type="text" id="value" class="form-control">
+        </div>
+      </div>
+      <div class="col-12 text-right">
+        <button class="btn btn-outline-secondary" (click)="d('close')">Cancel</button>
+        <button class="btn btn-outline-primary ml-2" [disabled]="!input.value" (click)="createNew(input.value)">Create</button>
+      </div>
+    </div>
+  </div>
+</ng-template>

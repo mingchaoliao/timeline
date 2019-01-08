@@ -1,33 +1,48 @@
 <div class="container">
-    <div class="card">
-        <div class="card-body">
-            adsf
+    <div class="row">
+        <div class="col-12">
+            <button class="btn btn-outline-primary" (click)="createModalRef = modalService.open(createModal)">Create New</button>
         </div>
     </div>
     <div class="row">
-        <table class="table table-striped">
-            <thead>
-            <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Periods</th>
-                <th scope="col"># of associated events</th>
-                <th scope="col">Created At</th>
-                <th scope="col">Created By</th>
-                <th scope="col">Updated At</th>
-                <th scope="col">Updated By</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr *ngFor="let period of periods">
-                <td>{{ period.id }}</td>
-                <td>{{ period.value }}</td>
-                <td></td>
-                <td>{{ period.createdAt |  }}</td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            </tbody>
-        </table>
+        <div class="col-6 mt-3" *ngFor="let period of periods; let index = index">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-12">
+                            <input type="text" #input (change)="period['dirty'] = $event.srcElement.value !== period.value" class="form-control" id="value_{{ period.id }}" [value]="period.value">
+                        </div>
+                        <div class="col-12"># of associated events: {{ period.numberOfEvents }}</div>
+                        <div class="col-12">
+                            Created At: {{ period.createdAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }} by {{ period.createUserName }}
+                        </div>
+                        <div class="col-12" *ngIf="period.createdAt != period.updatedAt">
+                            Updated At: {{ period.updatedAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }} by {{ period.updateUserName }}
+                        </div>
+                        <div class="col-12">
+                            <button class="btn btn-outline-primary mr-2" *ngIf="period['dirty']" (click)="update(index, input.value)">Save</button>
+                            <button class="btn btn-outline-danger" (click)="delete(index)">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+<ng-template #createModal let-c="close" let-d="dismiss">
+    <div class="modal-body">
+        <div class="row">
+            <div class="col-12">
+                <div class="form-group">
+                    <label for="value">Value:</label>
+                    <input #input type="text" id="value" class="form-control">
+                </div>
+            </div>
+            <div class="col-12 text-right">
+                <button class="btn btn-outline-secondary" (click)="d('close')">Cancel</button>
+                <button class="btn btn-outline-primary ml-2" [disabled]="!input.value" (click)="createNew(input.value)">Create</button>
+            </div>
+        </div>
+    </div>
+</ng-template>

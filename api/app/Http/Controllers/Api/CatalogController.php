@@ -7,6 +7,7 @@ use App\Repositories\CatalogRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Input;
 
 class CatalogController extends Controller
 {
@@ -17,24 +18,14 @@ class CatalogController extends Controller
         $this->catalogRepository = $catalogRepository;
     }
 
-    /**
-     * @OAS\Get(
-     *     path="/api/catalog",
-     *     tags={"catalog"},
-     *     summary="Get all catalogs",
-     *     description="Get all catalogs",
-     *     operationId="catalog.get",
-     *     @OAS\RequestBody(
-     *         description="Create user object",
-     *         required=true
-     *     ),
-     *     @OAS\Response(
-     *         response="default",
-     *         description="successful operation"
-     *     )
-     * )
-     */
-    public function get() {
+    public function getTypeahead()
+    {
+        $options = $this->catalogRepository->getTypeahead();
+        return response()->json($options);
+    }
+
+    public function get()
+    {
         $collection = $this->catalogRepository->getCollection();
         return response()->json($collection);
     }
@@ -76,6 +67,27 @@ class CatalogController extends Controller
         );
 
         return response()->json($catalog);
+    }
+
+    public function update(Request $request)
+    {
+        $this->validate($request, [
+            'id' => 'integer|gt:0',
+            'value' => 'string'
+        ]);
+        $catalog = $this->catalogRepository->update(
+            Input::get('id'),
+            Input::get('value')
+        );
+        return response()->json($catalog->toArray());
+    }
+
+    public function delete(Request $request)
+    {
+        $this->validate($request, [
+            'id' => 'integer|gt:0'
+        ]);
+        return response()->json($this->catalogRepository->delete(Input::get('id')));
     }
 
     public function bulkCreate(Request $request) {

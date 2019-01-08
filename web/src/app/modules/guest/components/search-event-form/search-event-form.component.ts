@@ -48,7 +48,7 @@ export class SearchEventFormComponent implements OnInit {
       'catalogs': [null, []],
     });
 
-    this.periodService.get().subscribe(
+    this.periodService.getTypeahead().subscribe(
       periods => this.periodOptions = periods,
       error => {
         // TODO: handle error

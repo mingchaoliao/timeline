@@ -11,21 +11,37 @@ namespace App\Repositories;
 
 use App\DomainModels\Catalog;
 use App\DomainModels\Collections\CatalogCollection;
+use App\DomainModels\Collections\TypeaheadCollection;
+use App\DomainModels\Typeahead;
 use App\EloquentModels\EloquentCatalog;
 use App\Exceptions\CatalogNotFoundException;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\Auth;
 
 class CatalogRepository extends BaseRepository
 {
-    public function getCollection(): CatalogCollection {
-        $eloquentCatalogCollection = EloquentCatalog::all();
-        return $this->constructCatalogCollection($eloquentCatalogCollection);
+    public function getTypeahead(): TypeaheadCollection
+    {
+        $payload = EloquentCatalog::select(['id', 'value'])
+            ->get()
+            ->map(function (EloquentCatalog $period) {
+                return new Typeahead($period->getId(), $period->getValue());
+            })
+            ->toArray();
+        return new TypeaheadCollection($payload);
     }
 
-    public function bulkCreate(array $values, int $createUserId): CatalogCollection {
+    public function getCollection(): CatalogCollection
+    {
+        $eloquentCollection = EloquentCatalog::with(['create_user', 'update_user'])->get();
+        return $this->constructCatalogCollection($eloquentCollection);
+    }
+
+    public function bulkCreate(array $values, int $createUserId): CatalogCollection
+    {
         $eloquentCatalogs = EloquentCatalog::byValues($values)->get();
 
-        $existingValues = $eloquentCatalogs->map(function(EloquentCatalog $catalog) {
+        $existingValues = $eloquentCatalogs->map(function (EloquentCatalog $catalog) {
             return $catalog->getValue();
         })->toArray();
 
@@ -39,7 +55,39 @@ class CatalogRepository extends BaseRepository
         return $this->constructCatalogCollection($eloquentCatalogs);
     }
 
-    public function create(string $value, int $createUserId): Catalog {
+    public function update(int $id, string $value): Catalog
+    {
+        $catalog = EloquentCatalog::where('id', '=', $id)->first();
+        if ($catalog === null) {
+            throw new \InvalidArgumentException(sprintf(
+                'Catalog with id "%s" not found',
+                $id
+            ));
+        }
+
+        $catalog->update([
+            'value' => $value,
+            'update_user_id' => Auth::id()
+        ]);
+
+        return $this->getById($id);
+    }
+
+    public function delete(int $id): bool
+    {
+        $catalog = EloquentCatalog::where('id', '=', $id)->first();
+        if ($catalog === null) {
+            throw new \InvalidArgumentException(sprintf(
+                'Catalog with id "%s" not found',
+                $id
+            ));
+        }
+
+        return $catalog->delete();
+    }
+
+    public function create(string $value, int $createUserId): Catalog
+    {
         $eloquentCatalog = EloquentCatalog::createNew(
             $value,
             $createUserId
@@ -47,24 +95,27 @@ class CatalogRepository extends BaseRepository
         return $this->constructCatalog($eloquentCatalog);
     }
 
-    public function doesValueExist($value): bool {
+    public function doesValueExist($value): bool
+    {
         try {
             $this->getByValue($value);
             return true;
-        } catch(CatalogNotFoundException $e) {
+        } catch (CatalogNotFoundException $e) {
             return false;
         }
     }
 
-    public function getByValue(string $value): Catalog {
+    public function getByValue(string $value): Catalog
+    {
         $eloquentCatalog = EloquentCatalog::where('value', $value)->first();
-        if($eloquentCatalog === null) {
+        if ($eloquentCatalog === null) {
             throw new CatalogNotFoundException();
         }
         return $this->constructCatalog($eloquentCatalog);
     }
-    
-    public function getCollectionByIds(array $ids): CatalogCollection {
+
+    public function getCollectionByIds(array $ids): CatalogCollection
+    {
         $eloquentCatalogCollection = EloquentCatalog::findMany($ids);
         return $this->constructCatalogCollection($eloquentCatalogCollection);
     }
@@ -74,11 +125,23 @@ class CatalogRepository extends BaseRepository
         return new Catalog(
             $eloquentCatalog->getId(),
             $eloquentCatalog->getValue(),
+            $eloquentCatalog->getNumberOfEvents(),
             $eloquentCatalog->getCreateUserId(),
+            $eloquentCatalog->getCreateUser()->getName(),
             $eloquentCatalog->getUpdateUserId(),
+            $eloquentCatalog->getUpdateUser() === null ? null : $eloquentCatalog->getUpdateUser()->getName(),
             $eloquentCatalog->getCreatedAt(),
             $eloquentCatalog->getUpdatedAt()
         );
+    }
+
+    public function getById(int $id): Catalog
+    {
+        $catalog = EloquentCatalog::find($id);
+        if ($catalog === null) {
+            throw new CatalogNotFoundException();
+        }
+        return $this->constructCatalog($catalog);
     }
 
     public function constructCatalogCollection(Collection $collection): CatalogCollection

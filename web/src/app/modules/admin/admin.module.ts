@@ -13,7 +13,7 @@ import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import {UserManagementComponent} from './pages/user-management/user-management.component';
 import {MomentModule} from "ngx-moment";
 import { ConfigurePeriodsComponent } from './pages/configure-periods/configure-periods.component';
-import { ConfigureTagsComponent } from './pages/configure-tags/configure-tags.component';
+import { ConfigureCatalogsComponent } from './pages/configure-catalogs/configure-catalogs.component';
 
 @NgModule({
     imports: [
@@ -34,7 +34,7 @@ import { ConfigureTagsComponent } from './pages/configure-tags/configure-tags.co
         EventImageInputComponent,
         UserManagementComponent,
         ConfigurePeriodsComponent,
-        ConfigureTagsComponent
+        ConfigureCatalogsComponent
     ],
     exports: []
 })

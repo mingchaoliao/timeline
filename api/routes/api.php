@@ -20,9 +20,9 @@ Route::get('/dateAttribute', 'DateAttributeController@get');
 
 Route::get('/dateFormat', 'DateFormatController@get');
 
-Route::get('/catalog', 'CatalogController@get');
+Route::get('/catalog/typeahead', 'CatalogController@getTypeahead');
 
-Route::get('/period', 'PeriodController@get');
+Route::get('/period/typeahead', 'PeriodController@getTypeahead');
 
 Route::post('/register', 'UserController@register');
 Route::post('/login', 'UserController@login');
@@ -42,10 +42,15 @@ Route::group(['middleware' => ['auth:api', 'admin']], function () {
 
     Route::post('/period/bulkCreate', 'PeriodController@bulkCreate');
     Route::post('/period', 'PeriodController@createPeriod');
-    Route::get('/period/detail', 'PeriodController@getDetail');
+    Route::get('/period', 'PeriodController@get');
+    Route::put('/period', 'PeriodController@update');
+    Route::delete('/period', 'PeriodController@delete');
 
+    Route::get('/catalog', 'CatalogController@get');
     Route::post('/catalog/bulkCreate', 'CatalogController@bulkCreate');
     Route::post('/catalog', 'CatalogController@createCatalog');
+    Route::put('/catalog', 'CatalogController@update');
+    Route::delete('/catalog', 'CatalogController@delete');
 
     Route::post('/dateAttribute/bulkCreate', 'DateAttributeController@bulkCreate');
     Route::post('/dateAttribute', 'DateAttributeController@createDateAttribute');

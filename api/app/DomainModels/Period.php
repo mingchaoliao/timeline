@@ -37,7 +37,7 @@ class Period extends AbstractBase
      */
     private $updateUserId;
     /**
-     * @var string
+     * @var string|null
      */
     private $updateUserName;
     /**
@@ -57,11 +57,11 @@ class Period extends AbstractBase
      * @param int $createUserId
      * @param string $createUserName
      * @param int|null $updateUserId
-     * @param string $updateUserName
+     * @param string|null $updateUserName
      * @param Carbon $createdAt
      * @param Carbon|null $updatedAt
      */
-    public function __construct(int $id, string $value, int $numberOfEvents, int $createUserId, string $createUserName, ?int $updateUserId, string $updateUserName, Carbon $createdAt, ?Carbon $updatedAt)
+    public function __construct(int $id, string $value, int $numberOfEvents, int $createUserId, string $createUserName, ?int $updateUserId, ?string $updateUserName, Carbon $createdAt, ?Carbon $updatedAt)
     {
         $this->id = $id;
         $this->value = $value;
@@ -139,9 +139,9 @@ class Period extends AbstractBase
     }
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getUpdateUserName(): string
+    public function getUpdateUserName(): ?string
     {
         return $this->updateUserName;
     }

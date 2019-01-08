@@ -113,7 +113,7 @@ export class CreateEventComponent
       }
     );
 
-    this.periodService.get().subscribe(
+    this.periodService.getTypeahead().subscribe(
       periods => {
         this.periodOptions = periods;
         this.periodOptionsKvMap = this.common.kvArrToMap(this.periodOptions);
