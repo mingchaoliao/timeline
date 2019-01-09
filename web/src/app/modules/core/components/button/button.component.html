@@ -1,0 +1,4 @@
+<button [class]="'btn ' + style" (click)="onClick()" [disabled]="disabled" *ngIf="!isLoading">
+  <ng-content></ng-content>
+</button>
+<img src="/assets/img/loading.svg" alt="loading" *ngIf="isLoading" style="height: 30px;" class="ml-3">

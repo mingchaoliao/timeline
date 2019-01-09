@@ -1,0 +1,9 @@
+<div style="position: fixed; top: 10px; width: 100%; z-index: 2000; padding: 0 15px;">
+  <div class="row">
+    <div class="col-12" *ngFor="let notification of notifications;">
+      <ngb-alert (close)="close(notification)" [dismissible]="notification.isDismissible" [type]="notification.type" *ngIf="!notification.isTimeout">
+        {{ notification.message }}
+      </ngb-alert>
+    </div>
+  </div>
+</div>

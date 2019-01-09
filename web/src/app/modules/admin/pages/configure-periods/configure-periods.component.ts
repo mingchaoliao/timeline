@@ -1,7 +1,9 @@
-import {Component, OnInit} from '@angular/core';
-import {PeriodService} from "../../../core/shared/services/period.service";
-import {Period} from "../../../core/shared/models/period";
-import {NgbModal, NgbModalRef} from "@ng-bootstrap/ng-bootstrap";
+import {Component, EventEmitter, OnInit} from '@angular/core';
+import {PeriodService} from '../../../core/shared/services/period.service';
+import {Period} from '../../../core/shared/models/period';
+import {NgbModal, NgbModalRef} from '@ng-bootstrap/ng-bootstrap';
+import {Notification} from '../../../core/shared/models/notification';
+import {NotificationEmitter} from '../../../core/shared/events/notificationEmitter';
 
 @Component({
   selector: 'app-configure-periods',
@@ -14,41 +16,65 @@ export class ConfigurePeriodsComponent implements OnInit {
   public createModalRef: NgbModalRef = null;
 
   constructor(
-      public periodService: PeriodService,
-      public modalService: NgbModal
+    public periodService: PeriodService,
+    public modalService: NgbModal
   ) {
     periodService.get().subscribe(
-        s => {
-          this.periods = s;
-        }
+      s => {
+        this.periods = s;
+      },
+      error => {
+        NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve periods'));
+      }
     );
   }
 
-  public delete(index: number) {
+  public delete(loading: EventEmitter<boolean>, index: number) {
+    loading.emit(true);
     const period = this.periods[index];
     this.periodService.delete(period.id).subscribe(
-        s => {
-          this.periods.splice(index, 1);
-        }
+      s => {
+        this.periods.splice(index, 1);
+        loading.emit(false);
+        NotificationEmitter.emit(Notification.success('Delete successfully'));
+      },
+      error => {
+        loading.emit(false);
+        NotificationEmitter.emit(Notification.error(error.error.message, `Unable to delete period with ID "${period.id}"`));
+      }
     );
   }
 
-  public update(index: number, value: string) {
-      const period = this.periods[index];
-      this.periodService.update(period.id, value).subscribe(
-          s => {
-              this.periods[index] = s;
-          }
-      );
+  public update(loading: EventEmitter<boolean>, index: number, value: string) {
+    loading.emit(true);
+    const period = this.periods[index];
+    this.periodService.update(period.id, value).subscribe(
+      s => {
+        this.periods[index] = s;
+        loading.emit(false);
+        NotificationEmitter.emit(Notification.success('Update successfully'));
+      },
+      error => {
+        loading.emit(false);
+        NotificationEmitter.emit(Notification.error(error.error.message, `Unable to update period with ID "${period.id}"`));
+      }
+    );
   }
 
-  public createNew(value: string) {
+  public createNew(loading: EventEmitter<boolean>, value: string) {
+    loading.emit(true);
     this.periodService.create(value).subscribe(
-        s => {
-          this.periods.push(s);
-          this.createModalRef.close();
-        }
-    )
+      s => {
+        this.periods.push(s);
+        this.createModalRef.close();
+        loading.emit(false);
+        NotificationEmitter.emit(Notification.success('Create successfully'));
+      },
+      error => {
+        loading.emit(false);
+        NotificationEmitter.emit(Notification.error(error.error.message, `Unable to create period "${value}"`));
+      }
+    );
   }
 
   ngOnInit() {

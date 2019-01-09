@@ -3,7 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Repositories\EventRepository;
+use Carbon\Carbon;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
@@ -50,10 +52,21 @@ class TimelineGenerateCommand extends Command
 
         $timelineConfig = $events->toTimelineArray();
 
+        if(count($timelineConfig) === 0) {
+            $timelineConfig = [
+                'start_date' => [
+                    'year' => Carbon::now()->year
+                ],
+                'unique_id' => 1,
+                'text' => '<p>Sign in as administrator to create first event!</p>'
+            ];
+        }
+
         $json = json_encode([
             'events' => $timelineConfig
         ]);
 
         File::put(Storage::path('public/timeline.json'), $json);
+        
     }
 }

@@ -20,7 +20,9 @@
                id="gridCheck1"
                [checked]="user.isAdmin"
                (change)="grantOrRevokeAdminFor(user, $event)"
+               *ngIf="!user['isLoading']"
         >
+        <img src="/assets/img/loading.svg" alt="loading" style="height: 20px;" *ngIf="user['isLoading']">
       </td>
       <td>{{ user.createdAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}}</td>
     </tr>

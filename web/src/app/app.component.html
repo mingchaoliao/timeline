@@ -2,12 +2,11 @@
   <div class="container" id="headerContainer">
     <div class="row flex-nowrap justify-content-between align-items-center">
       <div class="d-none d-md-block col-2">
-      <!--<a class="text-muted" routerLink="/app/about" i18n="about">About</a>-->
       </div>
       <div class="col text-sm-left text-md-center px-0">
         <a class="blog-header-logo text-dark" routerLink="/">
           <h1 style="font-size: 1.5em;">
-            Timeline
+            {{ title }}
           </h1>
         </a>
       </div>
@@ -19,23 +18,37 @@
             <line x1="21" y1="21" x2="15.8" y2="15.8"></line>
           </svg>
         </a>
-        <a class="btn btn-sm btn-outline-primary" routerLink="/account/login" *ngIf="getUser() === null" i18n="sign in">Sign
+        <a class="btn btn-sm btn-outline-primary" routerLink="/account/login" *ngIf="getUser() === null"
+           i18n="sign in button text@@signInBtn">Sign
           in</a>
         <div class="dropdown show" *ngIf="getUser() !== null">
-          <a class="btn-link dropdown-toggle" href="#" role="button" id="dropdownMenuLink" data-toggle="dropdown"
+          <a class="btn-link dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+             data-toggle="dropdown"
              aria-haspopup="true" aria-expanded="false">
             <span class="d-none d-sm-inline">{{ getUser().name }}</span>
             <span class="d-sm-none" style="font-size: 1.1rem"><i class="far fa-user-circle"></i></span>
           </a>
 
           <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-            <a class="dropdown-item" routerLink="/admin/create-event" *ngIf="getUser().isAdmin" i18n>Create Event</a>
-            <a class="dropdown-item" routerLink="/admin/import-event" *ngIf="getUser().isAdmin" i18n>Import Event</a>
-            <a class="dropdown-item" routerLink="/admin/user-management" *ngIf="getUser().isAdmin" i18n>User Management</a>
-            <a class="dropdown-item" routerLink="/admin/configure-periods" *ngIf="getUser().isAdmin" i18n>Configure Periods</a>
-            <a class="dropdown-item" routerLink="/admin/configure-catalogs" *ngIf="getUser().isAdmin" i18n>Configure Catalogs</a>
-            <a class="dropdown-item" routerLink="/admin/configure-date-attributes" *ngIf="getUser().isAdmin" i18n>Configure Date Attributes</a>
-            <a class="dropdown-item" (click)="logout()" routerLink="/" i18n>Logout</a>
+            <a class="dropdown-item" routerLink="/admin/create-event" *ngIf="getUser().isAdmin"
+               i18n="create event navigation link@@createEventNavLink">Create
+              Event</a>
+            <a class="dropdown-item" routerLink="/admin/import-event" *ngIf="getUser().isAdmin"
+               i18n="import events navigation link@@importEventNavLink">Import
+              Events</a>
+            <a class="dropdown-item" routerLink="/admin/user-management" *ngIf="getUser().isAdmin"
+               i18n="user management navigation link@@userManagementNavLink">User
+              Management</a>
+            <a class="dropdown-item" routerLink="/admin/configure-periods" *ngIf="getUser().isAdmin"
+               i18n="periods configuration navigation link@@configurePeriodsEventNavLink">Configure
+              Periods</a>
+            <a class="dropdown-item" routerLink="/admin/configure-catalogs" *ngIf="getUser().isAdmin"
+               i18n="catalogs configuration navigation link@@configureCatalogsNavLink">Configure
+              Catalogs</a>
+            <a class="dropdown-item" routerLink="/admin/configure-date-attributes" *ngIf="getUser().isAdmin"
+               i18n="date attributes configuration navigation link@@configureDateAttributesEventNavLink">Configure Date
+              Attributes</a>
+            <a class="dropdown-item" (click)="logout()" routerLink="/" i18n="logout navigation link@@logoutNavLink">Logout</a>
           </div>
         </div>
       </div>
@@ -44,6 +57,7 @@
 </header>
 
 <main role="main" style="margin-top: 75px;">
+  <app-notification></app-notification>
   <router-outlet></router-outlet>
 </main>
 

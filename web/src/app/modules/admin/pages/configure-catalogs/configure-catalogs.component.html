@@ -20,8 +20,8 @@
               Updated At: {{ catalog.updatedAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }} by {{ catalog.updateUserName }}
             </div>
             <div class="col-12">
-              <button class="btn btn-outline-primary mr-2" *ngIf="catalog['dirty']" (click)="update(index, input.value)">Save</button>
-              <button class="btn btn-outline-danger" (click)="delete(index)">Delete</button>
+              <app-button [style]="'btn-outline-primary mr-2'" *ngIf="catalog['dirty']" (onclick)="update($event, index, input.value)">Save</app-button>
+              <app-button [style]="'btn-outline-danger'" (onclick)="delete($event, index)">Delete</app-button>
             </div>
           </div>
         </div>
@@ -41,7 +41,7 @@
       </div>
       <div class="col-12 text-right">
         <button class="btn btn-outline-secondary" (click)="d('close')">Cancel</button>
-        <button class="btn btn-outline-primary ml-2" [disabled]="!input.value" (click)="createNew(input.value)">Create</button>
+        <app-button [style]="'btn-outline-primary ml-2'" [disabled]="!input.value" (onclick)="createNew($event, input.value)">Create</app-button>
       </div>
     </div>
   </div>

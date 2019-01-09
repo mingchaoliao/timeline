@@ -15,6 +15,7 @@ import {MomentModule} from "ngx-moment";
 import { ConfigurePeriodsComponent } from './pages/configure-periods/configure-periods.component';
 import { ConfigureCatalogsComponent } from './pages/configure-catalogs/configure-catalogs.component';
 import { ConfigureDateAttributesComponent } from './pages/configure-date-attributes/configure-date-attributes.component';
+import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
 
 @NgModule({
     imports: [
@@ -36,7 +37,8 @@ import { ConfigureDateAttributesComponent } from './pages/configure-date-attribu
         UserManagementComponent,
         ConfigurePeriodsComponent,
         ConfigureCatalogsComponent,
-        ConfigureDateAttributesComponent
+        ConfigureDateAttributesComponent,
+        ConfirmationModalComponent
     ],
     exports: []
 })

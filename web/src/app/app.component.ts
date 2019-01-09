@@ -2,6 +2,8 @@ import {Component} from '@angular/core';
 import {UserService} from './modules/core/shared/services/user.service';
 import * as moment from 'moment';
 import {environment} from '../environments/environment';
+import {NotificationEmitter} from './modules/core/shared/events/notificationEmitter';
+import {Notification} from './modules/core/shared/models/notification';
 
 @Component({
   selector: 'app-root',
@@ -9,7 +11,7 @@ import {environment} from '../environments/environment';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'app';
+  public title = environment.title;
   public currentYear: string;
   public company: any;
 

@@ -3,6 +3,8 @@ import {ActivatedRoute, NavigationExtras, Router} from '@angular/router';
 import {CommonService} from '../../../core/shared/services/common.service';
 import * as moment from 'moment';
 import {EventService} from '../../../core/shared/services/event.service';
+import {Notification} from '../../../core/shared/models/notification';
+import {NotificationEmitter} from '../../../core/shared/events/notificationEmitter';
 
 @Component({
   selector: 'app-search-event',
@@ -56,8 +58,10 @@ export class SearchEventComponent implements OnInit {
 
   private search(params: any) {
     this.isLocked = true;
-    const startDate = params['startDate'];
-    const endDate = params['endDate'];
+    const startDateFrom = params['startDateFrom'];
+    const startDateTo = params['startDateTo'];
+    const endDateFrom = params['endDateFrom'];
+    const endDateTo = params['endDateTo'];
     const period = params['period'];
     const catalogs = params['catalogs'];
     const content = params['content'];
@@ -65,15 +69,19 @@ export class SearchEventComponent implements OnInit {
     this.page = page;
 
     try {
-      this.validateDate(startDate);
-      this.validateDate(endDate);
+      this.validateDate(startDateFrom);
+      this.validateDate(startDateTo);
+      this.validateDate(endDateFrom);
+      this.validateDate(endDateTo);
       this.validatePeriod(period);
       this.validateCatalogs(catalogs);
       this.validatePage(page);
 
       this.eventService.search(
-        startDate,
-        endDate,
+        startDateFrom,
+        startDateTo,
+        endDateFrom,
+        endDateTo,
         period,
         catalogs,
         content,
@@ -84,7 +92,7 @@ export class SearchEventComponent implements OnInit {
           this.events = events;
         },
         error => {
-          // TODO: handle error
+          NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to search events'));
         },
         () => {
           this.isLocked = false;

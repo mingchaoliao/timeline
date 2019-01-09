@@ -3,24 +3,27 @@
     <div class="col">
       <form [formGroup]="loginForm">
         <div class="form-group">
-          <label for="email" i18n="email">Email</label>
+          <label for="email" i18n="email label@@emailLabel">Email</label>
           <input type="text"
                  class="form-control"
                  id="email"
+                 appAutofocus
                  formControlName="email"
-                 i18n-placeholder="email placeholder"
+                 i18n-placeholder="email placeholder@@emailInputPlaceholder"
                  placeholder="Enter email">
         </div>
         <div class="form-group">
-          <label for="password" i18n="password">Password</label>
+          <label for="password" i18n="password label@@passwordLabel">Password</label>
           <input type="password"
                  class="form-control"
                  id="password"
-                 i18n-placeholder="password placeholder"
+                 i18n-placeholder="password placeholder@@passwordPlaceholder"
                  formControlName="password"
                  placeholder="Password">
         </div>
-        <button type="submit" class="btn btn-primary" (click)="onSubmit()" i18n="sign in">Sign in</button>
+        <app-button [style]="'btn-primary'" (onclick)="onSubmit($event)" i18n="sign in button text@@signInBtn">
+          Sign in
+        </app-button>
       </form>
     </div>
   </div>

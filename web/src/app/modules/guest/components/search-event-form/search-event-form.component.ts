@@ -5,6 +5,8 @@ import {CommonService} from '../../../core/shared/services/common.service';
 import {NavigationExtras, Router} from '@angular/router';
 import {PeriodService} from '../../../core/shared/services/period.service';
 import {CatalogService} from '../../../core/shared/services/catalog.service';
+import {Notification} from '../../../core/shared/models/notification';
+import {NotificationEmitter} from '../../../core/shared/events/notificationEmitter';
 
 export function dateValidator(): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {
@@ -40,7 +42,16 @@ export class SearchEventFormComponent implements OnInit {
     private catalogService: CatalogService
   ) {
     this.searchEventForm = this.formBuilder.group({
-      'startDate': [null, [
+      'startDateFrom': [null, [
+        dateValidator()
+      ]],
+      'startDateTo': [null, [
+        dateValidator()
+      ]],
+      'endDateFrom': [null, [
+        dateValidator()
+      ]],
+      'endDateTo': [null, [
         dateValidator()
       ]],
       'content': [null, []],
@@ -51,16 +62,16 @@ export class SearchEventFormComponent implements OnInit {
     this.periodService.getTypeahead().subscribe(
       periods => this.periodOptions = periods,
       error => {
-        // TODO: handle error
+        NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve periods'));
       }
     );
 
-    this.catalogService.get().subscribe(
+    this.catalogService.getTypeahead().subscribe(
       catalogs => {
         this.catalogOptions = catalogs;
       },
       e => {
-        // TODO: handle exception
+        NotificationEmitter.emit(Notification.error(e.error.message, 'Unable to retrieve catalogs'));
       }
     );
   }
@@ -73,16 +84,43 @@ export class SearchEventFormComponent implements OnInit {
       const queryParams = {
         page: 1
       };
-      const startDate = this.searchEventForm.value.startDate;
+      const startDateFrom = this.searchEventForm.value.startDateFrom;
+      const startDateTo = this.searchEventForm.value.startDateTo;
+      const endDateFrom = this.searchEventForm.value.endDateFrom;
+      const endDateTo = this.searchEventForm.value.endDateTo;
       const period = this.searchEventForm.value.period;
       const catalogs = this.searchEventForm.value.catalogs;
       const content = this.searchEventForm.value.content;
 
-      if (startDate) {
-        queryParams['startDate'] = moment({
-          year: startDate['year'],
-          month: startDate['month'] - 1,
-          day: startDate['day']
+      if (startDateFrom) {
+        queryParams['startDateFrom'] = moment({
+          year: startDateFrom['year'],
+          month: startDateFrom['month'] - 1,
+          day: startDateFrom['day']
+        }).format('YYYY-MM-DD');
+      }
+
+      if (startDateTo) {
+        queryParams['startDateTo'] = moment({
+          year: startDateTo['year'],
+          month: startDateTo['month'] - 1,
+          day: startDateTo['day']
+        }).format('YYYY-MM-DD');
+      }
+
+      if (endDateFrom) {
+        queryParams['endDateFrom'] = moment({
+          year: endDateFrom['year'],
+          month: endDateFrom['month'] - 1,
+          day: endDateFrom['day']
+        }).format('YYYY-MM-DD');
+      }
+
+      if (endDateTo) {
+        queryParams['endDateTo'] = moment({
+          year: endDateTo['year'],
+          month: endDateTo['month'] - 1,
+          day: endDateTo['day']
         }).format('YYYY-MM-DD');
       }
 

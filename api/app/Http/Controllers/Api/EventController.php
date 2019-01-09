@@ -59,13 +59,19 @@ class EventController extends Controller
     {
 
         $this->validate($request, [
-            'startDate' => 'date_format:Y-m-d',
+            'startDateFrom' => 'date_format:Y-m-d',
+            'startDateTo' => 'date_format:Y-m-d',
+            'endDateFrom' => 'date_format:Y-m-d',
+            'endDateTo' => 'date_format:Y-m-d',
             'period' => 'nullable|string',
             'content' => 'nullable|string',
             'offset' => 'nullable|integer|gte:0',
             'size' => 'nullable|integer|lte:20'
         ]);
-        $startDate = $request->get('startDate');
+        $startDateFrom = $request->get('startDateFrom');
+        $startDateTo = $request->get('startDateTo');
+        $endDateFrom = $request->get('endDateFrom');
+        $endDateTo = $request->get('endDateTo');
         $period = $request->get('period');
         $catalogs = $request->get('catalogs');
         $content = $request->get('content');
@@ -74,15 +80,38 @@ class EventController extends Controller
 
         $query = ['bool' => ['must' => []]];
 
-        if ($startDate !== null) {
-            array_push($query['bool']['must'], [
+        if ($startDateFrom !== null || $startDateTo !== null) {
+            $config = [
                 'range' => [
                     'startDate' => [
-                        'gte' => $startDate,
                         'format' => 'yyyy-MM-dd'
                     ]
                 ]
-            ]);
+            ];
+            if($startDateFrom !== null) {
+                $config['range']['startDate']['gte'] = $startDateFrom;
+            }
+            if($startDateTo !== null) {
+                $config['range']['startDate']['lte'] = $startDateTo;
+            }
+            array_push($query['bool']['must'], $config);
+        }
+
+        if ($endDateFrom !== null || $endDateTo !== null) {
+            $config = [
+                'range' => [
+                    'endDate' => [
+                        'format' => 'yyyy-MM-dd'
+                    ]
+                ]
+            ];
+            if($endDateFrom !== null) {
+                $config['range']['endDate']['gte'] = $endDateFrom;
+            }
+            if($endDateTo !== null) {
+                $config['range']['endDate']['lte'] = $endDateTo;
+            }
+            array_push($query['bool']['must'], $config);
         }
 
         if ($period !== null) {

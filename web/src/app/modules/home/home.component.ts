@@ -4,6 +4,8 @@ import {CommonService} from '../core/shared/services/common.service';
 import {EventService} from '../core/shared/services/event.service';
 import {Event} from '../core/shared/models/event';
 import {TimelineService} from '../core/shared/services/timeline.service';
+import {Notification} from '../core/shared/models/notification';
+import {NotificationEmitter} from '../core/shared/events/notificationEmitter';
 
 declare var TL: any;
 
@@ -40,7 +42,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
         new TL.Timeline('timeline', timeline);
       },
       error => {
-        // TODO: handle error
+        console.log(error);
+        NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve events'));
       }
     );
   }
@@ -54,7 +57,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
           this.events = events;
         },
         error => {
-          // TODO: handle error
+          console.log(error.error.message);
+          NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve events'));
         }
       );
     } else if (this.displayMethod === 'timeline') {
@@ -70,7 +74,8 @@ export class HomeComponent implements OnInit, AfterViewInit {
         this.events = events;
       },
       error => {
-        // TODO: handle error
+        console.log(error.error.message);
+        NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve events'));
       }
     );
   }
