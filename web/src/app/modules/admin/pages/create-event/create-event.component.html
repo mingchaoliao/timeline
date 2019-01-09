@@ -27,13 +27,19 @@
               <ng-select [items]="dateAttributeOptions"
                          bindLabel="value"
                          bindValue="id"
+                         [loading]="addDateAttributeLoading"
+                         [hideSelected]="true"
+                         [addTag]="addDateAttribute"
+                         notFoundText="No items found. Type to create a new one."
+                         i18n-notFoundText
+                         addTagText="Add Item"
+                         i18n-addTagText
                          formControlName="startDateAttributeId"
                          id="startDateAttributeId">
               </ng-select>
             </div>
           </div>
         </div>
-
         <div class="row">
           <div class="col">
             <div class="form-group">
@@ -55,6 +61,13 @@
               <ng-select [items]="dateAttributeOptions"
                          bindLabel="value"
                          bindValue="id"
+                         [loading]="addDateAttributeLoading"
+                         [hideSelected]="true"
+                         [addTag]="addDateAttribute"
+                         notFoundText="No items found. Type to create a new one."
+                         i18n-notFoundText
+                         addTagText="Add Item"
+                         i18n-addTagText
                          formControlName="endDateAttributeId"
                          id="endDateAttributeId">
               </ng-select>
@@ -71,7 +84,7 @@
                      [hideSelected]="true"
                      [addTag]="addPeriod"
                      formControlName="periodId"
-                     notFoundText="No item found. Type to create a new one."
+                     notFoundText="No items found. Type to create a new one."
                      i18n-notFoundText
                      addTagText="Add Item"
                      i18n-addTagText
@@ -89,7 +102,7 @@
                      [multiple]="true"
                      [loading]="addCatalogLoading"
                      formControlName="catalogs"
-                     notFoundText="No item found. Type to create a new one."
+                     notFoundText="No items found. Type to create a new one."
                      i18n-notFoundText
                      addTagText="Add Item"
                      i18n-addTagText

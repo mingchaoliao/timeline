@@ -14,6 +14,7 @@ import {UserManagementComponent} from './pages/user-management/user-management.c
 import {MomentModule} from "ngx-moment";
 import { ConfigurePeriodsComponent } from './pages/configure-periods/configure-periods.component';
 import { ConfigureCatalogsComponent } from './pages/configure-catalogs/configure-catalogs.component';
+import { ConfigureDateAttributesComponent } from './pages/configure-date-attributes/configure-date-attributes.component';
 
 @NgModule({
     imports: [
@@ -34,7 +35,8 @@ import { ConfigureCatalogsComponent } from './pages/configure-catalogs/configure
         EventImageInputComponent,
         UserManagementComponent,
         ConfigurePeriodsComponent,
-        ConfigureCatalogsComponent
+        ConfigureCatalogsComponent,
+        ConfigureDateAttributesComponent
     ],
     exports: []
 })

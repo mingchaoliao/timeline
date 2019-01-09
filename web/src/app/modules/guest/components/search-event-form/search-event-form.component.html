@@ -42,8 +42,6 @@
           </div>
         </div>
       </div>
-
-
       <div class="row">
         <div class="col">
           <div class="form-group">
@@ -51,8 +49,9 @@
             <ng-select [items]="periodOptions"
                        bindLabel="value"
                        bindValue="id"
-                       [hideSelected]="true"
                        formControlName="period"
+                       notFoundText="No items found."
+                       i18n-notFoundText
                        id="period">
             </ng-select>
           </div>
@@ -63,9 +62,10 @@
             <ng-select [items]="catalogOptions"
                        bindLabel="value"
                        bindValue="id"
-                       [hideSelected]="true"
                        [multiple]="true"
                        formControlName="catalogs"
+                       notFoundText="No items found."
+                       i18n-notFoundText
                        id="catalogs">
             </ng-select>
           </div>

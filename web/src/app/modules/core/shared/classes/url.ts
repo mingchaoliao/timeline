@@ -85,11 +85,23 @@ export class Url {
         return environment.wsRoot + '/catalog/bulkCreate';
     }
 
+    static getDateAttributeTypeahead(): string {
+        return environment.wsRoot + '/dateAttribute/typeahead';
+    }
+
     static getDateAttribute(): string {
         return environment.wsRoot + '/dateAttribute';
     }
 
     static createDateAttribute(): string {
+        return environment.wsRoot + '/dateAttribute';
+    }
+
+    static updateDateAttribute(): string {
+        return environment.wsRoot + '/dateAttribute';
+    }
+
+    static deleteDateAttribute(): string {
         return environment.wsRoot + '/dateAttribute';
     }
 

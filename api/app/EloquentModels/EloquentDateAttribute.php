@@ -11,6 +11,8 @@ namespace App\EloquentModels;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 class EloquentDateAttribute extends Model
@@ -46,6 +48,22 @@ class EloquentDateAttribute extends Model
     public function getUpdatedAt(): Carbon
     {
         return $this->updated_at;
+    }
+
+    public function create_user(): BelongsTo {
+        return $this->belongsTo(EloquentUser::class,'create_user_id', 'id');
+    }
+
+    public function update_user(): BelongsTo {
+        return $this->belongsTo(EloquentUser::class,'update_user_id', 'id');
+    }
+
+    public function getCreateUser(): ?EloquentUser {
+        return $this->create_user;
+    }
+
+    public function getUpdateUser(): ?EloquentUser {
+        return $this->update_user;
     }
 
     public static function createNew(

@@ -16,7 +16,7 @@ Route::get('/event', 'EventController@get');
 Route::get('/event/search', 'EventController@search');
 Route::get('/event/{id}', 'EventController@getById');
 
-Route::get('/dateAttribute', 'DateAttributeController@get');
+Route::get('/dateAttribute/typeahead', 'DateAttributeController@getTypeahead');
 
 Route::get('/dateFormat', 'DateFormatController@get');
 
@@ -54,6 +54,9 @@ Route::group(['middleware' => ['auth:api', 'admin']], function () {
 
     Route::post('/dateAttribute/bulkCreate', 'DateAttributeController@bulkCreate');
     Route::post('/dateAttribute', 'DateAttributeController@createDateAttribute');
+    Route::get('/dateAttribute', 'DateAttributeController@get');
+    Route::put('/dateAttribute', 'DateAttributeController@update');
+    Route::delete('/dateAttribute', 'DateAttributeController@delete');
 
     Route::post('/image', 'ImageController@uploadImage');
 

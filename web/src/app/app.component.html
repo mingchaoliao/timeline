@@ -34,6 +34,7 @@
             <a class="dropdown-item" routerLink="/admin/user-management" *ngIf="getUser().isAdmin" i18n>User Management</a>
             <a class="dropdown-item" routerLink="/admin/configure-periods" *ngIf="getUser().isAdmin" i18n>Configure Periods</a>
             <a class="dropdown-item" routerLink="/admin/configure-catalogs" *ngIf="getUser().isAdmin" i18n>Configure Catalogs</a>
+            <a class="dropdown-item" routerLink="/admin/configure-date-attributes" *ngIf="getUser().isAdmin" i18n>Configure Date Attributes</a>
             <a class="dropdown-item" (click)="logout()" routerLink="/" i18n>Logout</a>
           </div>
         </div>
