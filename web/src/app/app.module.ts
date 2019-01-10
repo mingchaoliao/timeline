@@ -27,6 +27,7 @@ export function tokenGetter() {
         HttpClientModule,
         JwtModule.forRoot({
             config: {
+                headerName: 'Authorization',
                 tokenGetter: tokenGetter,
                 whitelistedDomains: environment.whitelistedDomains,
                 authScheme: 'Bearer '

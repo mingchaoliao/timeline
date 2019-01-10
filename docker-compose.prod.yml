@@ -1,42 +1,82 @@
 version: '2'
 services:
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - api
+      - web
+    volumes:
+      - ./etc/nginx/conf.d:/etc/nginx/conf.d
+      - ./etc/nginx/ssl:/etc/nginx/ssl
+      - apistorage:/apidist/storage
+      - webdist:/webdist
+    env_file:
+      - ./etc/docker/web.env
+      - ./etc/docker/api.env
+    networks:
+      - internal
   api:
     build:
       context: api
       dockerfile: Dockerfile
     user: apiuser
-    ports:
-      - 5002:80
     volumes:
-      - ./api/storage:/usr/share/nginx/api/storage
+      - apistorage:/apidist/storage
+      - ./api/.env:/apidist/.env
+    env_file:
+      - ./etc/docker/mysql.env
+      - ./etc/docker/api.env
     depends_on:
       - mysql
       - elasticsearch
-    environment:
-      DB_HOST: mysql
+    networks:
+      - internal
   mysql:
     image: mysql:5.7.22
     command: --disable-partition-engine-check
     ports:
-      - 5003:3306
+      - 13306:3306
     volumes:
-      - ./mysql:/var/lib/mysql
+      - dbdata1:/var/lib/mysql
+    env_file:
+      - ./etc/docker/mysql.env
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       MYSQL_DATABASE: timeline
       MYSQL_USER: timeline_user
-      MYSQL_PASSWORD: timeline_user_pwd
+    networks:
+      - internal
   elasticsearch:
     build: elasticsearch
     volumes:
-      - ./elasticsearch/data:/usr/share/elasticsearch/data
-    ports:
-      - 5004:9200
+      - esdata1:/usr/share/elasticsearch/data
+#    ports:
+#      - 9200:9200
+#      - 9300:9300
     environment:
-      TAKE_FILE_OWNERSHIP: 1
+      discovery.type: single-node
+    networks:
+      - internal
   web:
     build:
       context: web
       dockerfile: Dockerfile
-    ports:
-      - 5001:80
+    volumes:
+      - webdist:/webdist
+volumes:
+  esdata1:
+    driver: local
+  dbdata1:
+    driver: local
+  webdist:
+    driver: local
+  apistorage:
+    driver: local
+
+networks:
+  internal:
