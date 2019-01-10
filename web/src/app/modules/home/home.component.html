@@ -19,12 +19,15 @@
       <div id="timeline" style="width: 100%; height: 600px;" [hidden]="displayMethod !== 'timeline'"></div>
 
       <div class="row" [hidden]="displayMethod !== 'list'">
+        <div class="col-12 mt-3" *ngIf="!events || !events.length">
+          There is no event. <a routerLink="/account/login">Sign in</a> as administrator to create the first one.
+        </div>
         <div class="col-12" *ngFor="let event of events">
           <app-event-card
             [data]="event"
           ></app-event-card>
         </div>
-        <div class="col-12">
+        <div class="col-12" *ngIf="events && events.length">
           <ngb-pagination
             class="d-flex justify-content-center"
             [collectionSize]="total"

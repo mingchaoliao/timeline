@@ -9,6 +9,7 @@
                    class="form-control"
                    id="content"
                    appAutofocus
+                   placeholder="Enter search query"
                    formControlName="content">
           </div>
         </div>
@@ -153,7 +154,9 @@
                        formControlName="period"
                        notFoundText="No items found."
                        i18n-notFoundText
-                       id="period">
+                       id="period"
+                       #periodNgSelect
+            >
             </ng-select>
           </div>
         </div>
@@ -167,7 +170,9 @@
                        formControlName="catalogs"
                        notFoundText="No items found."
                        i18n-notFoundText
-                       id="catalogs">
+                       id="catalogs"
+                       #catalogNgSelect
+            >
             </ng-select>
           </div>
         </div>

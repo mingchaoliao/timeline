@@ -58,12 +58,8 @@ class EloquentCatalog extends Model
         return $this->belongsTo(EloquentUser::class,'update_user_id', 'id');
     }
 
-    public function events(): HasMany {
-        return $this->hasMany(EloquentEvent::class, 'period_id', 'id');
-    }
-
     public function getNumberOfEventsAttribute() {
-        return $this->hasMany(EloquentEvent::class, 'period_id', 'id')->count();
+        return $this->belongsToMany(EloquentEvent::class, 'catalog_event','catalog_id', 'event_id')->count();
     }
 
     public function getNumberOfEvents(): int {

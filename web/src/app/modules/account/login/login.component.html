@@ -19,7 +19,7 @@
                  id="password"
                  i18n-placeholder="password placeholder@@passwordPlaceholder"
                  formControlName="password"
-                 placeholder="Password">
+                 placeholder="Enter password">
         </div>
         <app-button [style]="'btn-primary'" (onclick)="onSubmit($event)" i18n="sign in button text@@signInBtn">
           Sign in
@@ -29,7 +29,7 @@
   </div>
   <div class="row mt-3">
     <div class="col">
-      <ng-container i18n>Don't have an account yet?</ng-container>
+      <ng-container i18n>Don't have an account yet? </ng-container>
       <a routerLink="/account/signup" i18n>Create one</a>
     </div>
   </div>

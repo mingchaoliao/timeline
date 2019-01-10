@@ -1,5 +1,10 @@
 <div class="container">
   <app-search-event-form></app-search-event-form>
+  <div class="row" *ngIf="!events || !events.length">
+    <div class="col-12 mt-3">
+      No event found.
+    </div>
+  </div>
   <div class="row">
     <div class="col-12" style="margin-top: 15px" *ngFor="let event of events">
       <app-event-card
@@ -7,7 +12,7 @@
       ></app-event-card>
     </div>
   </div>
-  <div class="row" style="margin-top: 15px;">
+  <div class="row" style="margin-top: 15px;" *ngIf="events && events.length">
     <div class="col-12">
       <ngb-pagination
         class="d-flex justify-content-center"

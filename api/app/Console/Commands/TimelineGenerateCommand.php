@@ -54,11 +54,13 @@ class TimelineGenerateCommand extends Command
 
         if(count($timelineConfig) === 0) {
             $timelineConfig = [
-                'start_date' => [
-                    'year' => Carbon::now()->year
-                ],
-                'unique_id' => 1,
-                'text' => '<p>Sign in as administrator to create first event!</p>'
+                [
+                    'start_date' => [
+                        'year' => Carbon::now()->year
+                    ],
+                    'unique_id' => 1,
+                    'text' => ['text' => '<p>Sign in as administrator to create the first event!</p>']
+                ]
             ];
         }
 
@@ -67,6 +69,5 @@ class TimelineGenerateCommand extends Command
         ]);
 
         File::put(Storage::path('public/timeline.json'), $json);
-        
     }
 }

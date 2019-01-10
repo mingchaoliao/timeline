@@ -1,5 +1,5 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, NavigationExtras, Router} from '@angular/router';
+import {AfterViewInit, Component, OnInit} from '@angular/core';
+import {ActivatedRoute, NavigationEnd, NavigationExtras, Router} from '@angular/router';
 import {CommonService} from '../../../core/shared/services/common.service';
 import * as moment from 'moment';
 import {EventService} from '../../../core/shared/services/event.service';
@@ -11,12 +11,11 @@ import {NotificationEmitter} from '../../../core/shared/events/notificationEmitt
   templateUrl: './search-event.component.html',
   styleUrls: ['./search-event.component.css']
 })
-export class SearchEventComponent implements OnInit {
+export class SearchEventComponent implements OnInit, AfterViewInit {
   public events: any = [];
-  public total = 20;
-  public page = 1;
   public pageSize = 10;
-  public isLocked = false;
+  public total = 10;
+  public page = 1;
 
   constructor(
     private common: CommonService,
@@ -24,40 +23,48 @@ export class SearchEventComponent implements OnInit {
     private router: Router,
     private eventService: EventService
   ) {
-    let page = this.route.snapshot.queryParams['page'];
-    if (!page) {
-      page = 1;
+    this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd) {
+        console.log('nav end');
+        const params = this.route.snapshot.queryParams;
+        this.page = params['page'] ? parseInt(params['page'], 10) : 1;
+        this.search(params);
+      }
+    });
+
+
+  }
+
+  public onPageChange(page) {
+    console.log(`on page change (binding: ${this.page} action: ${page})`);
+    if (parseInt(this.route.snapshot.queryParams['page'], 10) === this.page) {
+      console.log('nothing');
+      return;
     }
-    this.page = page;
-    this.total = page * this.pageSize;
+    console.log('nav');
+    this.events = [];
     this.route.queryParams.subscribe(
       params => {
-        this.search(params);
+        const navigationExtras: NavigationExtras = {
+          queryParams: {
+            ...params,
+            ...{page: page}
+          }
+        };
+        this.router.navigate([], navigationExtras);
       }
     );
   }
 
-  public onPageChange(page) {
-    if(!this.isLocked) {
-      this.page = page;
-      this.events = [];
-      const param = this.route.snapshot.queryParams;
+  ngOnInit() {
 
-      const navigationExtras: NavigationExtras = {
-        queryParams: {
-          ...param,
-          ...{page: this.page}
-        }
-      };
-      this.router.navigate([], navigationExtras);
-    }
   }
 
-  ngOnInit() {
+  ngAfterViewInit() {
+
   }
 
   private search(params: any) {
-    this.isLocked = true;
     const startDateFrom = params['startDateFrom'];
     const startDateTo = params['startDateTo'];
     const endDateFrom = params['endDateFrom'];
@@ -66,7 +73,6 @@ export class SearchEventComponent implements OnInit {
     const catalogs = params['catalogs'];
     const content = params['content'];
     const page = params['page'] ? params['page'] : 1;
-    this.page = page;
 
     try {
       this.validateDate(startDateFrom);
@@ -90,12 +96,10 @@ export class SearchEventComponent implements OnInit {
         events => {
           this.total = events['total'];
           this.events = events;
+          console.log(this.events);
         },
         error => {
           NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to search events'));
-        },
-        () => {
-          this.isLocked = false;
         }
       );
     } catch (error) {
