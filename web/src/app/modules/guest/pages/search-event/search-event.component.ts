@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, OnInit} from '@angular/core';
+import {AfterViewInit, Component, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, NavigationEnd, NavigationExtras, Router} from '@angular/router';
 import {CommonService} from '../../../core/shared/services/common.service';
 import * as moment from 'moment';
@@ -11,11 +11,12 @@ import {NotificationEmitter} from '../../../core/shared/events/notificationEmitt
   templateUrl: './search-event.component.html',
   styleUrls: ['./search-event.component.css']
 })
-export class SearchEventComponent implements OnInit, AfterViewInit {
+export class SearchEventComponent implements OnInit, AfterViewInit, OnDestroy {
   public events: any = [];
   public pageSize = 10;
   public total = 10;
   public page = 1;
+  public routerSubscriber = null;
 
   constructor(
     private common: CommonService,
@@ -23,37 +24,34 @@ export class SearchEventComponent implements OnInit, AfterViewInit {
     private router: Router,
     private eventService: EventService
   ) {
-    this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd) {
-        console.log('nav end');
+    this.routerSubscriber = this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd && event.url.startsWith('/app/event/search')) {
         const params = this.route.snapshot.queryParams;
         this.page = params['page'] ? parseInt(params['page'], 10) : 1;
         this.search(params);
       }
     });
+  }
 
-
+  ngOnDestroy() {
+    if (this.routerSubscriber) {
+      this.routerSubscriber.unsubscribe();
+    }
   }
 
   public onPageChange(page) {
-    console.log(`on page change (binding: ${this.page} action: ${page})`);
     if (parseInt(this.route.snapshot.queryParams['page'], 10) === this.page) {
-      console.log('nothing');
       return;
     }
-    console.log('nav');
+
     this.events = [];
-    this.route.queryParams.subscribe(
-      params => {
-        const navigationExtras: NavigationExtras = {
-          queryParams: {
-            ...params,
-            ...{page: page}
-          }
-        };
-        this.router.navigate([], navigationExtras);
+    const navigationExtras: NavigationExtras = {
+      queryParams: {
+        ...this.route.snapshot.queryParams,
+        ...{page: page}
       }
-    );
+    };
+    this.router.navigate([], navigationExtras);
   }
 
   ngOnInit() {
@@ -96,7 +94,6 @@ export class SearchEventComponent implements OnInit, AfterViewInit {
         events => {
           this.total = events['total'];
           this.events = events;
-          console.log(this.events);
         },
         error => {
           NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to search events'));

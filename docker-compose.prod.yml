@@ -55,9 +55,9 @@ services:
     build: elasticsearch
     volumes:
       - esdata1:/usr/share/elasticsearch/data
-#    ports:
-#      - 9200:9200
-#      - 9300:9300
+    ports:
+      - 9200:9200
+      - 9300:9300
     environment:
       discovery.type: single-node
     networks:
