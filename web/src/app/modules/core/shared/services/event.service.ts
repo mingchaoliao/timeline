@@ -61,8 +61,10 @@ export class EventService {
   }
 
   search(
-    startDate: string,
-    endDate: string,
+    startDateFrom: string,
+    startDateTo: string,
+    endDateFrom: string,
+    endDateTo: string,
     period: string,
     catalogs: string,
     content: string,
@@ -73,11 +75,17 @@ export class EventService {
       offset: (page - 1) * pageSize,
       limit: pageSize
     };
-    if (startDate) {
-      query['startDate'] = startDate;
+    if (startDateFrom) {
+      query['startDateFrom'] = startDateFrom;
     }
-    if (endDate) {
-      query['endDate'] = endDate;
+    if (startDateTo) {
+      query['startDateTo'] = startDateTo;
+    }
+    if (endDateFrom) {
+      query['endDateFrom'] = endDateFrom;
+    }
+    if (endDateTo) {
+      query['endDateTo'] = endDateTo;
     }
     if (period) {
       query['period'] = period;

@@ -12,32 +12,33 @@ import {environment} from '../environments/environment';
 import {AdminGuard} from './admin-guard';
 
 export function tokenGetter() {
-  return localStorage.getItem('access_token');
+    return localStorage.getItem('access_token');
 }
 
 @NgModule({
-  declarations: [
-    AppComponent
-  ],
-  imports: [
-    BrowserModule,
-    APP_ROUTING,
-    NgbModule.forRoot(),
-    HomeModule,
-    HttpClientModule,
-    JwtModule.forRoot({
-      config: {
-        tokenGetter: tokenGetter,
-        whitelistedDomains: environment.whitelistedDomains,
-        authScheme: 'Bearer '
-      }
-    }),
-    CoreModule
-  ],
-  providers: [
-    AdminGuard
-  ],
-  bootstrap: [AppComponent]
+    declarations: [
+        AppComponent
+    ],
+    imports: [
+        BrowserModule,
+        APP_ROUTING,
+        NgbModule.forRoot(),
+        HomeModule,
+        HttpClientModule,
+        JwtModule.forRoot({
+            config: {
+                headerName: 'Authorization',
+                tokenGetter: tokenGetter,
+                whitelistedDomains: environment.whitelistedDomains,
+                authScheme: 'Bearer '
+            }
+        }),
+        CoreModule
+    ],
+    providers: [
+        AdminGuard
+    ],
+    bootstrap: [AppComponent]
 })
 export class AppModule {
 }

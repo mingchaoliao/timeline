@@ -4,13 +4,15 @@ import {CoreModule} from '../core/core.module';
 import {HomeComponent} from './home.component';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import {FormsModule} from '@angular/forms';
+import {RouterModule} from '@angular/router';
 
 @NgModule({
   imports: [
     CommonModule,
     CoreModule,
     NgbModule,
-    FormsModule
+    FormsModule,
+    RouterModule
   ],
   declarations: [HomeComponent]
 })

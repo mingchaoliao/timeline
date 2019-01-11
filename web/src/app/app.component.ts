@@ -9,7 +9,7 @@ import {environment} from '../environments/environment';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  title = 'app';
+  public title = environment.title;
   public currentYear: string;
   public company: any;
 
@@ -26,7 +26,7 @@ export class AppComponent {
   }
 
   getUser() {
-    return UserService.getUser();
+    return UserService.getCurrentUser();
   }
 
   public logout() {

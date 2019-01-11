@@ -1,6 +1,8 @@
 import {Component, OnInit} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {EventService} from '../../../core/shared/services/event.service';
+import {Notification} from '../../../core/shared/models/notification';
+import {NotificationEmitter} from '../../../core/shared/events/notificationEmitter';
 
 @Component({
   selector: 'app-update-event',
@@ -19,7 +21,7 @@ export class UpdateEventComponent implements OnInit {
         this.eventService.getById(params['id']).subscribe(
           event => this.eventData = event,
           error => {
-            // TODO: handle error
+            NotificationEmitter.emit(Notification.error(error.error.message, `Unable to retrieve event with ID ${params['id']}`));
           }
         );
       }

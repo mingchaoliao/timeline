@@ -24,14 +24,6 @@ class CreateUsersTable extends Migration
             $table->rememberToken();
             $table->timestamps();
         });
-
-        EloquentUser::createNew(
-            'System',
-            'system@localhost',
-            str_random(64),
-            false,
-            true
-        );
     }
 
     /**

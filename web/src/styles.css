@@ -60,3 +60,7 @@ body {
   color: #dc3545;
   margin-top: 0.25rem;
 }
+
+#timeline > div.tl-timenav > div.tl-attribution {
+  display: none;
+}

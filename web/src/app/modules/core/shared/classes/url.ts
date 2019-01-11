@@ -1,87 +1,131 @@
 import {environment} from '../../../../../environments/environment';
 
 export class Url {
-  public static login(): string {
-    return environment.wsRoot + '/login';
-  }
-
-  public static getCurrentUser(): string {
-    return environment.wsRoot + '/user';
-  }
-
-  static register() {
-    return environment.wsRoot + '/register';
-  }
-
-  static getEvents(): string {
-    return environment.wsRoot + '/event';
-  }
-
-  static getImageByPath(path: string, withAdminAccess: boolean = false): string {
-    if (withAdminAccess) {
-      return environment.wsRoot + '/admin/image/' + path;
+    public static login(): string {
+        return environment.wsRoot + '/login';
     }
 
-    return environment.wsRoot + '/image/' + path;
-  }
+    public static getCurrentUser(): string {
+        return environment.wsRoot + '/user';
+    }
 
-  static getEventById(id: number): string {
-    return environment.wsRoot + '/event/' + id;
-  }
+    static register() {
+        return environment.wsRoot + '/register';
+    }
 
-  static getPeriod(): string {
-    return environment.wsRoot + '/period';
-  }
+    static getEvents(): string {
+        return environment.wsRoot + '/event';
+    }
 
-  static createPeriod(): string {
-    return environment.wsRoot + '/period';
-  }
+    static getAllUser(): string {
+        return environment.wsRoot + '/user/all';
+    }
 
-  static bulkCreatePeriod(): string {
-    return environment.wsRoot + '/period/bulkCreate';
-  }
+    static grantOrRevokeAdminPrivilege(): string {
+        return environment.wsRoot + '/user/grantOrRevokeAdminPrivilege';
+    }
 
-  static getCatalog(): string {
-    return environment.wsRoot + '/catalog';
-  }
+    static getImageByPath(path: string, withAdminAccess: boolean = false): string {
+        if (withAdminAccess) {
+            return environment.wsRoot + '/admin/image/' + path;
+        }
 
-  static createCatalog(): string {
-    return environment.wsRoot + '/catalog';
-  }
+        return environment.wsRoot + '/image/' + path;
+    }
 
-  static bulkCreateCatalog(): string {
-    return environment.wsRoot + '/catalog/bulkCreate';
-  }
+    static getEventById(id: number): string {
+        return environment.wsRoot + '/event/' + id;
+    }
 
-  static getDateAttribute(): string {
-    return environment.wsRoot + '/dateAttribute';
-  }
+    static getPeriod(): string {
+        return environment.wsRoot + '/period';
+    }
 
-  static createDateAttribute(): string {
-    return environment.wsRoot + '/dateAttribute';
-  }
+    static updatePeriod(): string {
+        return environment.wsRoot + '/period';
+    }
 
-  static bulkCreateDateAttribute(): string {
-    return environment.wsRoot + '/dateAttribute/bulkCreate';
-  }
+    static deletePeriod(): string {
+        return environment.wsRoot + '/period';
+    }
 
-  static getDateFormat(): string {
-    return environment.wsRoot + '/dateFormat';
-  }
+    static updateCatalog(): string {
+        return environment.wsRoot + '/catalog';
+    }
 
-  static getTimeline(): string {
-    return environment.wsRoot + '/storage/timeline.json';
-  }
+    static deleteCatalog(): string {
+        return environment.wsRoot + '/catalog';
+    }
 
-  static createEvent(): string {
-    return environment.wsRoot + '/event';
-  }
+    static getPeriodTypeahead(): string {
+        return environment.wsRoot + '/period/typeahead';
+    }
 
-  static updateEventById(id: number): string {
-    return environment.wsRoot + '/event/' + id;
-  }
+    static createPeriod(): string {
+        return environment.wsRoot + '/period';
+    }
 
-  static bulkCreateEvents(): string {
-    return environment.wsRoot + '/event/bulkCreate';
-  }
+    static bulkCreatePeriod(): string {
+        return environment.wsRoot + '/period/bulkCreate';
+    }
+
+    static getCatalogTypeahead(): string {
+        return environment.wsRoot + '/catalog/typeahead';
+    }
+
+    static getCatalog(): string {
+        return environment.wsRoot + '/catalog';
+    }
+
+    static createCatalog(): string {
+        return environment.wsRoot + '/catalog';
+    }
+
+    static bulkCreateCatalog(): string {
+        return environment.wsRoot + '/catalog/bulkCreate';
+    }
+
+    static getDateAttributeTypeahead(): string {
+        return environment.wsRoot + '/dateAttribute/typeahead';
+    }
+
+    static getDateAttribute(): string {
+        return environment.wsRoot + '/dateAttribute';
+    }
+
+    static createDateAttribute(): string {
+        return environment.wsRoot + '/dateAttribute';
+    }
+
+    static updateDateAttribute(): string {
+        return environment.wsRoot + '/dateAttribute';
+    }
+
+    static deleteDateAttribute(): string {
+        return environment.wsRoot + '/dateAttribute';
+    }
+
+    static bulkCreateDateAttribute(): string {
+        return environment.wsRoot + '/dateAttribute/bulkCreate';
+    }
+
+    static getDateFormat(): string {
+        return environment.wsRoot + '/dateFormat';
+    }
+
+    static getTimeline(): string {
+        return environment.wsRoot + '/storage/timeline.json';
+    }
+
+    static createEvent(): string {
+        return environment.wsRoot + '/event';
+    }
+
+    static updateEventById(id: number): string {
+        return environment.wsRoot + '/event/' + id;
+    }
+
+    static bulkCreateEvents(): string {
+        return environment.wsRoot + '/event/bulkCreate';
+    }
 }

@@ -1,4 +1,4 @@
-import {Component, Input, OnInit} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit} from '@angular/core';
 import {AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators} from '@angular/forms';
 import * as moment from 'moment';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
@@ -9,6 +9,8 @@ import {CatalogService} from '../../../core/shared/services/catalog.service';
 import {DateAttributeService} from '../../../core/shared/services/dateAttribute.service';
 import {DateFormatService} from '../../../core/shared/services/dateFormat.service';
 import {EventService} from '../../../core/shared/services/event.service';
+import {Notification} from '../../../core/shared/models/notification';
+import {NotificationEmitter} from '../../../core/shared/events/notificationEmitter';
 
 export function dateValidator(): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {
@@ -49,10 +51,17 @@ export class CreateEventComponent
   public dateAttributeOptions: any = [];
   public periodOptions: any = [];
   public catalogOptions: any = [];
+  public addDateAttributeLoading = false;
   public addPeriodLoading = false;
   public addCatalogLoading = false;
   public previewData: any = {};
   public isSubmitted = false;
+
+  private periodOptionsKvMap: any = {};
+  private dateAttributeOptionsKvMap: any = {};
+  private catalogOptionsKvMap: any = {};
+  private dateFormats: any = [];
+  private dateFormatKvMap: any = {};
 
   public addPeriod = (name) => {
     return new Promise((resolve) => {
@@ -62,14 +71,34 @@ export class CreateEventComponent
           period => {
             resolve({id: period.id, value: period.value});
             this.addPeriodLoading = false;
+            NotificationEmitter.emit(Notification.success('Create successfully'));
           },
-          e => {
-            // TODO: handle exception
+          error => {
+            NotificationEmitter.emit(Notification.error(error.error.message, `Unable to create period "${name}"`));
           }
         );
       }, 100);
     });
   };
+
+  public addDateAttribute = (name) => {
+    return new Promise((resolve) => {
+      this.addDateAttributeLoading = true;
+      setTimeout(() => {
+        this.dateAttributeService.create(name).subscribe(
+          dateAttribute => {
+            resolve({id: dateAttribute.id, value: dateAttribute.value});
+            this.addDateAttributeLoading = false;
+            NotificationEmitter.emit(Notification.success('Create successfully'));
+          },
+          error => {
+            NotificationEmitter.emit(Notification.error(error.error.message, `Unable to create date attribute "${name}"`));
+          }
+        );
+      }, 100);
+    });
+  };
+
   public addCatalog = (name) => {
     return new Promise((resolve) => {
       this.addCatalogLoading = true;
@@ -78,19 +107,15 @@ export class CreateEventComponent
           catalog => {
             resolve({id: catalog.id, value: catalog.value});
             this.addCatalogLoading = false;
+            NotificationEmitter.emit(Notification.success('Create successfully'));
           },
-          e => {
-            // TODO: handle exception
+          error => {
+            NotificationEmitter.emit(Notification.error(error.error.message, `Unable to create catalog "${name}"`));
           }
         );
       }, 100);
     });
   };
-  private periodOptionsKvMap: any = {};
-  private dateAttributeOptionsKvMap: any = {};
-  private catalogOptionsKvMap: any = {};
-  private dateFormats: any = [];
-  private dateFormatKvMap: any = {};
 
   constructor(
     public formBuilder: FormBuilder,
@@ -108,18 +133,18 @@ export class CreateEventComponent
         this.dateAttributeOptions = dateAttributes;
         this.dateAttributeOptionsKvMap = this.common.kvArrToMap(this.dateAttributeOptions);
       },
-      e => {
-        // TODO: handle exception
+      error => {
+        NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve date attributes'));
       }
     );
 
-    this.periodService.get().subscribe(
+    this.periodService.getTypeahead().subscribe(
       periods => {
         this.periodOptions = periods;
         this.periodOptionsKvMap = this.common.kvArrToMap(this.periodOptions);
       },
       error => {
-        // TODO: handle error
+        NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve periods'));
       }
     );
 
@@ -128,8 +153,8 @@ export class CreateEventComponent
         this.catalogOptions = catalogs;
         this.catalogOptionsKvMap = this.common.kvArrToMap(this.catalogOptions);
       },
-      e => {
-        // TODO: handle exception
+      error => {
+        NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve catalogs'));
       }
     );
 
@@ -138,8 +163,8 @@ export class CreateEventComponent
         this.dateFormats = dateFormats;
         this.dateFormatKvMap = this.common.kvArrToMap(this.dateFormats, 'value', 'id');
       },
-      e => {
-        // TODO: handle exception
+      error => {
+        NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve date formats'));
       }
     );
   }
@@ -151,7 +176,9 @@ export class CreateEventComponent
         Validators.pattern('(^[0-9]{4}$)|(^[0-9]{4}-[0-9]{2}$)|(^[0-9]{4}-[0-9]{2}-[0-9]{2}$)'),
         dateValidator()
       ]],
-      'startDateAttributeId': [this.eventData ? (this.eventData.startDateAttribute ? this.eventData.startDateAttribute.id : null) : null, []],
+      'startDateAttributeId': [
+        this.eventData ? (this.eventData.startDateAttribute ? this.eventData.startDateAttribute.id : null) : null, []
+      ],
       'endDate': [this.eventData ? this.eventData.endDate : null, [
         Validators.pattern('(^[0-9]{4}$)|(^[0-9]{4}-[0-9]{2}$)|(^[0-9]{4}-[0-9]{2}-[0-9]{2}$)'),
         dateValidator()
@@ -186,7 +213,7 @@ export class CreateEventComponent
     }
   }
 
-  onSubmit() {
+  onSubmit(loading: EventEmitter<boolean>) {
     this.isSubmitted = true;
     if (!this.createEventForm.valid) {
       return;
@@ -207,21 +234,29 @@ export class CreateEventComponent
     }
 
     if (this.eventData !== null && this.eventData['id']) {
+      loading.emit(true);
       this.eventService.update(Number(this.eventData['id']), requestBody).subscribe(
         event => {
           this.router.navigate(['/']);
+          loading.emit(false);
+          NotificationEmitter.emit(Notification.success('Update successfully'));
         },
         error => {
-          // TODO: handle exception
+          loading.emit(false);
+          NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to update event'));
         }
       );
     } else {
+      loading.emit(true);
       this.eventService.create(requestBody).subscribe(
         event => {
           this.router.navigate(['/']);
+          loading.emit(false);
+          NotificationEmitter.emit(Notification.success('Create successfully'));
         },
         error => {
-          // TODO: handle exception
+          loading.emit(false);
+          NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to create event'));
         }
       );
     }

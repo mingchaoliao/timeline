@@ -10,25 +10,37 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgSelectModule} from '@ng-select/ng-select';
 import {CoreModule} from '../core/core.module';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import {UserManagementComponent} from './pages/user-management/user-management.component';
+import {MomentModule} from "ngx-moment";
+import { ConfigurePeriodsComponent } from './pages/configure-periods/configure-periods.component';
+import { ConfigureCatalogsComponent } from './pages/configure-catalogs/configure-catalogs.component';
+import { ConfigureDateAttributesComponent } from './pages/configure-date-attributes/configure-date-attributes.component';
+import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
 
 @NgModule({
-  imports: [
-    CommonModule,
-    ADMIN_ROUTING,
-    FormsModule,
-    ReactiveFormsModule,
-    NgSelectModule,
-    CoreModule,
-    NgbModule
-  ],
-  declarations: [
-    CreateEventComponent,
-    ImportEventComponent,
-    UpdateEventComponent,
-    RichTextEditorComponent,
-    EventImageInputComponent
-  ],
-  exports: []
+    imports: [
+        CommonModule,
+        ADMIN_ROUTING,
+        FormsModule,
+        ReactiveFormsModule,
+        NgSelectModule,
+        CoreModule,
+        MomentModule,
+        NgbModule
+    ],
+    declarations: [
+        CreateEventComponent,
+        ImportEventComponent,
+        UpdateEventComponent,
+        RichTextEditorComponent,
+        EventImageInputComponent,
+        UserManagementComponent,
+        ConfigurePeriodsComponent,
+        ConfigureCatalogsComponent,
+        ConfigureDateAttributesComponent,
+        ConfirmationModalComponent
+    ],
+    exports: []
 })
 export class AdminModule {
 }

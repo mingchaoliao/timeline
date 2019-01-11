@@ -8,42 +8,142 @@
             <input type="text"
                    class="form-control"
                    id="content"
+                   appAutofocus
+                   placeholder="Enter search query"
                    formControlName="content">
           </div>
         </div>
+      </div>
+      <div class="row">
         <div class="col">
           <div class="form-group">
-            <label for="startDate" i18n="start date">Start Date</label>
-            <div class="input-group">
-              <input
-                class="form-control"
-                type="text"
-                ngbDatepicker
-                i18n-placeholder
-                [autoClose]="true"
-                placeholder="Format: YYYY-MM-DD. e.g. 1969-11-04"
-                #startDate="ngbDatepicker"
-                [startDate]="{year: 1900, month: 1, day: 1}"
-                [minDate]="{year: 1800, month: 1, day: 1}"
-                [maxDate]="{year: 2010, month: 1, day: 1}"
-                formControlName="startDate"
-                id="startDate"
-              />
-              <div class="input-group-append">
-                <button class="btn btn-outline-secondary" (click)="startDate.toggle()" type="button"
-                        style="border-color: #ced4da">
-                  <i class="far fa-calendar-alt"></i>
-                </button>
+            <label i18n="start date">Start Date</label>
+            <div class="row pl-3 pr-3">
+              <div class="col">
+                <label for="startDateFrom">From</label>
+                <div class="input-group">
+                  <input
+                    class="form-control"
+                    type="text"
+                    ngbDatepicker
+                    i18n-placeholder
+                    [autoClose]="true"
+                    placeholder="Format: YYYY-MM-DD. e.g. 1969-11-04"
+                    #startDateFrom="ngbDatepicker"
+                    [startDate]="{year: 1900, month: 1, day: 1}"
+                    [minDate]="{year: 1800, month: 1, day: 1}"
+                    [maxDate]="{year: 2030, month: 1, day: 1}"
+                    formControlName="startDateFrom"
+                    id="startDateFrom"
+                  />
+                  <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" (click)="startDateFrom.toggle()" type="button"
+                            style="border-color: #ced4da">
+                      <i class="far fa-calendar-alt"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="error-container" *ngIf="searchEventForm.controls['startDateFrom'].dirty && !searchEventForm.controls['startDateFrom'].valid">
+                  <div>Date is invalid</div>
+                </div>
               </div>
-            </div>
-            <div class="error-container" *ngIf="searchEventForm.controls.startDate.dirty && !searchEventForm.controls.startDate.valid">
-              <div>Start date is invalid</div>
+              <div class="col">
+                <label for="startDateTo">To</label>
+                <div class="input-group">
+                  <input
+                    class="form-control"
+                    type="text"
+                    ngbDatepicker
+                    i18n-placeholder
+                    [autoClose]="true"
+                    placeholder="Format: YYYY-MM-DD. e.g. 1969-11-04"
+                    #startDateTo="ngbDatepicker"
+                    [startDate]="{year: 1900, month: 1, day: 1}"
+                    [minDate]="{year: 1800, month: 1, day: 1}"
+                    [maxDate]="{year: 2030, month: 1, day: 1}"
+                    formControlName="startDateTo"
+                    id="startDateTo"
+                  />
+                  <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" (click)="startDateTo.toggle()" type="button"
+                            style="border-color: #ced4da">
+                      <i class="far fa-calendar-alt"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="error-container" *ngIf="searchEventForm.controls['startDateTo'].dirty && !searchEventForm.controls['startDateTo'].valid">
+                  <div>Date is invalid</div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
-
-
+      <div class="row">
+        <div class="col">
+          <div class="form-group">
+            <label i18n="end date">End Date</label>
+            <div class="row pl-3 pr-3">
+              <div class="col">
+                <label for="endDateFrom">From</label>
+                <div class="input-group">
+                  <input
+                    class="form-control"
+                    type="text"
+                    ngbDatepicker
+                    i18n-placeholder
+                    [autoClose]="true"
+                    placeholder="Format: YYYY-MM-DD. e.g. 1969-11-04"
+                    #endDateFrom="ngbDatepicker"
+                    [startDate]="{year: 1900, month: 1, day: 1}"
+                    [minDate]="{year: 1800, month: 1, day: 1}"
+                    [maxDate]="{year: 2030, month: 1, day: 1}"
+                    formControlName="endDateFrom"
+                    id="endDateFrom"
+                  />
+                  <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" (click)="endDateFrom.toggle()" type="button"
+                            style="border-color: #ced4da">
+                      <i class="far fa-calendar-alt"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="error-container" *ngIf="searchEventForm.controls['endDateFrom'].dirty && !searchEventForm.controls['endDateFrom'].valid">
+                  <div>Date is invalid</div>
+                </div>
+              </div>
+              <div class="col">
+                <label for="endDateTo">To</label>
+                <div class="input-group">
+                  <input
+                    class="form-control"
+                    type="text"
+                    ngbDatepicker
+                    i18n-placeholder
+                    [autoClose]="true"
+                    placeholder="Format: YYYY-MM-DD. e.g. 1969-11-04"
+                    #endDateTo="ngbDatepicker"
+                    [startDate]="{year: 1900, month: 1, day: 1}"
+                    [minDate]="{year: 1800, month: 1, day: 1}"
+                    [maxDate]="{year: 2030, month: 1, day: 1}"
+                    formControlName="endDateTo"
+                    id="endDateTo"
+                  />
+                  <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" (click)="endDateTo.toggle()" type="button"
+                            style="border-color: #ced4da">
+                      <i class="far fa-calendar-alt"></i>
+                    </button>
+                  </div>
+                </div>
+                <div class="error-container" *ngIf="searchEventForm.controls['endDateTo'].dirty && !searchEventForm.controls['endDateTo'].valid">
+                  <div>Date is invalid</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="row">
         <div class="col">
           <div class="form-group">
@@ -51,9 +151,12 @@
             <ng-select [items]="periodOptions"
                        bindLabel="value"
                        bindValue="id"
-                       [hideSelected]="true"
                        formControlName="period"
-                       id="period">
+                       notFoundText="No items found."
+                       i18n-notFoundText
+                       id="period"
+                       #periodNgSelect
+            >
             </ng-select>
           </div>
         </div>
@@ -63,10 +166,13 @@
             <ng-select [items]="catalogOptions"
                        bindLabel="value"
                        bindValue="id"
-                       [hideSelected]="true"
                        [multiple]="true"
                        formControlName="catalogs"
-                       id="catalogs">
+                       notFoundText="No items found."
+                       i18n-notFoundText
+                       id="catalogs"
+                       #catalogNgSelect
+            >
             </ng-select>
           </div>
         </div>

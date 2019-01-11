@@ -1,16 +1,22 @@
 export class Catalog {
   private readonly _id: number;
   private readonly _value: string;
+  private readonly _numberOfEvents: number;
   private readonly _createUserId: number;
+  private readonly _createUserName: string;
   private readonly _updateUserId: number;
+  private readonly _updateUserName: string;
   private readonly _createdAt: Date;
   private readonly _updatedAt: Date;
 
-  constructor(id: number, value: string, createUserId: number, updateUserId: number, createdAt: Date, updatedAt: Date) {
+  constructor(id: number, value: string, numberOfEvents: number, createUserId: number, createUserName: string, updateUserId: number, updateUserName: string, createdAt: Date, updatedAt: Date) {
     this._id = id;
     this._value = value;
+    this._numberOfEvents = numberOfEvents;
     this._createUserId = createUserId;
+    this._createUserName = createUserName;
     this._updateUserId = updateUserId;
+    this._updateUserName = updateUserName;
     this._createdAt = createdAt;
     this._updatedAt = updatedAt;
   }
@@ -23,12 +29,24 @@ export class Catalog {
     return this._value;
   }
 
+  get numberOfEvents(): number {
+    return this._numberOfEvents;
+  }
+
   get createUserId(): number {
     return this._createUserId;
   }
 
+  get createUserName(): string {
+    return this._createUserName;
+  }
+
   get updateUserId(): number {
     return this._updateUserId;
+  }
+
+  get updateUserName(): string {
+    return this._updateUserName;
   }
 
   get createdAt(): Date {
@@ -46,8 +64,11 @@ export class Catalog {
     return new Catalog(
       json['id'],
       json['value'],
+      json['numberOfEvents'],
       json['createUserId'],
+      json['createUserName'],
       json['updateUserId'],
+      json['updateUserName'],
       json['createdAt'],
       json['updatedAt']
     );

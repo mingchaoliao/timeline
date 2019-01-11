@@ -1,0 +1,47 @@
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <button class="btn btn-outline-primary" (click)="createModalRef = modalService.open(createModal)">Create New</button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-6 mt-3" *ngFor="let dateAttribute of dateAttributes; let index = index">
+      <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-12">
+              <input type="text" #input (change)="dateAttribute['dirty'] = $event.srcElement.value !== dateAttribute.value" class="form-control" id="value_{{ dateAttribute.id }}" [value]="dateAttribute.value">
+            </div>
+            <div class="col-12">
+              Created At: {{ dateAttribute.createdAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }} by {{ dateAttribute.createUserName }}
+            </div>
+            <div class="col-12" *ngIf="dateAttribute.createdAt != dateAttribute.updatedAt">
+              Updated At: {{ dateAttribute.updatedAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }} by {{ dateAttribute.updateUserName }}
+            </div>
+            <div class="col-12">
+              <app-button [style]="'btn-outline-primary mr-2'" *ngIf="dateAttribute['dirty']" (onclick)="update($event, index, input.value)">Save</app-button>
+              <app-button [style]="'btn-outline-danger'" (onclick)="delete($event, index)">Delete</app-button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #createModal let-c="close" let-d="dismiss">
+  <div class="modal-body">
+    <div class="row">
+      <div class="col-12">
+        <div class="form-group">
+          <label for="value">Value:</label>
+          <input #input type="text" id="value" class="form-control" appAutofocus>
+        </div>
+      </div>
+      <div class="col-12 text-right">
+        <button class="btn btn-outline-secondary" (click)="d('close')">Cancel</button>
+        <app-button [style]="'btn-outline-primary ml-2'" [disabled]="!input.value" (onclick)="createNew($event, input.value)">Create</app-button>
+      </div>
+    </div>
+  </div>
+</ng-template>

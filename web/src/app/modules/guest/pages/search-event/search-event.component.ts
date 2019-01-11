@@ -1,20 +1,22 @@
-import {Component, OnInit} from '@angular/core';
-import {ActivatedRoute, NavigationExtras, Router} from '@angular/router';
+import {AfterViewInit, Component, OnDestroy, OnInit} from '@angular/core';
+import {ActivatedRoute, NavigationEnd, NavigationExtras, Router} from '@angular/router';
 import {CommonService} from '../../../core/shared/services/common.service';
 import * as moment from 'moment';
 import {EventService} from '../../../core/shared/services/event.service';
+import {Notification} from '../../../core/shared/models/notification';
+import {NotificationEmitter} from '../../../core/shared/events/notificationEmitter';
 
 @Component({
   selector: 'app-search-event',
   templateUrl: './search-event.component.html',
   styleUrls: ['./search-event.component.css']
 })
-export class SearchEventComponent implements OnInit {
+export class SearchEventComponent implements OnInit, AfterViewInit, OnDestroy {
   public events: any = [];
-  public total = 20;
-  public page = 1;
   public pageSize = 10;
-  public isLocked = false;
+  public total = 10;
+  public page = 1;
+  public routerSubscriber = null;
 
   constructor(
     private common: CommonService,
@@ -22,58 +24,68 @@ export class SearchEventComponent implements OnInit {
     private router: Router,
     private eventService: EventService
   ) {
-    let page = this.route.snapshot.queryParams['page'];
-    if (!page) {
-      page = 1;
-    }
-    this.page = page;
-    this.total = page * this.pageSize;
-    this.route.queryParams.subscribe(
-      params => {
+    this.routerSubscriber = this.router.events.subscribe(event => {
+      if (event instanceof NavigationEnd && event.url.startsWith('/app/event/search')) {
+        const params = this.route.snapshot.queryParams;
+        this.page = params['page'] ? parseInt(params['page'], 10) : 1;
         this.search(params);
       }
-    );
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.routerSubscriber) {
+      this.routerSubscriber.unsubscribe();
+    }
   }
 
   public onPageChange(page) {
-    if(!this.isLocked) {
-      this.page = page;
-      this.events = [];
-      const param = this.route.snapshot.queryParams;
-
-      const navigationExtras: NavigationExtras = {
-        queryParams: {
-          ...param,
-          ...{page: this.page}
-        }
-      };
-      this.router.navigate([], navigationExtras);
+    if (parseInt(this.route.snapshot.queryParams['page'], 10) === this.page) {
+      return;
     }
+
+    this.events = [];
+    const navigationExtras: NavigationExtras = {
+      queryParams: {
+        ...this.route.snapshot.queryParams,
+        ...{page: page}
+      }
+    };
+    this.router.navigate([], navigationExtras);
   }
 
   ngOnInit() {
+
+  }
+
+  ngAfterViewInit() {
+
   }
 
   private search(params: any) {
-    this.isLocked = true;
-    const startDate = params['startDate'];
-    const endDate = params['endDate'];
+    const startDateFrom = params['startDateFrom'];
+    const startDateTo = params['startDateTo'];
+    const endDateFrom = params['endDateFrom'];
+    const endDateTo = params['endDateTo'];
     const period = params['period'];
     const catalogs = params['catalogs'];
     const content = params['content'];
     const page = params['page'] ? params['page'] : 1;
-    this.page = page;
 
     try {
-      this.validateDate(startDate);
-      this.validateDate(endDate);
+      this.validateDate(startDateFrom);
+      this.validateDate(startDateTo);
+      this.validateDate(endDateFrom);
+      this.validateDate(endDateTo);
       this.validatePeriod(period);
       this.validateCatalogs(catalogs);
       this.validatePage(page);
 
       this.eventService.search(
-        startDate,
-        endDate,
+        startDateFrom,
+        startDateTo,
+        endDateFrom,
+        endDateTo,
         period,
         catalogs,
         content,
@@ -84,10 +96,7 @@ export class SearchEventComponent implements OnInit {
           this.events = events;
         },
         error => {
-          // TODO: handle error
-        },
-        () => {
-          this.isLocked = false;
+          NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to search events'));
         }
       );
     } catch (error) {

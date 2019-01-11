@@ -62,7 +62,7 @@ export class RichTextEditorComponent implements OnInit, ControlValueAccessor, Af
     this.editor = $('div.rich-text-editor');
     this.editor.summernote({
       toolbar: [
-        ['insert', ['link', 'table', 'hr', 'picture']],
+        ['insert', ['link', 'table', 'hr']],
         ['style', ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
         // ['fontsize', ['fontsize']],
         ['color', ['color']],

@@ -3,13 +3,14 @@
 // The list of file replacements can be found in `angular.json`.
 
 export const environment = {
-  production: false,
-  wsRoot: 'https://api.timeline',
-  whitelistedDomains: ['api.timeline', 'api.timeline:443'],
-  company: {
-    name: 'Mingchao Liao',
-    url: 'https://somethine'
-  }
+    production: false,
+    title: 'Timeline',
+    wsRoot: 'https://localhost:9443/timeline-api',
+    whitelistedDomains: ['localhost', 'localhost:9443'],
+    company: {
+        name: 'Mingchao Liao',
+        url: 'https://somethine'
+    }
 };
 
 /*

@@ -21,7 +21,9 @@ export class Event {
   private readonly _createdAt: Date;
   private readonly _updatedAt: Date;
 
-  constructor(id: number, startDate: Date, endDate: Date, startDateAttribute: DateAttribute, endDateAttribute: DateAttribute, startDateFormat: DateFormat, endDateFormat: DateFormat, period: Period, catalogs: Array<Catalog>, content: string, images: Array<Image>, createUserId: number, updateUserId: number, createdAt: Date, updatedAt: Date) {
+  constructor(id: number, startDate: Date, endDate: Date, startDateAttribute: DateAttribute, endDateAttribute: DateAttribute,
+              startDateFormat: DateFormat, endDateFormat: DateFormat, period: Period, catalogs: Array<Catalog>, content: string,
+              images: Array<Image>, createUserId: number, updateUserId: number, createdAt: Date, updatedAt: Date) {
     this._id = id;
     this._startDate = startDate;
     this._endDate = endDate;

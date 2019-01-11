@@ -26,21 +26,25 @@ services:
   mysql:
     image: mysql:5.7.22
     command: --disable-partition-engine-check
-    ports:
-      - 13306:3306
+#    ports:
+#      - 13306:3306
     volumes:
-      - ./mysql:/var/lib/mysql
+      - dbdata1:/var/lib/mysql
+    env_file:
+      - config/docker-env.ini
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       MYSQL_DATABASE: timeline
       MYSQL_USER: timeline_user
-      MYSQL_PASSWORD: timeline_user_pwd
   elasticsearch:
     build: elasticsearch
     volumes:
-      - ./elasticsearch/data:/usr/share/elasticsearch/data
-    ports:
-      - 19200:9200
+      - esdata1:/usr/share/elasticsearch/data
+#    ports:
+#      - 9200:9200
+#      - 9300:9300
+    environment:
+      discovery.type: single-node
 #  web:
 #    build:
 #      context: web
@@ -49,3 +53,9 @@ services:
 #      - 14200:4200
 #    volumes:
 #      - .:/timeline
+volumes:
+  esdata1:
+    driver: local
+  dbdata1:
+    driver: local
+

@@ -7,6 +7,7 @@ use App\Repositories\DateAttributeRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Input;
 
 class DateAttributeController extends Controller
 {
@@ -17,9 +18,37 @@ class DateAttributeController extends Controller
         $this->dateAttributeRepository = $dateAttributeRepository;
     }
 
-    public function get() {
+    public function getTypeahead()
+    {
+        $options = $this->dateAttributeRepository->getTypeahead();
+        return response()->json($options);
+    }
+
+    public function get()
+    {
         $collection = $this->dateAttributeRepository->getCollection();
         return response()->json($collection);
+    }
+
+    public function update(Request $request)
+    {
+        $this->validate($request, [
+            'id' => 'integer|gt:0',
+            'value' => 'string'
+        ]);
+        $attribute = $this->dateAttributeRepository->update(
+            Input::get('id'),
+            Input::get('value')
+        );
+        return response()->json($attribute->toArray());
+    }
+
+    public function delete(Request $request)
+    {
+        $this->validate($request, [
+            'id' => 'integer|gt:0'
+        ]);
+        return response()->json($this->dateAttributeRepository->delete(Input::get('id')));
     }
 
     public function createDateAttribute(Request $request) {

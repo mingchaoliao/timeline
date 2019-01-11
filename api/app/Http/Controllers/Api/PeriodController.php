@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exceptions\PeriodNotFoundException;
+use App\Http\Controllers\Controller;
 use App\Repositories\PeriodRepository;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Input;
 
 class PeriodController extends Controller
 {
@@ -17,19 +17,48 @@ class PeriodController extends Controller
         $this->periodRepository = $periodRepository;
     }
 
-    public function get() {
+    public function getTypeahead()
+    {
+        $options = $this->periodRepository->getTypeahead();
+        return response()->json($options);
+    }
+
+    public function get()
+    {
         $collection = $this->periodRepository->getCollection();
         return response()->json($collection);
     }
 
-    public function createPeriod(Request $request) {
+    public function update(Request $request)
+    {
+        $this->validate($request, [
+            'id' => 'integer|gt:0',
+            'value' => 'string'
+        ]);
+        $period = $this->periodRepository->update(
+            Input::get('id'),
+            Input::get('value')
+        );
+        return response()->json($period->toArray());
+    }
+
+    public function delete(Request $request)
+    {
+        $this->validate($request, [
+            'id' => 'integer|gt:0'
+        ]);
+        return response()->json($this->periodRepository->delete(Input::get('id')));
+    }
+
+    public function createPeriod(Request $request)
+    {
         $this->validate(
             $request,
             [
                 'value' => [
                     'required',
-                    function($attribute, $value, $fail) {
-                        if($this->periodRepository->doesValueExist($value)) {
+                    function ($attribute, $value, $fail) {
+                        if ($this->periodRepository->doesValueExist($value)) {
                             return $fail('Duplicated period');
                         }
                     },
@@ -48,17 +77,18 @@ class PeriodController extends Controller
         return response()->json($period);
     }
 
-    public function bulkCreate(Request $request) {
+    public function bulkCreate(Request $request)
+    {
         $this->validate($request, [
             'values' => [
                 'required',
-                function($attribute, $value, $fail) {
-                    if(!is_array($value)) {
+                function ($attribute, $value, $fail) {
+                    if (!is_array($value)) {
                         $fail('Parameter "values" must be a list of string');
                         return;
                     }
-                    foreach($value as $item) {
-                        if(!is_string($item)) {
+                    foreach ($value as $item) {
+                        if (!is_string($item)) {
                             $fail('Parameter "values" must be a list of string');
                         }
                     }

@@ -10,7 +10,9 @@ namespace App\Repositories;
 
 
 use App\DomainModels\Collections\PeriodCollection;
+use App\DomainModels\Collections\TypeaheadCollection;
 use App\DomainModels\Period;
+use App\DomainModels\Typeahead;
 use App\EloquentModels\EloquentPeriod;
 use App\Exceptions\PeriodNotFoundException;
 use Illuminate\Database\Eloquent\Collection;
@@ -18,12 +20,25 @@ use Illuminate\Support\Facades\Auth;
 
 class PeriodRepository extends BaseRepository
 {
-    public function getCollection(): PeriodCollection {
-        $eloquentCollection = EloquentPeriod::all();
+    public function getTypeahead(): TypeaheadCollection
+    {
+        $payload = EloquentPeriod::select(['id', 'value'])
+            ->get()
+            ->map(function (EloquentPeriod $period) {
+                return new Typeahead($period->getId(), $period->getValue());
+            })
+            ->toArray();
+        return new TypeaheadCollection($payload);
+    }
+
+    public function getCollection(): PeriodCollection
+    {
+        $eloquentCollection = EloquentPeriod::with(['create_user', 'update_user'])->get();
         return $this->constructPeriodCollection($eloquentCollection);
     }
 
-    public function create(string $value, int $createUserId): Period {
+    public function create(string $value, int $createUserId): Period
+    {
         $eloquentPeriod = EloquentPeriod::createNew(
             $value,
             $createUserId
@@ -31,10 +46,42 @@ class PeriodRepository extends BaseRepository
         return $this->constructPeriod($eloquentPeriod);
     }
 
-    public function bulkCreate(array $values, int $createUserId): PeriodCollection {
+    public function update(int $id, string $value): Period
+    {
+        $period = EloquentPeriod::where('id', '=', $id)->first();
+        if ($period === null) {
+            throw new \InvalidArgumentException(sprintf(
+                'Period with id "%s" not found',
+                $id
+            ));
+        }
+
+        $period->update([
+            'value' => $value,
+            'update_user_id' => Auth::id()
+        ]);
+
+        return $this->getById($id);
+    }
+
+    public function delete(int $id): bool
+    {
+        $period = EloquentPeriod::where('id', '=', $id)->first();
+        if ($period === null) {
+            throw new \InvalidArgumentException(sprintf(
+                'Period with id "%s" not found',
+                $id
+            ));
+        }
+
+        return $period->delete();
+    }
+
+    public function bulkCreate(array $values, int $createUserId): PeriodCollection
+    {
         $eloquentPeriods = EloquentPeriod::byValues($values)->get();
 
-        $existingValues = $eloquentPeriods->map(function(EloquentPeriod $period) {
+        $existingValues = $eloquentPeriods->map(function (EloquentPeriod $period) {
             return $period->getValue();
         })->toArray();
 
@@ -47,38 +94,44 @@ class PeriodRepository extends BaseRepository
         return $this->constructPeriodCollection($eloquentPeriods);
     }
 
-    public function doesValueExist($value): bool {
+    public function doesValueExist($value): bool
+    {
         try {
             $this->getByValue($value);
             return true;
-        } catch(PeriodNotFoundException $e) {
+        } catch (PeriodNotFoundException $e) {
             return false;
         }
     }
 
-    public function getByValue(string $value): Period {
+    public function getByValue(string $value): Period
+    {
         $eloquentPeriod = EloquentPeriod::where('value', $value)->first();
-        if($eloquentPeriod === null) {
+        if ($eloquentPeriod === null) {
             throw new PeriodNotFoundException();
         }
         return $this->constructPeriod($eloquentPeriod);
     }
 
-    public function getById(int $id): Period {
+    public function getById(int $id): Period
+    {
         $eloquentPeriod = EloquentPeriod::find($id);
-        if($eloquentPeriod === null) {
+        if ($eloquentPeriod === null) {
             throw new PeriodNotFoundException();
         }
         return $this->constructPeriod($eloquentPeriod);
     }
-    
+
     public function constructPeriod(EloquentPeriod $eloquentPeriod): Period
     {
         return new Period(
             $eloquentPeriod->getId(),
             $eloquentPeriod->getValue(),
+            $eloquentPeriod->getNumberOfEvents(),
             $eloquentPeriod->getCreateUserId(),
+            $eloquentPeriod->getCreateUser()->getName(),
             $eloquentPeriod->getUpdateUserId(),
+            $eloquentPeriod->getUpdateUser() === null ? null : $eloquentPeriod->getUpdateUser()->getName(),
             $eloquentPeriod->getCreatedAt(),
             $eloquentPeriod->getUpdatedAt()
         );

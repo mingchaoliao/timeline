@@ -4,6 +4,8 @@ import {CommonService} from '../../../core/shared/services/common.service';
 import {Url} from '../../../core/shared/classes/url';
 import {UserService} from '../../../core/shared/services/user.service';
 import {ImageService} from '../../../core/shared/services/image.service';
+import {Notification} from '../../../core/shared/models/notification';
+import {NotificationEmitter} from '../../../core/shared/events/notificationEmitter';
 
 @Component({
   selector: 'app-event-image-input',
@@ -32,7 +34,7 @@ export class EventImageInputComponent
   getImageUrl(path: string): string {
     return Url.getImageByPath(
       path,
-      UserService.getUser() === null ? false : UserService.getUser().isAdmin
+      UserService.getCurrentUser() === null ? false : UserService.getCurrentUser().isAdmin
     );
   }
 
@@ -66,8 +68,8 @@ export class EventImageInputComponent
         this.images[index].uploadStatus = 'Uploaded';
         this.propagateChange(this.images);
       },
-      e => {
-        // TODO: error handling
+      error => {
+        NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to update image'));
       }
     );
   }
