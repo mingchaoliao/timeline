@@ -1,36 +1,25 @@
 version: '2'
 services:
   nginx:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: nginx:1.15.1-alpine
     ports:
       - 80:80
       - 443:443
     depends_on:
       - api
-      - web
+    working_dir: /apidist
     volumes:
-      - ./etc/nginx/conf.d:/etc/nginx/conf.d
-      - ./etc/nginx/ssl:/etc/nginx/ssl
-      - apistorage:/apidist/storage
-      - webdist:/webdist
-    env_file:
-      - ./etc/docker/web.env
-      - ./etc/docker/api.env
+      - ./etc/development/nginx/conf.d:/etc/nginx/conf.d
+      - ./etc/development/nginx/ssl:/etc/nginx/ssl
+      - ./api:/apidist
     networks:
       - internal
   api:
     build:
       context: api
-      dockerfile: Dockerfile
-    user: apiuser
+      dockerfile: Dockerfile.dev
     volumes:
-      - apistorage:/apidist/storage
-      - ./api/.env:/apidist/.env
-    env_file:
-      - ./etc/docker/mysql.env
-      - ./etc/docker/api.env
+      - ./api:/apidist
     depends_on:
       - mysql
       - elasticsearch
@@ -39,12 +28,12 @@ services:
   mysql:
     image: mysql:5.7.22
     command: --disable-partition-engine-check
-    ports:
-      - 13306:3306
     volumes:
       - dbdata1:/var/lib/mysql
     env_file:
-      - ./etc/docker/mysql.env
+      - ./etc/development/docker/mysql.env
+    ports:
+      - 13306:3306
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       MYSQL_DATABASE: timeline
@@ -65,17 +54,15 @@ services:
   web:
     build:
       context: web
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.dev
+    ports:
+      - 4200:4200
     volumes:
-      - webdist:/webdist
+      - ./web:/webdist
 volumes:
   esdata1:
     driver: local
   dbdata1:
-    driver: local
-  webdist:
-    driver: local
-  apistorage:
     driver: local
 
 networks:
