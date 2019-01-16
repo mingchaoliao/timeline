@@ -10,7 +10,7 @@ namespace App\Timeline\Domain\Models;
 
 use Illuminate\Support\Carbon;
 
-class Image extends AbstractBase
+class Image extends BaseModel
 {
     public const TMP_PATH = 'images/tmp';
     public const PATH = 'images';

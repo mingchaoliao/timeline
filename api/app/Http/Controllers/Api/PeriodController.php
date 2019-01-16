@@ -3,51 +3,29 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentPeriodRepository;
+use App\Timeline\Domain\Repositories\PeriodRepository;
+use App\Timeline\Domain\ValueObjects\PeriodId;
+use App\Timeline\Domain\ValueObjects\UserId;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Input;
 
 class PeriodController extends Controller
 {
     private $periodRepository;
 
-    public function __construct(EloquentPeriodRepository $periodRepository)
+    public function __construct(PeriodRepository $periodRepository)
     {
         $this->periodRepository = $periodRepository;
     }
 
     public function getTypeahead()
     {
-        $options = $this->periodRepository->getTypeahead();
-        return response()->json($options);
+        return response()->json($this->periodRepository->getTypeahead());
     }
 
-    public function get()
+    public function getAll()
     {
-        $collection = $this->periodRepository->getCollection();
-        return response()->json($collection);
-    }
-
-    public function update(Request $request)
-    {
-        $this->validate($request, [
-            'id' => 'integer|gt:0',
-            'value' => 'string'
-        ]);
-        $period = $this->periodRepository->update(
-            Input::get('id'),
-            Input::get('value')
-        );
-        return response()->json($period->toArray());
-    }
-
-    public function delete(Request $request)
-    {
-        $this->validate($request, [
-            'id' => 'integer|gt:0'
-        ]);
-        return response()->json($this->periodRepository->delete(Input::get('id')));
+        return response()->json($this->periodRepository->getAll());
     }
 
     public function createPeriod(Request $request)
@@ -55,14 +33,7 @@ class PeriodController extends Controller
         $this->validate(
             $request,
             [
-                'value' => [
-                    'required',
-                    function ($attribute, $value, $fail) {
-                        if ($this->periodRepository->doesValueExist($value)) {
-                            return $fail('Duplicated period');
-                        }
-                    },
-                ]
+                'value' => 'required'
             ],
             [
                 'required' => 'Missing value'
@@ -71,36 +42,51 @@ class PeriodController extends Controller
 
         $period = $this->periodRepository->create(
             $request->get('value'),
-            Auth::user()->getId()
+            new UserId(Auth::user()->getId())
         );
 
         return response()->json($period);
     }
 
+    public function update(Request $request)
+    {
+        $this->validate($request, [
+            'id' => 'integer|gt:0',
+            'value' => 'required'
+        ]);
+
+        $period = $this->periodRepository->update(
+            new PeriodId($request->get('id')),
+            $request->get('value'),
+            new UserId(Auth::user()->getId())
+        );
+
+        return response()->json($period);
+    }
+
+    public function delete(Request $request)
+    {
+        $this->validate($request, [
+            'id' => 'integer|gt:0'
+        ]);
+
+        $isSuccess = $this->periodRepository->delete(new PeriodId($request->get('id')));
+
+        return response()->json($isSuccess);
+    }
+
     public function bulkCreate(Request $request)
     {
         $this->validate($request, [
-            'values' => [
-                'required',
-                function ($attribute, $value, $fail) {
-                    if (!is_array($value)) {
-                        $fail('Parameter "values" must be a list of string');
-                        return;
-                    }
-                    foreach ($value as $item) {
-                        if (!is_string($item)) {
-                            $fail('Parameter "values" must be a list of string');
-                        }
-                    }
-                },
-            ]
-        ], [
-            'required' => 'Parameter "values" is required'
+            'values' => 'array'
         ]);
 
         $values = $request->get('values');
 
-        $response = $this->periodRepository->bulkCreate($values, Auth::user()->getId());
+        $response = $this->periodRepository->bulkCreate(
+            $values,
+            new UserId(Auth::user()->getId())
+        );
 
         return response()->json($response);
     }

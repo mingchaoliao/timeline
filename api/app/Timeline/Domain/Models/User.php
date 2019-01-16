@@ -10,7 +10,7 @@ namespace App\Timeline\Domain\Models;
 
 use Carbon\Carbon;
 
-class User extends AbstractBase
+class User extends BaseModel
 {
     /**
      * @var int

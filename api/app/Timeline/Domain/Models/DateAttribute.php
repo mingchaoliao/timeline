@@ -2,18 +2,20 @@
 /**
  * Author: liaom
  * Date: 6/21/18
- * Time: 4:51 PM
+ * Time: 4:45 PM
  */
 
 namespace App\Timeline\Domain\Models;
 
 
-use Carbon\Carbon;
+use App\Timeline\Domain\ValueObjects\DateAttributeId;
+use App\Timeline\Domain\ValueObjects\UserId;
+use Illuminate\Support\Carbon;
 
-class DateAttribute extends AbstractBase
+class DateAttribute extends BaseModel
 {
     /**
-     * @var int
+     * @var DateAttributeId
      */
     private $id;
     /**
@@ -21,7 +23,7 @@ class DateAttribute extends AbstractBase
      */
     private $value;
     /**
-     * @var int
+     * @var UserId
      */
     private $createUserId;
     /**
@@ -29,11 +31,11 @@ class DateAttribute extends AbstractBase
      */
     private $createUserName;
     /**
-     * @var int|null
+     * @var UserId
      */
     private $updateUserId;
     /**
-     * @var string|null
+     * @var string
      */
     private $updateUserName;
     /**
@@ -41,22 +43,22 @@ class DateAttribute extends AbstractBase
      */
     private $createdAt;
     /**
-     * @var Carbon|null
+     * @var Carbon
      */
     private $updatedAt;
 
     /**
      * DateAttribute constructor.
-     * @param int $id
+     * @param DateAttributeId $id
      * @param string $value
-     * @param int $createUserId
+     * @param UserId $createUserId
      * @param string $createUserName
-     * @param int|null $updateUserId
-     * @param null|string $updateUserName
+     * @param UserId $updateUserId
+     * @param string $updateUserName
      * @param Carbon $createdAt
-     * @param Carbon|null $updatedAt
+     * @param Carbon $updatedAt
      */
-    public function __construct(int $id, string $value, int $createUserId, string $createUserName, ?int $updateUserId, ?string $updateUserName, Carbon $createdAt, ?Carbon $updatedAt)
+    public function __construct(DateAttributeId $id, string $value, UserId $createUserId, string $createUserName, UserId $updateUserId, string $updateUserName, Carbon $createdAt, Carbon $updatedAt)
     {
         $this->id = $id;
         $this->value = $value;
@@ -69,9 +71,9 @@ class DateAttribute extends AbstractBase
     }
 
     /**
-     * @return int
+     * @return DateAttributeId
      */
-    public function getId(): int
+    public function getId(): DateAttributeId
     {
         return $this->id;
     }
@@ -85,9 +87,9 @@ class DateAttribute extends AbstractBase
     }
 
     /**
-     * @return int
+     * @return UserId
      */
-    public function getCreateUserId(): int
+    public function getCreateUserId(): UserId
     {
         return $this->createUserId;
     }
@@ -101,17 +103,17 @@ class DateAttribute extends AbstractBase
     }
 
     /**
-     * @return int|null
+     * @return UserId
      */
-    public function getUpdateUserId(): ?int
+    public function getUpdateUserId(): UserId
     {
         return $this->updateUserId;
     }
 
     /**
-     * @return null|string
+     * @return string
      */
-    public function getUpdateUserName(): ?string
+    public function getUpdateUserName(): string
     {
         return $this->updateUserName;
     }
@@ -125,9 +127,9 @@ class DateAttribute extends AbstractBase
     }
 
     /**
-     * @return Carbon|null
+     * @return Carbon
      */
-    public function getUpdatedAt(): ?Carbon
+    public function getUpdatedAt(): Carbon
     {
         return $this->updatedAt;
     }
@@ -135,14 +137,14 @@ class DateAttribute extends AbstractBase
     public function toArray(): array
     {
         return [
-            'id' => $this->getId(),
+            'id' => $this->getId()->getValue(),
             'value' => $this->getValue(),
-            'createUserId' => $this->getCreateUserId(),
+            'createUserId' => $this->getCreateUserId()->getValue(),
             'createUserName' => $this->getCreateUserName(),
-            'updateUserId' => $this->getUpdateUserId(),
+            'updateUserId' => $this->getUpdateUserId()->getValue(),
             'updateUserName' => $this->getUpdateUserName(),
-            'createdAt' => $this->getCreatedAt()->format(DATE_ISO8601),
-            'updatedAt' => $this->getUpdatedAt()->format(DATE_ISO8601)
+            'createdAt' => $this->getCreatedAt()->toIso8601String(),
+            'updatedAt' => $this->getUpdatedAt()->toIso8601String()
         ];
     }
 }

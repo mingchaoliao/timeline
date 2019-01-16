@@ -76,26 +76,4 @@ class EloquentCatalog extends Model
     public function scopeByValues(Builder $query, array $values): Builder {
         return $query->whereIn('value', $values);
     }
-
-    public static function createNew(
-        string $value,
-        int $createUserId
-    ): self
-    {
-        return static::create([
-            'value' => $value,
-            'create_user_id' => $createUserId
-        ]);
-    }
-
-    public static function bulkCreate(array $values, int $createUserId): Collection
-    {
-        $collection = new Collection();
-
-        foreach ($values as $value) {
-            $collection->push(self::createNew($value, $createUserId));
-        }
-
-        return $collection;
-    }
 }

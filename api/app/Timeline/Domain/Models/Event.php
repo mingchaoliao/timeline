@@ -12,7 +12,7 @@ use App\Timeline\Domain\Collections\CatalogCollection;
 use App\Timeline\Domain\Collections\ImageCollection;
 use Carbon\Carbon;
 
-class Event extends AbstractBase
+class Event extends BaseModel
 {
     /**
      * @var int

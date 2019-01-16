@@ -15,11 +15,11 @@ class CreateImagesTable extends Migration
     {
         Schema::create('images', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('path');
+            $table->string('path')->unique();
             $table->text('description')->nullable();
             $table->unsignedInteger('event_id');
             $table->unsignedInteger('create_user_id');
-            $table->unsignedInteger('update_user_id')->nullable();
+            $table->unsignedInteger('update_user_id');
             $table->timestamps();
         });
     }

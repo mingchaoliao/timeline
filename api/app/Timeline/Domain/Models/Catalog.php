@@ -8,12 +8,14 @@
 namespace App\Timeline\Domain\Models;
 
 
+use App\Timeline\Domain\ValueObjects\CatalogId;
+use App\Timeline\Domain\ValueObjects\UserId;
 use Illuminate\Support\Carbon;
 
-class Catalog
+class Catalog extends BaseModel
 {
     /**
-     * @var int
+     * @var CatalogId
      */
     private $id;
     /**
@@ -25,7 +27,7 @@ class Catalog
      */
     private $numberOfEvents;
     /**
-     * @var int
+     * @var UserId
      */
     private $createUserId;
     /**
@@ -33,11 +35,11 @@ class Catalog
      */
     private $createUserName;
     /**
-     * @var int|null
+     * @var UserId
      */
     private $updateUserId;
     /**
-     * @var string|null
+     * @var string
      */
     private $updateUserName;
     /**
@@ -45,23 +47,23 @@ class Catalog
      */
     private $createdAt;
     /**
-     * @var Carbon|null
+     * @var Carbon
      */
     private $updatedAt;
 
     /**
-     * Period constructor.
-     * @param int $id
+     * Catalog constructor.
+     * @param CatalogId $id
      * @param string $value
      * @param int $numberOfEvents
-     * @param int $createUserId
+     * @param UserId $createUserId
      * @param string $createUserName
-     * @param int|null $updateUserId
-     * @param string|null $updateUserName
+     * @param UserId $updateUserId
+     * @param string $updateUserName
      * @param Carbon $createdAt
-     * @param Carbon|null $updatedAt
+     * @param Carbon $updatedAt
      */
-    public function __construct(int $id, string $value, int $numberOfEvents, int $createUserId, string $createUserName, ?int $updateUserId, ?string $updateUserName, Carbon $createdAt, ?Carbon $updatedAt)
+    public function __construct(CatalogId $id, string $value, int $numberOfEvents, UserId $createUserId, string $createUserName, UserId $updateUserId, string $updateUserName, Carbon $createdAt, Carbon $updatedAt)
     {
         $this->id = $id;
         $this->value = $value;
@@ -75,9 +77,9 @@ class Catalog
     }
 
     /**
-     * @return int
+     * @return CatalogId
      */
-    public function getId(): int
+    public function getId(): CatalogId
     {
         return $this->id;
     }
@@ -93,41 +95,17 @@ class Catalog
     /**
      * @return int
      */
-    public function getCreateUserId(): int
-    {
-        return $this->createUserId;
-    }
-
-    /**
-     * @return int|null
-     */
-    public function getUpdateUserId(): ?int
-    {
-        return $this->updateUserId;
-    }
-
-    /**
-     * @return Carbon
-     */
-    public function getCreatedAt(): Carbon
-    {
-        return $this->createdAt;
-    }
-
-    /**
-     * @return Carbon|null
-     */
-    public function getUpdatedAt(): ?Carbon
-    {
-        return $this->updatedAt;
-    }
-
-    /**
-     * @return int
-     */
     public function getNumberOfEvents(): int
     {
         return $this->numberOfEvents;
+    }
+
+    /**
+     * @return UserId
+     */
+    public function getCreateUserId(): UserId
+    {
+        return $this->createUserId;
     }
 
     /**
@@ -139,25 +117,49 @@ class Catalog
     }
 
     /**
-     * @return string|null
+     * @return UserId
      */
-    public function getUpdateUserName(): ?string
+    public function getUpdateUserId(): UserId
+    {
+        return $this->updateUserId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUpdateUserName(): string
     {
         return $this->updateUserName;
+    }
+
+    /**
+     * @return Carbon
+     */
+    public function getCreatedAt(): Carbon
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @return Carbon
+     */
+    public function getUpdatedAt(): Carbon
+    {
+        return $this->updatedAt;
     }
 
     public function toArray(): array
     {
         return [
-            'id' => $this->getId(),
+            'id' => $this->getId()->getValue(),
             'value' => $this->getValue(),
             'numberOfEvents' => $this->getNumberOfEvents(),
-            'createUserId' => $this->getCreateUserId(),
+            'createUserId' => $this->getCreateUserId()->getValue(),
             'createUserName' => $this->getCreateUserName(),
-            'updateUserId' => $this->getUpdateUserId(),
+            'updateUserId' => $this->getUpdateUserId()->getValue(),
             'updateUserName' => $this->getUpdateUserName(),
-            'createdAt' => $this->getCreatedAt()->format(DATE_ISO8601),
-            'updatedAt' => $this->getUpdatedAt()->format(DATE_ISO8601)
+            'createdAt' => $this->getCreatedAt()->toIso8601String(),
+            'updatedAt' => $this->getUpdatedAt()->toIso8601String()
         ];
     }
 }

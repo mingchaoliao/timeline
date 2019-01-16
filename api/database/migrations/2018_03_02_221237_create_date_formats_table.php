@@ -16,8 +16,8 @@ class CreateDateFormatsTable extends Migration
     {
         Schema::create('date_formats', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('mysql_format');
-            $table->string('php_format');
+            $table->string('mysql_format')->unique();
+            $table->string('php_format')->unique();
             $table->tinyInteger('has_year');
             $table->tinyInteger('has_month');
             $table->tinyInteger('has_day');

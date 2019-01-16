@@ -70,7 +70,8 @@ class EloquentDateAttribute extends Model
     ): self {
         return static::create([
             'value' => $value,
-            'create_user_id' => $createUserId
+            'create_user_id' => $createUserId,
+            'update_user_id' => $createUserId
         ]);
     }
 

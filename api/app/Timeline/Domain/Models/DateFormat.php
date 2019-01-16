@@ -8,12 +8,13 @@
 namespace App\Timeline\Domain\Models;
 
 
+use App\Timeline\Domain\ValueObjects\DateFormatId;
 use Illuminate\Support\Carbon;
 
-class DateFormat extends AbstractBase
+class DateFormat extends BaseModel
 {
     /**
-     * @var int
+     * @var DateFormatId
      */
     private $id;
     /**
@@ -52,7 +53,7 @@ class DateFormat extends AbstractBase
     /**
      * DateFormat constructor.
      *
-     * @param int $id
+     * @param DateFormatId $id
      * @param string $mysqlFormat
      * @param string $phpFormat
      * @param bool $hasYear
@@ -63,7 +64,7 @@ class DateFormat extends AbstractBase
      * @param Carbon $updatedAt
      */
     public function __construct(
-        int $id,
+        DateFormatId $id,
         string $mysqlFormat,
         string $phpFormat,
         bool $hasYear,
@@ -72,7 +73,8 @@ class DateFormat extends AbstractBase
         bool $isAttributeAllowed,
         Carbon $createdAt,
         Carbon $updatedAt
-    ) {
+    )
+    {
         $this->id = $id;
         $this->mysqlFormat = $mysqlFormat;
         $this->phpFormat = $phpFormat;
@@ -85,9 +87,9 @@ class DateFormat extends AbstractBase
     }
 
     /**
-     * @return int
+     * @return DateFormatId
      */
-    public function getId(): int
+    public function getId(): DateFormatId
     {
         return $this->id;
     }
@@ -160,7 +162,7 @@ class DateFormat extends AbstractBase
     public function toArray(): array
     {
         return [
-            'id' => $this->getId(),
+            'id' => $this->getId()->getValue(),
             'mysqlFormat' => $this->getMysqlFormat(),
             'phpFormat' => $this->getPhpFormat(),
             'isAttributeAllowed' => $this->isAttributeAllowed(),

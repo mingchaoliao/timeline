@@ -10,7 +10,7 @@ namespace App\Timeline\Domain\Models;
 
 use Illuminate\Contracts\Support\Jsonable;
 
-abstract class AbstractBase implements Jsonable
+abstract class BaseModel implements Jsonable
 {
     abstract public function toArray(): array;
 

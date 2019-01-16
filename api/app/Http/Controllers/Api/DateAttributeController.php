@@ -2,67 +2,38 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Timeline\Exceptions\DateAttributeNotFoundException;
-use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentDateAttributeRepository;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Timeline\Domain\Repositories\DateAttributeRepository;
+use App\Timeline\Domain\ValueObjects\DateAttributeId;
+use App\Timeline\Domain\ValueObjects\UserId;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Input;
 
 class DateAttributeController extends Controller
 {
     private $dateAttributeRepository;
 
-    public function __construct(EloquentDateAttributeRepository $dateAttributeRepository)
+    public function __construct(DateAttributeRepository $dateAttributeRepository)
     {
         $this->dateAttributeRepository = $dateAttributeRepository;
     }
 
     public function getTypeahead()
     {
-        $options = $this->dateAttributeRepository->getTypeahead();
-        return response()->json($options);
+        return response()->json($this->dateAttributeRepository->getTypeahead());
     }
 
-    public function get()
+    public function getAll()
     {
-        $collection = $this->dateAttributeRepository->getCollection();
-        return response()->json($collection);
+        return response()->json($this->dateAttributeRepository->getAll());
     }
 
-    public function update(Request $request)
+    public function createDateAttribute(Request $request)
     {
-        $this->validate($request, [
-            'id' => 'integer|gt:0',
-            'value' => 'string'
-        ]);
-        $attribute = $this->dateAttributeRepository->update(
-            Input::get('id'),
-            Input::get('value')
-        );
-        return response()->json($attribute->toArray());
-    }
-
-    public function delete(Request $request)
-    {
-        $this->validate($request, [
-            'id' => 'integer|gt:0'
-        ]);
-        return response()->json($this->dateAttributeRepository->delete(Input::get('id')));
-    }
-
-    public function createDateAttribute(Request $request) {
         $this->validate(
             $request,
             [
-                'value' => [
-                    'required',
-                    function($attribute, $value, $fail) {
-                        if($this->dateAttributeRepository->doesValueExist($value)) {
-                            return $fail('Duplicated date attribute');
-                        }
-                    },
-                ]
+                'value' => 'required'
             ],
             [
                 'required' => 'Missing value'
@@ -71,35 +42,51 @@ class DateAttributeController extends Controller
 
         $dateAttribute = $this->dateAttributeRepository->create(
             $request->get('value'),
-            Auth::user()->getId()
+            new UserId(Auth::user()->getId())
         );
 
         return response()->json($dateAttribute);
     }
 
-    public function bulkCreate(Request $request) {
+    public function update(Request $request)
+    {
         $this->validate($request, [
-            'values' => [
-                'required',
-                function($attribute, $value, $fail) {
-                    if(!is_array($value)) {
-                        $fail('Parameter "values" must be a list of string');
-                        return;
-                    }
-                    foreach($value as $item) {
-                        if(!is_string($item)) {
-                            $fail('Parameter "values" must be a list of string');
-                        }
-                    }
-                },
-            ]
-        ], [
-            'required' => 'Parameter "values" is required'
+            'id' => 'integer|gt:0',
+            'value' => 'required'
+        ]);
+
+        $dateAttribute = $this->dateAttributeRepository->update(
+            new DateAttributeId($request->get('id')),
+            $request->get('value'),
+            new UserId(Auth::user()->getId())
+        );
+
+        return response()->json($dateAttribute);
+    }
+
+    public function delete(Request $request)
+    {
+        $this->validate($request, [
+            'id' => 'integer|gt:0'
+        ]);
+
+        $isSuccess = $this->dateAttributeRepository->delete(new DateAttributeId($request->get('id')));
+
+        return response()->json($isSuccess);
+    }
+
+    public function bulkCreate(Request $request)
+    {
+        $this->validate($request, [
+            'values' => 'array'
         ]);
 
         $values = $request->get('values');
 
-        $response = $this->dateAttributeRepository->bulkCreate($values, Auth::user()->getId());
+        $response = $this->dateAttributeRepository->bulkCreate(
+            $values,
+            new UserId(Auth::user()->getId())
+        );
 
         return response()->json($response);
     }

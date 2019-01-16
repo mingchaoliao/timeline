@@ -24,7 +24,7 @@ class CreateEventsTable extends Migration
             $table->text('content');
             $table->unsignedInteger('period_id')->nullable();
             $table->unsignedInteger('create_user_id');
-            $table->unsignedInteger('update_user_id')->nullable();
+            $table->unsignedInteger('update_user_id');
             $table->timestamps();
         });
     }

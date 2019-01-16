@@ -34,9 +34,7 @@ class AppServiceProvider extends ServiceProvider
             return new Authorization();
         });
 
-        $this->app->singleton(EloquentCatalogRepository::class, function ($app) {
-            return new EloquentCatalogRepository(resolve(Authorization::class));
-        });
+
 
         $this->app->singleton(EloquentDateAttributeRepository::class, function ($app) {
             return new EloquentDateAttributeRepository(resolve(Authorization::class));

@@ -11,29 +11,34 @@ namespace App\Timeline\Infrastructure\Persistence\Eloquent\Repositories;
 
 use App\Timeline\Domain\Collections\DateFormatCollection;
 use App\Timeline\Domain\Models\DateFormat;
+use App\Timeline\Domain\Repositories\DateFormatRepository;
+use App\Timeline\Domain\ValueObjects\DateFormatId;
+use App\Timeline\Exceptions\TimelineException;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentDateFormat;
-use App\Timeline\Exceptions\DateFormatNotFoundException;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\QueryException;
 
-class EloquentDateFormatRepository extends EloquentBaseRepository
+class EloquentDateFormatRepository implements DateFormatRepository
 {
-    public function getCollection(): DateFormatCollection {
-        $eloquentCollection = EloquentDateFormat::all();
-        return $this->constructDateFormatCollection($eloquentCollection);
-    }
+    /**
+     * @return DateFormatCollection
+     * @throws TimelineException
+     */
+    public function getAll(): DateFormatCollection
+    {
+        try {
+            $eloquentCollection = app(EloquentDateFormat::class)->all();
 
-    public function getById(int $id): DateFormat {
-        $eloquentDateFormat = EloquentDateFormat::find($id);
-        if($eloquentDateFormat === null) {
-            throw new DateFormatNotFoundException();
+            return $this->constructDateFormatCollection($eloquentCollection);
+        } catch (QueryException $e) {
+            throw TimelineException::ofUnableToRetrieveDateFormats();
         }
-        return $this->constructDateFormat($eloquentDateFormat);
     }
 
-    public function constructDateFormat(EloquentDateFormat $eloquentDateFormat): DateFormat
+    private function constructDateFormat(EloquentDateFormat $eloquentDateFormat): DateFormat
     {
         return new DateFormat(
-            $eloquentDateFormat->getId(),
+            new DateFormatId($eloquentDateFormat->getId()),
             $eloquentDateFormat->getMysqlFormat(),
             $eloquentDateFormat->getPhpFormat(),
             $eloquentDateFormat->hasYear(),
@@ -45,7 +50,7 @@ class EloquentDateFormatRepository extends EloquentBaseRepository
         );
     }
 
-    public function constructDateFormatCollection(Collection $collection): DateFormatCollection
+    private function constructDateFormatCollection(Collection $collection): DateFormatCollection
     {
         $results = new DateFormatCollection();
         foreach ($collection as $item) {
