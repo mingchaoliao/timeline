@@ -1,6 +1,6 @@
 <?php
 
-use App\EloquentModels\EloquentUser;
+use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentUser;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

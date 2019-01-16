@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exceptions\CatalogNotFoundException;
-use App\Repositories\CatalogRepository;
+use App\Timeline\Exceptions\CatalogNotFoundException;
+use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentCatalogRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -13,7 +13,7 @@ class CatalogController extends Controller
 {
     private $catalogRepository;
 
-    public function __construct(CatalogRepository $catalogRepository)
+    public function __construct(EloquentCatalogRepository $catalogRepository)
     {
         $this->catalogRepository = $catalogRepository;
     }

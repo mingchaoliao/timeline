@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use App\Exceptions\UserNotFoundException;
-use App\Repositories\UserRepository;
+use App\Timeline\Exceptions\UserNotFoundException;
+use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentUserRepository;
 use Illuminate\Console\Command;
 
 class UserCreateCommand extends Command
@@ -29,7 +29,7 @@ class UserCreateCommand extends Command
      *
      * @return void
      */
-    public function __construct(UserRepository $userRepository)
+    public function __construct(EloquentUserRepository $userRepository)
     {
         parent::__construct();
         $this->userRepository = $userRepository;

@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Repositories\EventRepository;
+use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentEventRepository;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Storage;
 class TimelineGenerateCommand extends Command
 {
     /**
-     * @var EventRepository
+     * @var EloquentEventRepository
      */
     private $eventRepository;
 
@@ -35,7 +35,7 @@ class TimelineGenerateCommand extends Command
      *
      * @return void
      */
-    public function __construct(EventRepository $eventRepository)
+    public function __construct(EloquentEventRepository $eventRepository)
     {
         parent::__construct();
         $this->eventRepository = $eventRepository;

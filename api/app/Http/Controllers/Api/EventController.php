@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\DomainModels\Collections\EventCollection;
-use App\DomainModels\DateFormat;
-use App\DomainModels\Event;
-use App\DomainModels\Image;
-use App\Exceptions\DateAttributeNotFoundException;
-use App\Exceptions\DateFormatNotFoundException;
-use App\Exceptions\PeriodNotFoundException;
+use App\Timeline\Domain\Collections\EventCollection;
+use App\Timeline\Domain\Models\DateFormat;
+use App\Timeline\Domain\Models\Event;
+use App\Timeline\Domain\Models\Image;
+use App\Timeline\Exceptions\DateAttributeNotFoundException;
+use App\Timeline\Exceptions\DateFormatNotFoundException;
+use App\Timeline\Exceptions\PeriodNotFoundException;
 use App\Http\Controllers\Controller;
-use App\Repositories\CatalogRepository;
-use App\Repositories\DateAttributeRepository;
-use App\Repositories\DateFormatRepository;
-use App\Repositories\EventRepository;
-use App\Repositories\PeriodRepository;
+use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentCatalogRepository;
+use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentDateAttributeRepository;
+use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentDateFormatRepository;
+use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentEventRepository;
+use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentPeriodRepository;
 use Carbon\Carbon;
 use Elasticsearch;
 use Illuminate\Http\Request;
@@ -34,11 +34,11 @@ class EventController extends Controller
     private $catalogRepository;
 
     public function __construct(
-        EventRepository $eventRepository,
-        DateFormatRepository $dateFormatRepository,
-        DateAttributeRepository $dateAttributeRepository,
-        PeriodRepository $periodRepository,
-        CatalogRepository $catalogRepository
+        EloquentEventRepository $eventRepository,
+        EloquentDateFormatRepository $dateFormatRepository,
+        EloquentDateAttributeRepository $dateAttributeRepository,
+        EloquentPeriodRepository $periodRepository,
+        EloquentCatalogRepository $catalogRepository
     )
     {
         $this->eventRepository = $eventRepository;

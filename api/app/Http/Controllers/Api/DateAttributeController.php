@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exceptions\DateAttributeNotFoundException;
-use App\Repositories\DateAttributeRepository;
+use App\Timeline\Exceptions\DateAttributeNotFoundException;
+use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentDateAttributeRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -13,7 +13,7 @@ class DateAttributeController extends Controller
 {
     private $dateAttributeRepository;
 
-    public function __construct(DateAttributeRepository $dateAttributeRepository)
+    public function __construct(EloquentDateAttributeRepository $dateAttributeRepository)
     {
         $this->dateAttributeRepository = $dateAttributeRepository;
     }

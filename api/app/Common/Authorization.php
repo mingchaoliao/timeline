@@ -8,8 +8,8 @@
 namespace App\Common;
 
 
-use App\Exceptions\UnauthenticatedException;
-use App\Exceptions\UnauthorizedException;
+use App\Timeline\Exceptions\UnauthenticatedException;
+use App\Timeline\Exceptions\UnauthorizedException;
 use Illuminate\Support\Facades\Auth;
 
 class Authorization

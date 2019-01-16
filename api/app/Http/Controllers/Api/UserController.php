@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Exceptions\HttpException;
 use App\Http\Controllers\Controller;
-use App\Repositories\UserRepository;
+use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentUserRepository;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
 use Illuminate\Http\Request;
@@ -17,7 +17,7 @@ use Laravel\Passport\Http\Controllers\AccessTokenController;
 class UserController extends Controller
 {
     /**
-     * @var UserRepository
+     * @var EloquentUserRepository
      */
     private $userRepository;
     /**
@@ -30,7 +30,7 @@ class UserController extends Controller
     private $accessTokenController;
 
     public function __construct(
-        UserRepository $userRepository,
+        EloquentUserRepository $userRepository,
         Client $httpClient,
         AccessTokenController $accessTokenController
     ) {

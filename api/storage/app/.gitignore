@@ -1,9 +1,3 @@
 *
 !public/
 !.gitignore
-!images/
-images/*
-!images/.gitkeep
-!images/tmp/
-images/tmp/*
-!images/tmp/.gitkeep

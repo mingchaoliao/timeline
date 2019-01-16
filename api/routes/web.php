@@ -17,11 +17,11 @@ Route::get('/', function () {
 
 Route::get('/admin/image/{path}', function ($path) {
     $image = null;
-    if(Storage::exists(\App\DomainModels\Image::TMP_PATH . '/' . $path)) {
-        $image = Storage::get(\App\DomainModels\Image::TMP_PATH . '/' . $path);
+    if(Storage::exists(\App\Timeline\Domain\Models\Image::TMP_PATH . '/' . $path)) {
+        $image = Storage::get(\App\Timeline\Domain\Models\Image::TMP_PATH . '/' . $path);
     }
-    if(Storage::exists(\App\DomainModels\Image::PATH . '/' . $path)) {
-        $image = Storage::get(\App\DomainModels\Image::PATH . '/' . $path);
+    if(Storage::exists(\App\Timeline\Domain\Models\Image::PATH . '/' . $path)) {
+        $image = Storage::get(\App\Timeline\Domain\Models\Image::PATH . '/' . $path);
     }
     return \Intervention\Image\Facades\Image::make($image)->response();
 });
@@ -29,7 +29,7 @@ Route::get('/admin/image/{path}', function ($path) {
 Route::get('/image/{path}', function ($path) {
     return \Intervention\Image\Facades\Image::make(
         \Illuminate\Support\Facades\Storage::get(
-            \App\DomainModels\Image::PATH . '/' . $path
+            \App\Timeline\Domain\Models\Image::PATH . '/' . $path
         )
     )->response();
 });

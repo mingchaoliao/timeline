@@ -1,6 +1,6 @@
 <?php
 
-use App\EloquentModels\EloquentDateAttribute;
+use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentDateAttribute;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

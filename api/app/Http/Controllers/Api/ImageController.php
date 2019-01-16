@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\DomainModels\Image;
+use App\Timeline\Domain\Models\Image;
 use App\Http\Controllers\Controller;
-use App\Repositories\ImageRepository;
+use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentImageRepository;
 use Illuminate\Http\Request;
 
 class ImageController extends Controller
 {
     private $imageRepository;
 
-    public function __construct(ImageRepository $imageRepository)
+    public function __construct(EloquentImageRepository $imageRepository)
     {
         $this->imageRepository = $imageRepository;
     }

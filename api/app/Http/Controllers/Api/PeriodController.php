@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\PeriodRepository;
+use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentPeriodRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Input;
@@ -12,7 +12,7 @@ class PeriodController extends Controller
 {
     private $periodRepository;
 
-    public function __construct(PeriodRepository $periodRepository)
+    public function __construct(EloquentPeriodRepository $periodRepository)
     {
         $this->periodRepository = $periodRepository;
     }
