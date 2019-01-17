@@ -10,12 +10,14 @@ namespace App\Timeline\Domain\Models;
 
 use App\Timeline\Domain\Collections\CatalogCollection;
 use App\Timeline\Domain\Collections\ImageCollection;
+use App\Timeline\Domain\ValueObjects\EventId;
+use App\Timeline\Domain\ValueObjects\UserId;
 use Carbon\Carbon;
 
 class Event extends BaseModel
 {
     /**
-     * @var int
+     * @var EventId
      */
     private $id;
     /**
@@ -59,11 +61,11 @@ class Event extends BaseModel
      */
     private $imageCollection;
     /**
-     * @var int
+     * @var UserId
      */
     private $createUserId;
     /**
-     * @var int|null
+     * @var UserId
      */
     private $updateUserId;
     /**
@@ -71,14 +73,13 @@ class Event extends BaseModel
      */
     private $createdAt;
     /**
-     * @var Carbon|null
+     * @var Carbon
      */
     private $updatedAt;
 
     /**
      * Event constructor.
-     *
-     * @param int $id
+     * @param EventId $id
      * @param Carbon $startDate
      * @param Carbon|null $endDate
      * @param DateAttribute|null $startDateAttribute
@@ -89,28 +90,13 @@ class Event extends BaseModel
      * @param CatalogCollection $catalogCollection
      * @param string $content
      * @param ImageCollection $imageCollection
-     * @param int $createUserId
-     * @param int|null $updateUserId
+     * @param UserId $createUserId
+     * @param UserId $updateUserId
      * @param Carbon $createdAt
-     * @param Carbon|null $updatedAt
+     * @param Carbon $updatedAt
      */
-    public function __construct(
-        int $id,
-        Carbon $startDate,
-        ?Carbon $endDate,
-        ?DateAttribute $startDateAttribute,
-        ?DateAttribute $endDateAttribute,
-        DateFormat $startDateFormat,
-        ?DateFormat $endDateFormat,
-        ?Period $period,
-        CatalogCollection $catalogCollection,
-        string $content,
-        ImageCollection $imageCollection,
-        int $createUserId,
-        ?int $updateUserId,
-        Carbon $createdAt,
-        ?Carbon $updatedAt
-    ) {
+    public function __construct(EventId $id, Carbon $startDate, ?Carbon $endDate, ?DateAttribute $startDateAttribute, ?DateAttribute $endDateAttribute, DateFormat $startDateFormat, ?DateFormat $endDateFormat, ?Period $period, CatalogCollection $catalogCollection, string $content, ImageCollection $imageCollection, UserId $createUserId, UserId $updateUserId, Carbon $createdAt, Carbon $updatedAt)
+    {
         $this->id = $id;
         $this->startDate = $startDate;
         $this->endDate = $endDate;
@@ -129,9 +115,9 @@ class Event extends BaseModel
     }
 
     /**
-     * @return int
+     * @return EventId
      */
-    public function getId(): int
+    public function getId(): EventId
     {
         return $this->id;
     }
@@ -217,17 +203,17 @@ class Event extends BaseModel
     }
 
     /**
-     * @return int
+     * @return UserId
      */
-    public function getCreateUserId(): int
+    public function getCreateUserId(): UserId
     {
         return $this->createUserId;
     }
 
     /**
-     * @return int|null
+     * @return UserId
      */
-    public function getUpdateUserId(): ?int
+    public function getUpdateUserId(): UserId
     {
         return $this->updateUserId;
     }
@@ -241,9 +227,9 @@ class Event extends BaseModel
     }
 
     /**
-     * @return Carbon|null
+     * @return Carbon
      */
-    public function getUpdatedAt(): ?Carbon
+    public function getUpdatedAt(): Carbon
     {
         return $this->updatedAt;
     }
@@ -273,7 +259,7 @@ class Event extends BaseModel
         }
 
         return [
-            'id' => $this->getId(),
+            'id' => $this->getId()->getValue(),
             'startDate' => $this->getStartDate()->format($startDateFormat->getPhpFormat()),
             'endDate' => $endDate,
             'startDateAttribute' => $startDateAttribute,
@@ -284,8 +270,8 @@ class Event extends BaseModel
             'catalogCollection' => $this->getCatalogCollection()->toValueArray(),
             'content' => $this->getContent(),
             'imageCollection' => $this->getImageCollection()->toValueArray(),
-            'createUserId' => $this->getCreateUserId(),
-            'updateUserId' => $this->getUpdateUserId(),
+            'createUserId' => $this->getCreateUserId()->getValue(),
+            'updateUserId' => $this->getUpdateUserId()->getValue(),
             'createdAt' => $this->getCreatedAt()->format(DATE_ISO8601),
             'updatedAt' => $this->getUpdatedAt()->format(DATE_ISO8601),
         ];
@@ -304,7 +290,7 @@ class Event extends BaseModel
             })->toArray();
 
         $body = [
-            'id' => $this->getId(),
+            'id' => $this->getId()->getValue(),
             'startDate' => $this->getStartDate()->format('Y-m-d'),
             'period' => $period,
             'catalogs' => $catalogs,
@@ -315,19 +301,20 @@ class Event extends BaseModel
             'body' => $body,
             'index' => 'timelines',
             'type' => 'event',
-            'id' => $this->getId(),
+            'id' => $this->getId()->getValue(),
         ];
     }
 
-    public function toTimelineArray(): array {
+    public function toTimelineArray(): array
+    {
         $startDate = [];
-        if($this->getStartDateFormat()->hasYear()) {
+        if ($this->getStartDateFormat()->hasYear()) {
             $startDate['year'] = $this->getStartDate()->year;
         }
-        if($this->getStartDateFormat()->hasMonth()) {
+        if ($this->getStartDateFormat()->hasMonth()) {
             $startDate['month'] = $this->getStartDate()->month;
         }
-        if($this->getStartDateFormat()->hasDay()) {
+        if ($this->getStartDateFormat()->hasDay()) {
             $startDate['day'] = $this->getStartDate()->day;
         }
 
@@ -336,36 +323,36 @@ class Event extends BaseModel
             'unique_id' => $this->getId()
         ];
 
-        if($this->getEndDate() !== null) {
+        if ($this->getEndDate() !== null) {
             $endDate = [];
-            if($this->getEndDateFormat()->hasYear()) {
+            if ($this->getEndDateFormat()->hasYear()) {
                 $endDate['year'] = $this->getEndDate()->year;
             }
-            if($this->getEndDateFormat()->hasMonth()) {
+            if ($this->getEndDateFormat()->hasMonth()) {
                 $endDate['month'] = $this->getEndDate()->month;
             }
-            if($this->getEndDateFormat()->hasDay()) {
+            if ($this->getEndDateFormat()->hasDay()) {
                 $endDate['day'] = $this->getEndDate()->day;
             }
             $eventsConfig['end_date'] = $endDate;
         }
 
         $text = $this->getContent();
-        if($text !== null) {
+        if ($text !== null) {
 //            $len = str_word_count($text);
 //            $text = mb_substr($text, 0, min($len, 150), 'UTF-8') . ' ... [Read More]';
             $eventsConfig['text']['text'] = $text;
         }
 
         $images = $this->getImageCollection();
-        if(count($images) !== 0) {
+        if (count($images) !== 0) {
             $eventsConfig['media'] = [
                 'url' => url('/') . '/image/' . $images->get(0)->getPath()
             ];
         }
 
         $period = $this->getPeriod();
-        if($period !== null) {
+        if ($period !== null) {
             $eventsConfig['group'] = $period->getValue();
         }
 

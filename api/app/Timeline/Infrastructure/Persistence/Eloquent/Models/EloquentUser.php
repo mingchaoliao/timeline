@@ -7,11 +7,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Hash;
 use Laravel\Passport\HasApiTokens;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class EloquentUser extends Authenticatable
+class EloquentUser extends Authenticatable implements JWTSubject
 {
     use Notifiable;
-    use HasApiTokens;
 
     protected $table = 'users';
 
@@ -24,7 +24,8 @@ class EloquentUser extends Authenticatable
         'name',
         'email',
         'password',
-        'is_admin'
+        'is_admin',
+        'is_editor'
     ];
 
     /**
@@ -72,22 +73,28 @@ class EloquentUser extends Authenticatable
         return $this->updated_at;
     }
 
-    public static function createNew(
-        string $name,
-        string $email,
-        string $password,
-        bool $isHashed = false,
-        bool $isAdmin = false
-    ): self
+    public function isEditor(): bool
     {
-        if (!$isHashed) {
-            $password = Hash::make($password);
-        }
-        return static::create([
-            'name' => $name,
-            'email' => $email,
-            'password' => $password,
-            'is_admin' => $isAdmin ? 1 : 0
-        ]);
+        return $this->is_editor === 1;
+    }
+
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed
+     */
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
+    {
+        return [];
     }
 }

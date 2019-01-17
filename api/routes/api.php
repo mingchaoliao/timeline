@@ -28,7 +28,7 @@ Route::post('/register', 'UserController@register');
 Route::post('/login', 'UserController@login');
 
 Route::group(['middleware' => ['auth:api']], function () {
-    Route::get('/user', 'UserController@getCurrentUser');
+    Route::get('/user/current', 'UserController@getCurrentUser');
 });
 
 Route::group(['middleware' => ['auth:api', 'admin']], function () {
@@ -59,6 +59,6 @@ Route::group(['middleware' => ['auth:api', 'admin']], function () {
 
     Route::post('/image', 'ImageController@uploadImage');
 
-    Route::get('/user/all', 'UserController@getAllUser');
-    Route::put('/user/grantOrRevokeAdminPrivilege', 'UserController@grantOrRevokeAdminPrivilege');
+    Route::get('/user', 'UserController@getAllUser');
+    Route::put('/user', 'UserController@update');
 });

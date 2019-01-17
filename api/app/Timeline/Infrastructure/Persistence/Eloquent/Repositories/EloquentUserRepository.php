@@ -10,84 +10,211 @@ namespace App\Timeline\Infrastructure\Persistence\Eloquent\Repositories;
 
 use App\Timeline\Domain\Collections\UserCollection;
 use App\Timeline\Domain\Models\User;
+use App\Timeline\Domain\Models\UserToken;
+use App\Timeline\Domain\Repositories\UserRepository;
+use App\Timeline\Domain\ValueObjects\Email;
+use App\Timeline\Domain\ValueObjects\UserId;
+use App\Timeline\Exceptions\TimelineException;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentUser;
-use App\Timeline\Exceptions\UserNotFoundException;
+use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\QueryException;
+use Tymon\JWTAuth\JWTGuard;
 
-class EloquentUserRepository extends EloquentBaseRepository
+class EloquentUserRepository implements UserRepository
 {
+    /**
+     * @var EloquentUser
+     */
+    private $userModel;
+    /**
+     * @var Hasher
+     */
+    private $hasher;
+    /**
+     * @var JWTGuard
+     */
+    private $guard;
 
-    public function getCurrentUser()
+    /**
+     * EloquentUserRepository constructor.
+     * @param EloquentUser $userModel
+     * @param Hasher $hasher
+     * @param JWTGuard $guard
+     */
+    public function __construct(EloquentUser $userModel, Hasher $hasher, JWTGuard $guard)
     {
-        return $this->constructUser(Auth::user());
+        $this->userModel = $userModel;
+        $this->hasher = $hasher;
+        $this->guard = $guard;
     }
 
+    /**
+     * @return User|null
+     */
+    public function getCurrentUser(): ?User
+    {
+        if (!$this->guard->check()) {
+            return null;
+        }
+
+        /** @var EloquentUser $eloquentUser */
+        $eloquentUser = $this->guard->user();
+
+        return $this->constructUser($eloquentUser);
+    }
+
+    /**
+     * @param Email $email
+     * @param string $password
+     * @return UserToken
+     * @throws TimelineException
+     */
+    public function login(Email $email, string $password): UserToken
+    {
+        $token = $this->guard->attempt([
+            'email' => $email->getValue(),
+            'password' => $password
+        ]);
+
+        if ($token === false) {
+            throw TimelineException::ofInvalidCredentials();
+        }
+
+        return new UserToken(
+            'Bearer',
+            $token
+        );
+    }
+
+    /**
+     * @return UserCollection
+     */
     public function getAll(): UserCollection
     {
-        return $this->constructUserCollection(EloquentUser::all());
+        return $this->constructUserCollection($this->userModel->all());
     }
 
-    public function constructUser(EloquentUser $eloquentUser): User
+    /**
+     * @param string $name
+     * @param Email $email
+     * @param string $password
+     * @param bool $isAdmin
+     * @param bool $isEditor
+     * @return User
+     */
+    public function create(
+        string $name,
+        Email $email,
+        string $password,
+        bool $isAdmin = false,
+        bool $isEditor = false
+    ): User
+    {
+        try {
+            $passwordHash = $this->hasher->make($password);
+
+            $eloquentUser = $this->userModel
+                ->create([
+                    'name' => $name,
+                    'email' => $email,
+                    'password' => $passwordHash,
+                    'is_admin' => $isAdmin ? 1 : 0,
+                    'is_editor' => $isEditor ? 1 : 0
+                ]);
+
+            return $this->constructUser($eloquentUser);
+        } catch (QueryException $e) {
+            /** @var \PDOException $pdoException */
+            $pdoException = $e->getPrevious();
+            $errorInfo = $pdoException->errorInfo;
+
+            if ($errorInfo['1'] === 1062) { // duplicated value
+                throw TimelineException::ofDuplicatedUserEmail($email);
+            }
+
+            throw $e;
+        }
+    }
+
+    /**
+     * @param UserId $id
+     * @param null|string $name
+     * @param null|string $password
+     * @param bool|null $isAdmin
+     * @param bool|null $isEditor
+     * @return User
+     * @throws TimelineException
+     */
+    public function update(
+        UserId $id,
+        ?string $name = null,
+        ?string $password = null,
+        ?bool $isAdmin = null,
+        ?bool $isEditor = null
+    ): User
+    {
+        $eloquentUser = $this->userModel->find($id->getValue());
+
+        if ($eloquentUser === null) {
+            throw TimelineException::ofUserWithIdDoesNotExist($id);
+        }
+
+        $passwordHash = $this->hasher->make($password);
+
+        $update = [];
+
+        if ($name !== null) {
+            $update['name'] = $name;
+        }
+
+        if ($password !== null) {
+            $update['password'] = $passwordHash;
+        }
+
+        if ($isAdmin !== null) {
+            $update['is_admin'] = $isAdmin ? 1 : 0;
+        }
+
+        if ($isEditor !== null) {
+            $update['is_editor'] = $isEditor ? 1 : 0;
+        }
+
+        if (count($update) !== 0) {
+            $eloquentUser->update($update);
+        }
+
+        return $this->constructUser($this->userModel->find($id->getValue()));
+    }
+
+    /**
+     * @param EloquentUser $eloquentUser
+     * @return User
+     */
+    private function constructUser(EloquentUser $eloquentUser): User
     {
         return new User(
-            $eloquentUser->getId(),
+            new UserId($eloquentUser->getId()),
             $eloquentUser->getName(),
-            $eloquentUser->getEmail(),
+            new Email($eloquentUser->getEmail()),
             $eloquentUser->getPasswordHash(),
             $eloquentUser->isAdmin(),
+            $eloquentUser->isEditor(),
             $eloquentUser->getCreatedAt(),
             $eloquentUser->getUpdatedAt()
         );
     }
 
-    public function constructUserCollection(Collection $eloquentUsers): UserCollection
+    /**
+     * @param Collection $eloquentUsers
+     * @return UserCollection
+     */
+    private function constructUserCollection(Collection $eloquentUsers): UserCollection
     {
-        return new UserCollection($eloquentUsers->map(function (EloquentUser $eloquentUser) {
-            return $this->constructUser($eloquentUser);
-        })->toArray());
-    }
-
-    public function grantOrRevokeAdminPrivilege(int $id, bool $isAdmin): bool {
-        $user = EloquentUser::where('id', '=', $id)->first();
-
-        if($user === null) {
-            throw new \InvalidArgumentException(sprintf(
-                'User with ID "%d" not found',
-                $id
-            ));
-        }
-
-        return $user->update([
-            'is_admin' => $isAdmin
-        ]);
-    }
-
-    public function createUser(string $name, string $email, string $password, bool $isAdmin = false): User
-    {
-        if (EloquentUser::where('email', '=', $email)->count() !== 0) {
-            throw new \InvalidArgumentException('Email address ' . $email . ' has already existed');
-        }
-
-        $eloquentUser = EloquentUser::createNew(
-            $name,
-            $email,
-            $password,
-            false,
-            $isAdmin
+        return new UserCollection(
+            $eloquentUsers->map(function (EloquentUser $eloquentUser) {
+                return $this->constructUser($eloquentUser);
+            })->toArray()
         );
-
-        return $this->constructUser($eloquentUser);
-    }
-
-    public function getByEmail(string $email): User
-    {
-        $eloquentUser = EloquentUser::where('email', $email)->first();
-
-        if ($eloquentUser === null) {
-            throw new UserNotFoundException();
-        }
-
-        return $this->constructUser($eloquentUser);
     }
 }

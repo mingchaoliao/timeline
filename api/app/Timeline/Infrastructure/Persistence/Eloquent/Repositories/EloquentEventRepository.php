@@ -7,96 +7,89 @@
 
 namespace App\Timeline\Infrastructure\Persistence\Eloquent\Repositories;
 
-
-use App\Common\Authorization;
+use App\Jobs\CleanUnlinkedImages;
+use App\Jobs\LinkImages;
 use App\Timeline\Domain\Collections\EventCollection;
+use App\Timeline\Domain\Collections\EventIdCollection;
+use App\Timeline\Domain\Collections\ImageIdCollection;
 use App\Timeline\Domain\Models\Event;
+use App\Timeline\Domain\Models\Image;
+use App\Timeline\Domain\Repositories\CatalogRepository;
+use App\Timeline\Domain\Repositories\DateAttributeRepository;
+use App\Timeline\Domain\Repositories\DateFormatRepository;
+use App\Timeline\Domain\Repositories\EventRepository;
+use App\Timeline\Domain\Repositories\ImageRepository;
+use App\Timeline\Domain\Repositories\PeriodRepository;
+use App\Timeline\Domain\Requests\CreateEventRequest;
+use App\Timeline\Domain\Requests\PageableRequest;
+use App\Timeline\Domain\Requests\UpdateEventRequest;
+use App\Timeline\Domain\ValueObjects\EventId;
+use App\Timeline\Domain\ValueObjects\UserId;
+use App\Timeline\Exceptions\TimelineException;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentEvent;
-use Carbon\Carbon;
+use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentImage;
+use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Collection;
-use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
-class EloquentEventRepository extends EloquentBaseRepository
+class EloquentEventRepository implements EventRepository
 {
     /**
-     * @var EloquentCatalogRepository
+     * @var EloquentEvent
+     */
+    private $eventModel;
+    /**
+     * @var ImageRepository
+     */
+    private $imageRepository;
+    /**
+     * @var CatalogRepository
      */
     private $catalogRepository;
     /**
-     * @var EloquentDateAttributeRepository
+     * @var DateAttributeRepository
      */
     private $dateAttributeRepository;
     /**
-     * @var EloquentDateFormatRepository
+     * @var DateFormatRepository
      */
     private $dateFormatRepository;
     /**
-     * @var EloquentPeriodRepository
+     * @var PeriodRepository
      */
     private $periodRepository;
     /**
-     * @var EloquentImageRepository
+     * @var ConnectionInterface
      */
-    private $imageRepository;
-
+    private $dbh;
     /**
-     * EventRepository constructor.
-     *
-     * @param Authorization $authorization
-     * @param EloquentCatalogRepository $catalogRepository
-     * @param EloquentDateAttributeRepository $dateAttributeRepository
-     * @param EloquentDateFormatRepository $dateFormatRepository
-     * @param EloquentPeriodRepository $periodRepository
-     * @param EloquentImageRepository $imageRepository
+     * @var Filesystem
      */
-    public function __construct(
-        Authorization $authorization,
-        EloquentCatalogRepository $catalogRepository,
-        EloquentDateAttributeRepository $dateAttributeRepository,
-        EloquentDateFormatRepository $dateFormatRepository,
-        EloquentPeriodRepository $periodRepository,
-        EloquentImageRepository $imageRepository
-    ) {
-        parent::__construct($authorization);
-        $this->catalogRepository = $catalogRepository;
-        $this->dateAttributeRepository = $dateAttributeRepository;
-        $this->dateFormatRepository = $dateFormatRepository;
-        $this->periodRepository = $periodRepository;
-        $this->imageRepository = $imageRepository;
-    }
+    private $fs;
 
-    public function getById(string $id): Event
+    public function getById(EventId $id): Event
     {
-        $eloquentEvent = EloquentEvent::find($id);
+        $eloquentEvent = $this->eventModel->find($id->getValue());
 
         if ($eloquentEvent === null) {
-            throw new BadRequestHttpException('Event with id, "' . $id . '", does not found');
+            throw TimelineException::ofEventWithIdDoesNotExist($id);
         }
 
         return $this->constructEvent($eloquentEvent);
     }
 
-    public function getCollectionByIds(array $ids): EventCollection {
-        $eloquentEvents = EloquentEvent::byIds($ids)->get();
-        return $this->constructEventCollection($eloquentEvents);
+    public function getByIds(EventIdCollection $ids): EventCollection
+    {
+        return $this->constructEventCollection(
+            $this->eventModel->findMany($ids->toValueArray())
+        );
     }
 
-    public function deleteById(int $id) {
-        $event = EloquentEvent::findOrFail($id);
-        $event->delete();
-    }
+    public function get(PageableRequest $request): EventCollection
+    {
+        $count = $this->eventModel->count();
 
-    public function getCollection(
-        int $offset = null,
-        int $limit = null,
-        int &$count = null,
-        string $order = 'startDate',
-        string $direction = 'asc'
-    ): EventCollection {
-        if ($count !== null) {
-            $count = EloquentEvent::count();
-        }
-        $query = EloquentEvent::with([
+        $query = $this->eventModel->with([
             'start_date_attribute',
             'end_date_attribute',
             'period',
@@ -106,109 +99,121 @@ class EloquentEventRepository extends EloquentBaseRepository
             'end_date_format'
         ]);
 
-        switch ($order) {
-            case 'startDate':
-                $order = 'start_date';
-                break;
-            default:
-                throw new \InvalidArgumentException('Invalid order');
-        }
+        $query->offset($request->getOffset());
+        $query->limit($request->getPageSize());
+        $query->orderBy('startDate', 'asc');
 
-        if(!in_array($direction, ['asc', 'desc'])) {
-            throw new \InvalidArgumentException('Invalid directory');
-        }
-
-        if ($offset !== null) {
-            $query->offset($offset);
-        }
-        if ($limit !== null) {
-            $query->limit($limit);
-        }
-        $query->orderBy($order, $direction);
         $eloquentCollection = $query->get();
 
-        return $this->constructEventCollection($eloquentCollection);
+        $events = $this->constructEventCollection($eloquentCollection);
+        $events->setCount($count);
+
+        return $events;
     }
 
     /**
-     * @param Carbon $startDate
-     * @param string $content
-     * @param int $startDateFormatId
-     * @param int $createUserId
-     * @param int|null $endDateFormatId
-     * @param int|null $startDateAttributeId
-     * @param Carbon|null $endDate
-     * @param int|null $endDateAttributeId
-     * @param int|null $periodId
-     * @param array $catalogIds
-     * @param array $imageData
-     *
+     * @param CreateEventRequest $request
+     * @param UserId $createUserId
      * @return Event
+     * @throws \Throwable
      */
     public function create(
-        Carbon $startDate,
-        string $content,
-        int $startDateFormatId,
-        int $createUserId,
-        int $endDateFormatId = null,
-        int $startDateAttributeId = null,
-        Carbon $endDate = null,
-        int $endDateAttributeId = null,
-        int $periodId = null,
-        array $catalogIds = [],
-        array $imageData = []
-    ): Event {
-        $eloquentEvent = EloquentEvent::createNew(
-            $startDate,
-            $content,
-            $createUserId,
-            $startDateFormatId,
-            $endDateFormatId,
-            $startDateAttributeId,
-            $endDate,
-            $endDateAttributeId,
-            $periodId,
-            $catalogIds,
-            $imageData
-        );
+        CreateEventRequest $request,
+        UserId $createUserId
+    ): Event
+    {
+        $eloquentEvent = null;
 
-        return $this->constructEvent($eloquentEvent);
+        $this->dbh->transaction(function () use ($eloquentEvent, $request, $createUserId) {
+            /**
+             * @var EloquentEvent $eloquentEvent
+             * */
+            $eloquentEvent = $this->eventModel->create([
+                'start_date' => $request->getStartDate(),
+                'end_date' => $request->getEndDate(),
+                'start_date_attribute_id' => $request->getStartDateAttributeId()->getValue(),
+                'start_date_format_id' => $request->getStartDateFormatId()->getValue(),
+                'end_date_format_id' => $request->getEndDateFormatId()->getValue(),
+                'end_date_attribute_id' => $request->getEndDateAttributeId()->getValue(),
+                'content' => $request->getContent(),
+                'period_id' => $request->getPeriodId(),
+                'create_user_id' => $createUserId->getValue(),
+                'update_user_id' => $createUserId->getValue(),
+            ]);
+
+            $eloquentImages = $this->imageRepository->getRawByIds($request->getImageIds());
+            $eloquentEvent->images()->saveMany($eloquentImages);
+
+            $eloquentEvent->catalogs()->attach($request->getCatalogIds()->toValueArray());
+
+            LinkImages::dispatch($eloquentImages);
+        });
+
+        return $this->constructEvent($this->eventModel->find($eloquentEvent->getId()));
     }
 
+    /**
+     * @param EventId $id
+     * @param UpdateEventRequest $request
+     * @param UserId $updateUserId
+     * @return Event
+     * @throws TimelineException
+     * @throws \Throwable
+     */
     public function update(
-        int $id,
-        Carbon $startDate,
-        string $content,
-        int $startDateFormatId,
-        int $createUserId,
-        int $endDateFormatId = null,
-        int $startDateAttributeId = null,
-        Carbon $endDate = null,
-        int $endDateAttributeId = null,
-        int $periodId = null,
-        array $catalogIds = [],
-        array $imageData = []
-    ): Event {
-        $eloquentEvent = EloquentEvent::updateById(
-            $id,
-            $startDate,
-            $content,
-            $createUserId,
-            $startDateFormatId,
-            $endDateFormatId,
-            $startDateAttributeId,
-            $endDate,
-            $endDateAttributeId,
-            $periodId,
-            $catalogIds,
-            $imageData
-        );
+        EventId $id,
+        UpdateEventRequest $request,
+        UserId $updateUserId
+    ): Event
+    {
+        $eloquentEvent = $this->eventModel->find($id->getValue());
 
-        return $this->constructEvent($eloquentEvent);
+        if ($eloquentEvent === null) {
+            throw TimelineException::ofEventWithIdDoesNotExist($id);
+        }
+
+        $this->dbh->transaction(function () use ($eloquentEvent, $request, $id, $updateUserId) {
+            $eloquentEvent->update([
+                'start_date' => $request->getStartDate(),
+                'end_date' => $request->getEndDate(),
+                'start_date_attribute_id' => $request->getStartDateAttributeId(),
+                'start_date_format_id' => $request->getStartDateFormatId(),
+                'end_date_format_id' => $request->getEndDateFormatId(),
+                'end_date_attribute_id' => $request->getEndDateAttributeId(),
+                'content' => $request->getContent(),
+                'period_id' => $request->getPeriodId(),
+                'update_user_id' => $updateUserId->getValue()
+            ]);
+
+            $unneededImages = $eloquentEvent->images()
+                ->whereNotIn('id', $request->getImageIds()->toValueArray())
+                ->get();
+
+            $unneededImages->delete();
+
+            $existingImages = $eloquentEvent->images()->get();
+            $existingImageIds = $existingImages->map(function (EloquentImage $eloquentImage) {
+                return $eloquentImage->getId();
+            })->toArray();
+
+            $linkImageIds = array_diff($request->getImageIds()->toValueArray(), $existingImageIds);
+            $linkImages = $this->imageRepository->getRawByIds(new ImageIdCollection($linkImageIds));
+            $eloquentEvent->saveMany($linkImages);
+            $eloquentEvent->catalogs()->sync($request->getCatalogIds()->toValueArray());
+
+            CleanUnlinkedImages::dispatch($unneededImages);
+            LinkImages::dispatch($linkImages);
+        });
+
+        return $this->constructEvent($this->eventModel->find($id->getValue()));
     }
 
+    public function delete(EventId $id): bool
+    {
+        // TODO: Implement delete() method.
+    }
 
-    public function constructEvent(EloquentEvent $eloquentEvent): Event
+    private function constructEvent(EloquentEvent $eloquentEvent): Event
     {
         $startDateAttribute = $eloquentEvent->getStartDateAttributeObj();
         if ($startDateAttribute !== null) {
@@ -231,7 +236,6 @@ class EloquentEventRepository extends EloquentBaseRepository
             $endDateFormat = $this->dateFormatRepository
                 ->constructDateFormat($endDateFormat);
         }
-
         $period = $eloquentEvent->getPeriod();
         if ($period !== null) {
             $period = $this->periodRepository
@@ -243,9 +247,8 @@ class EloquentEventRepository extends EloquentBaseRepository
 
         $imageCollection = $this->imageRepository
             ->constructImageCollection($eloquentEvent->getImageCollection());
-
         return new Event(
-            $eloquentEvent->getId(),
+            new EventId($eloquentEvent->getId()),
             $eloquentEvent->getStartDate(),
             $eloquentEvent->getEndDate(),
             $startDateAttribute,
@@ -256,14 +259,14 @@ class EloquentEventRepository extends EloquentBaseRepository
             $catalogCollection,
             $eloquentEvent->getContent(),
             $imageCollection,
-            $eloquentEvent->getCreateUserId(),
-            $eloquentEvent->getUpdateUserId(),
+            new UserId($eloquentEvent->getCreateUserId()),
+            new UserId($eloquentEvent->getUpdateUserId()),
             $eloquentEvent->getCreatedAt(),
             $eloquentEvent->getUpdatedAt()
         );
     }
 
-    public function constructEventCollection(Collection $collection)
+    private function constructEventCollection(Collection $collection)
     {
         $results = new EventCollection();
         foreach ($collection as $item) {

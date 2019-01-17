@@ -22,6 +22,7 @@ abstract class SingleString
      */
     public function __construct(string $value)
     {
+        $this->validation($value);
         $this->value = $value;
     }
 
@@ -31,6 +32,10 @@ abstract class SingleString
     public function getValue(): string
     {
         return $this->value;
+    }
+
+    public function validation(string $value): void {
+        // validate value
     }
 
     public function __toString()

@@ -22,6 +22,7 @@ abstract class SingleInteger
      */
     public function __construct(int $value)
     {
+        $this->validation($value);
         $this->value = $value;
     }
 
@@ -33,8 +34,16 @@ abstract class SingleInteger
         return $this->value;
     }
 
+    public function validation(int $value): void {
+        // validate value
+    }
+
     public function __toString()
     {
         return (string)$this->value;
+    }
+
+    public function equalsWith(self $obj): bool {
+        return $this->value === $obj->getValue();
     }
 }

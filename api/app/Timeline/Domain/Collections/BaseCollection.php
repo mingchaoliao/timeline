@@ -12,6 +12,27 @@ use Illuminate\Support\Collection;
 
 class BaseCollection extends Collection
 {
+    /**
+     * @var int
+     */
+    protected $count = 0;
+
+    /**
+     * @return int
+     */
+    public function getCount(): int
+    {
+        return $this->count;
+    }
+
+    /**
+     * @param int $count
+     */
+    public function setCount(int $count): void
+    {
+        $this->count = $count;
+    }
+
     public function toJson($options = 0)
     {
         return json_encode($this->toValueArray(), $options);

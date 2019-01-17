@@ -8,6 +8,8 @@
 namespace App\Timeline\Domain\Models;
 
 
+use App\Timeline\Domain\ValueObjects\ImageId;
+use App\Timeline\Domain\ValueObjects\UserId;
 use Illuminate\Support\Carbon;
 
 class Image extends BaseModel
@@ -16,7 +18,7 @@ class Image extends BaseModel
     public const PATH = 'images';
 
     /**
-     * @var int
+     * @var ImageId
      */
     private $id;
     /**
@@ -28,11 +30,11 @@ class Image extends BaseModel
      */
     private $description;
     /**
-     * @var int
+     * @var UserId
      */
     private $createUserId;
     /**
-     * @var int|null
+     * @var UserId
      */
     private $updateUserId;
     /**
@@ -40,30 +42,22 @@ class Image extends BaseModel
      */
     private $createdAt;
     /**
-     * @var Carbon|null
+     * @var Carbon
      */
     private $updatedAt;
 
     /**
      * Image constructor.
-     *
-     * @param int $id
+     * @param ImageId $id
      * @param string $path
      * @param null|string $description
-     * @param int $createUserId
-     * @param int|null $updateUserId
+     * @param UserId $createUserId
+     * @param UserId $updateUserId
      * @param Carbon $createdAt
-     * @param Carbon|null $updatedAt
+     * @param Carbon $updatedAt
      */
-    public function __construct(
-        int $id,
-        string $path,
-        ?string $description,
-        int $createUserId,
-        ?int $updateUserId,
-        Carbon $createdAt,
-        ?Carbon $updatedAt
-    ) {
+    public function __construct(ImageId $id, string $path, ?string $description, UserId $createUserId, UserId $updateUserId, Carbon $createdAt, Carbon $updatedAt)
+    {
         $this->id = $id;
         $this->path = $path;
         $this->description = $description;
@@ -74,9 +68,9 @@ class Image extends BaseModel
     }
 
     /**
-     * @return int
+     * @return ImageId
      */
-    public function getId(): int
+    public function getId(): ImageId
     {
         return $this->id;
     }
@@ -98,17 +92,17 @@ class Image extends BaseModel
     }
 
     /**
-     * @return int
+     * @return UserId
      */
-    public function getCreateUserId(): int
+    public function getCreateUserId(): UserId
     {
         return $this->createUserId;
     }
 
     /**
-     * @return int|null
+     * @return UserId
      */
-    public function getUpdateUserId(): ?int
+    public function getUpdateUserId(): UserId
     {
         return $this->updateUserId;
     }
@@ -122,9 +116,9 @@ class Image extends BaseModel
     }
 
     /**
-     * @return Carbon|null
+     * @return Carbon
      */
-    public function getUpdatedAt(): ?Carbon
+    public function getUpdatedAt(): Carbon
     {
         return $this->updatedAt;
     }
@@ -132,11 +126,11 @@ class Image extends BaseModel
     public function toArray(): array
     {
         return [
-            'id' => $this->getId(),
+            'id' => $this->getId()->getValue(),
             'path' => $this->getPath(),
             'description' => $this->getDescription(),
-            'createUserId' => $this->getCreateUserId(),
-            'updateUserId' => $this->getUpdateUserId(),
+            'createUserId' => $this->getCreateUserId()->getValue(),
+            'updateUserId' => $this->getUpdateUserId()->getValue(),
             'createdAt' => $this->getCreatedAt()->format(DATE_ISO8601),
             'updatedAt' => $this->getUpdatedAt()->format(DATE_ISO8601)
         ];

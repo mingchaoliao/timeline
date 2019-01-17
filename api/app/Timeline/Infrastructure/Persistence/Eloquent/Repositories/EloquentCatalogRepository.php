@@ -26,56 +26,55 @@ use Illuminate\Support\Facades\DB;
 class EloquentCatalogRepository implements CatalogRepository
 {
     /**
+     * @var EloquentCatalog
+     */
+    private $catalogModel;
+
+    /**
+     * EloquentCatalogRepository constructor.
+     * @param EloquentCatalog $catalogModel
+     */
+    public function __construct(EloquentCatalog $catalogModel)
+    {
+        $this->catalogModel = $catalogModel;
+    }
+
+    /**
      * @return TypeaheadCollection
-     * @throws TimelineException
      */
     public function getTypeahead(): TypeaheadCollection
     {
-        try {
-            $payload = app(EloquentCatalog::class)
-                ->select(['id', 'value'])
-                ->get()
-                ->map(function (EloquentCatalog $period) {
-                    return new Typeahead($period->getId(), $period->getValue());
-                })
-                ->toArray();
-            return new TypeaheadCollection($payload);
-        } catch (QueryException $e) {
-            throw TimelineException::ofUnableToRetrieveCatalogs();
-        }
+        $payload = $this->catalogModel
+            ->select(['id', 'value'])
+            ->get()
+            ->map(function (EloquentCatalog $period) {
+                return new Typeahead($period->getId(), $period->getValue());
+            })
+            ->toArray();
+        return new TypeaheadCollection($payload);
     }
 
     /**
      * @return CatalogCollection
-     * @throws TimelineException
      */
     public function getAll(): CatalogCollection
     {
-        try {
-            $eloquentCollection = app(EloquentCatalog::class)
-                ->with(['create_user', 'update_user'])
-                ->get();
+        $eloquentCollection = $this->catalogModel
+            ->with(['create_user', 'update_user'])
+            ->get();
 
-            return $this->constructCatalogCollection($eloquentCollection);
-        } catch (QueryException $e) {
-            throw TimelineException::ofUnableToRetrieveCatalogs();
-        }
+        return $this->constructCatalogCollection($eloquentCollection);
     }
 
     /**
      * @param CatalogIdCollection $ids
      * @return CatalogCollection
-     * @throws TimelineException
      */
     public function getByIds(CatalogIdCollection $ids): CatalogCollection
     {
-        try {
-            return $this->constructCatalogCollection(
-                app(EloquentCatalog::class)->findMany($ids->toArray())
-            );
-        } catch (QueryException $e) {
-            throw TimelineException::ofUnableToRetrieveCatalogs();
-        }
+        return $this->constructCatalogCollection(
+            $this->catalogModel->findMany($ids->toValueArray())
+        );
     }
 
     /**
@@ -88,7 +87,7 @@ class EloquentCatalogRepository implements CatalogRepository
     {
         try {
             return $this->constructCatalog(
-                app(EloquentCatalog::class)->create([
+                $this->catalogModel->create([
                     'value' => $value,
                     'create_user_id' => $createUserId->getValue(),
                     'update_user_id' => $createUserId->getValue()
@@ -103,9 +102,9 @@ class EloquentCatalogRepository implements CatalogRepository
                 throw TimelineException::ofDuplicatedCatalogValue($value);
             } elseif ($errorInfo['1'] === 1452) { // non-exist user id
                 throw TimelineException::ofUserWithIdDoesNotExist($createUserId);
-            } else {
-                throw TimelineException::ofUnknownDatabaseError();
             }
+
+            throw $e;
         }
     }
 
@@ -138,7 +137,7 @@ class EloquentCatalogRepository implements CatalogRepository
     public function update(CatalogId $id, string $value, UserId $updateUserId): Catalog
     {
         try {
-            $catalog = app(EloquentCatalog::class)->find($id->getValue());
+            $catalog = $this->catalogModel->find($id->getValue());
 
             if ($catalog === null) {
                 throw TimelineException::ofCatalogWithIdDoesNotExist($id);
@@ -149,7 +148,7 @@ class EloquentCatalogRepository implements CatalogRepository
                 'update_user_id' => $updateUserId->getValue()
             ]);
 
-            return $this->constructCatalog(app(EloquentCatalog::class)->find($id->getValue()));
+            return $this->constructCatalog($this->catalogModel->find($id->getValue()));
         } catch (QueryException $e) {
             /** @var \PDOException $pdoException */
             $pdoException = $e->getPrevious();
@@ -159,9 +158,9 @@ class EloquentCatalogRepository implements CatalogRepository
                 throw TimelineException::ofDuplicatedCatalogValue($value);
             } elseif ($errorInfo['1'] === 1452) { // non-exist user id
                 throw TimelineException::ofUserWithIdDoesNotExist($updateUserId);
-            } else {
-                throw TimelineException::ofUnknownDatabaseError();
             }
+
+            throw $e;
         }
     }
 
@@ -172,20 +171,16 @@ class EloquentCatalogRepository implements CatalogRepository
      */
     public function delete(CatalogId $id): bool
     {
-        try {
-            $catalog = app(EloquentCatalog::class)->find($id->getValue());
+        $catalog = $this->catalogModel->find($id->getValue());
 
-            if ($catalog === null) {
-                throw TimelineException::ofCatalogWithIdDoesNotExist($id);
-            }
-
-            return $catalog->delete();
-        } catch (QueryException $e) {
-            throw TimelineException::ofUnableToDeleteCatalog($id);
+        if ($catalog === null) {
+            throw TimelineException::ofCatalogWithIdDoesNotExist($id);
         }
+
+        return $catalog->delete();
     }
 
-    private function constructCatalogCollection(Collection $eloquentCollection): CatalogCollection
+    public function constructCatalogCollection(Collection $eloquentCollection): CatalogCollection
     {
         return new CatalogCollection(
             $eloquentCollection->map(function (EloquentCatalog $eloquentCatalog) {

@@ -3,31 +3,50 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Timeline\Domain\Repositories\DateAttributeRepository;
+use App\Timeline\Domain\Services\DateAttributeService;
 use App\Timeline\Domain\ValueObjects\DateAttributeId;
-use App\Timeline\Domain\ValueObjects\UserId;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class DateAttributeController extends Controller
 {
-    private $dateAttributeRepository;
+    /**
+     * @var DateAttributeService
+     */
+    private $dateAttributeService;
 
-    public function __construct(DateAttributeRepository $dateAttributeRepository)
+    /**
+     * DateAttributeController constructor.
+     * @param DateAttributeService $dateAttributeService
+     */
+    public function __construct(DateAttributeService $dateAttributeService)
     {
-        $this->dateAttributeRepository = $dateAttributeRepository;
+        $this->dateAttributeService = $dateAttributeService;
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
     public function getTypeahead()
     {
-        return response()->json($this->dateAttributeRepository->getTypeahead());
+        return response()->json($this->dateAttributeService->getTypeahead());
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
     public function getAll()
     {
-        return response()->json($this->dateAttributeRepository->getAll());
+        return response()->json($this->dateAttributeService->getAll());
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function createDateAttribute(Request $request)
     {
         $this->validate(
@@ -40,14 +59,17 @@ class DateAttributeController extends Controller
             ]
         );
 
-        $dateAttribute = $this->dateAttributeRepository->create(
-            $request->get('value'),
-            new UserId(Auth::user()->getId())
-        );
+        $dateAttribute = $this->dateAttributeService->create($request->get('value'));
 
         return response()->json($dateAttribute);
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function update(Request $request)
     {
         $this->validate($request, [
@@ -55,26 +77,37 @@ class DateAttributeController extends Controller
             'value' => 'required'
         ]);
 
-        $dateAttribute = $this->dateAttributeRepository->update(
+        $dateAttribute = $this->dateAttributeService->update(
             new DateAttributeId($request->get('id')),
-            $request->get('value'),
-            new UserId(Auth::user()->getId())
+            $request->get('value')
         );
 
         return response()->json($dateAttribute);
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function delete(Request $request)
     {
         $this->validate($request, [
             'id' => 'integer|gt:0'
         ]);
 
-        $isSuccess = $this->dateAttributeRepository->delete(new DateAttributeId($request->get('id')));
+        $isSuccess = $this->dateAttributeService->delete(new DateAttributeId($request->get('id')));
 
         return response()->json($isSuccess);
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function bulkCreate(Request $request)
     {
         $this->validate($request, [
@@ -83,10 +116,7 @@ class DateAttributeController extends Controller
 
         $values = $request->get('values');
 
-        $response = $this->dateAttributeRepository->bulkCreate(
-            $values,
-            new UserId(Auth::user()->getId())
-        );
+        $response = $this->dateAttributeService->bulkCreate($values);
 
         return response()->json($response);
     }

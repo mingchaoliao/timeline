@@ -21,21 +21,30 @@ use Illuminate\Database\QueryException;
 class EloquentDateFormatRepository implements DateFormatRepository
 {
     /**
+     * @var EloquentDateFormat
+     */
+    private $dateFormatModel;
+
+    /**
+     * EloquentDateFormatRepository constructor.
+     * @param EloquentDateFormat $dateFormatModel
+     */
+    public function __construct(EloquentDateFormat $dateFormatModel)
+    {
+        $this->dateFormatModel = $dateFormatModel;
+    }
+
+    /**
      * @return DateFormatCollection
-     * @throws TimelineException
      */
     public function getAll(): DateFormatCollection
     {
-        try {
-            $eloquentCollection = app(EloquentDateFormat::class)->all();
+        $eloquentCollection = $this->dateFormatModel->all();
 
-            return $this->constructDateFormatCollection($eloquentCollection);
-        } catch (QueryException $e) {
-            throw TimelineException::ofUnableToRetrieveDateFormats();
-        }
+        return $this->constructDateFormatCollection($eloquentCollection);
     }
 
-    private function constructDateFormat(EloquentDateFormat $eloquentDateFormat): DateFormat
+    public function constructDateFormat(EloquentDateFormat $eloquentDateFormat): DateFormat
     {
         return new DateFormat(
             new DateFormatId($eloquentDateFormat->getId()),

@@ -24,40 +24,44 @@ use Illuminate\Support\Facades\DB;
 class EloquentDateAttributeRepository implements DateAttributeRepository
 {
     /**
+     * @var EloquentDateAttribute
+     */
+    private $dateAttributeModel;
+
+    /**
+     * EloquentDateAttributeRepository constructor.
+     * @param EloquentDateAttribute $dateAttributeModel
+     */
+    public function __construct(EloquentDateAttribute $dateAttributeModel)
+    {
+        $this->dateAttributeModel = $dateAttributeModel;
+    }
+
+    /**
      * @return TypeaheadCollection
-     * @throws TimelineException
      */
     public function getTypeahead(): TypeaheadCollection
     {
-        try {
-            $payload = app(EloquentDateAttribute::class)
-                ->select(['id', 'value'])
-                ->get()
-                ->map(function (EloquentDateAttribute $dateAttribute) {
-                    return new Typeahead($dateAttribute->getId(), $dateAttribute->getValue());
-                })
-                ->toArray();
-            return new TypeaheadCollection($payload);
-        } catch (QueryException $e) {
-            throw TimelineException::ofUnableToRetrieveDateAttributes();
-        }
+        $payload = $this->dateAttributeModel
+            ->select(['id', 'value'])
+            ->get()
+            ->map(function (EloquentDateAttribute $dateAttribute) {
+                return new Typeahead($dateAttribute->getId(), $dateAttribute->getValue());
+            })
+            ->toArray();
+        return new TypeaheadCollection($payload);
     }
 
     /**
      * @return DateAttributeCollection
-     * @throws TimelineException
      */
     public function getAll(): DateAttributeCollection
     {
-        try {
-            $eloquentCollection = app(EloquentDateAttribute::class)
-                ->with(['create_user', 'update_user'])
-                ->get();
+        $eloquentCollection = $this->dateAttributeModel
+            ->with(['create_user', 'update_user'])
+            ->get();
 
-            return $this->constructDateAttributeCollection($eloquentCollection);
-        } catch (QueryException $e) {
-            throw TimelineException::ofUnableToRetrieveDateAttributes();
-        }
+        return $this->constructDateAttributeCollection($eloquentCollection);
     }
 
     /**
@@ -70,7 +74,7 @@ class EloquentDateAttributeRepository implements DateAttributeRepository
     {
         try {
             return $this->constructDateAttribute(
-                app(EloquentDateAttribute::class)->create([
+                $this->dateAttributeModel->create([
                     'value' => $value,
                     'create_user_id' => $createUserId->getValue(),
                     'update_user_id' => $createUserId->getValue()
@@ -85,9 +89,9 @@ class EloquentDateAttributeRepository implements DateAttributeRepository
                 throw TimelineException::ofDuplicatedDateAttributeValue($value);
             } elseif ($errorInfo['1'] === 1452) { // non-exist user id
                 throw TimelineException::ofUserWithIdDoesNotExist($createUserId);
-            } else {
-                throw TimelineException::ofUnknownDatabaseError();
             }
+
+            throw $e;
         }
     }
 
@@ -120,7 +124,7 @@ class EloquentDateAttributeRepository implements DateAttributeRepository
     public function update(DateAttributeId $id, string $value, UserId $updateUserId): DateAttribute
     {
         try {
-            $dateAttribute = app(EloquentDateAttribute::class)->find($id->getValue());
+            $dateAttribute = $this->dateAttributeModel->find($id->getValue());
 
             if ($dateAttribute === null) {
                 throw TimelineException::ofDateAttributeWithIdDoesNotExist($id);
@@ -131,7 +135,7 @@ class EloquentDateAttributeRepository implements DateAttributeRepository
                 'update_user_id' => $updateUserId->getValue()
             ]);
 
-            return $this->constructDateAttribute(app(EloquentDateAttribute::class)->find($id->getValue()));
+            return $this->constructDateAttribute($this->dateAttributeModel->find($id->getValue()));
         } catch (QueryException $e) {
             /** @var \PDOException $pdoException */
             $pdoException = $e->getPrevious();
@@ -141,9 +145,9 @@ class EloquentDateAttributeRepository implements DateAttributeRepository
                 throw TimelineException::ofDuplicatedDateAttributeValue($value);
             } elseif ($errorInfo['1'] === 1452) { // non-exist user id
                 throw TimelineException::ofUserWithIdDoesNotExist($updateUserId);
-            } else {
-                throw TimelineException::ofUnknownDatabaseError();
             }
+
+            throw $e;
         }
     }
 
@@ -154,17 +158,13 @@ class EloquentDateAttributeRepository implements DateAttributeRepository
      */
     public function delete(DateAttributeId $id): bool
     {
-        try {
-            $catalog = app(EloquentDateAttribute::class)->find($id->getValue());
+        $catalog = $this->dateAttributeModel->find($id->getValue());
 
-            if ($catalog === null) {
-                throw TimelineException::ofDateAttributeWithIdDoesNotExist($id);
-            }
-
-            return $catalog->delete();
-        } catch (QueryException $e) {
-            throw TimelineException::ofUnableToDeleteDateAttribute($id);
+        if ($catalog === null) {
+            throw TimelineException::ofDateAttributeWithIdDoesNotExist($id);
         }
+
+        return $catalog->delete();
     }
 
     private function constructDateAttributeCollection(Collection $eloquentCollection): DateAttributeCollection

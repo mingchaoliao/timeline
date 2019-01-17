@@ -9,7 +9,7 @@
 namespace App\Timeline\Domain\Collections;
 
 
-class CatalogIdCollection extends SingleValueModelCollection
+class ImageIdCollection extends SingleValueModelCollection
 {
 
 }

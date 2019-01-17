@@ -3,31 +3,50 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Timeline\Domain\Repositories\CatalogRepository;
+use App\Timeline\Domain\Services\CatalogService;
 use App\Timeline\Domain\ValueObjects\CatalogId;
-use App\Timeline\Domain\ValueObjects\UserId;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class CatalogController extends Controller
 {
-    private $catalogRepository;
+    /**
+     * @var CatalogService
+     */
+    private $catalogService;
 
-    public function __construct(CatalogRepository $catalogRepository)
+    /**
+     * CatalogController constructor.
+     * @param CatalogService $catalogService
+     */
+    public function __construct(CatalogService $catalogService)
     {
-        $this->catalogRepository = $catalogRepository;
+        $this->catalogService = $catalogService;
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
     public function getTypeahead()
     {
-        return response()->json($this->catalogRepository->getTypeahead());
+        return response()->json($this->catalogService->getTypeahead());
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
     public function getAll()
     {
-        return response()->json($this->catalogRepository->getAll());
+        return response()->json($this->catalogService->getAll());
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function createCatalog(Request $request)
     {
         $this->validate(
@@ -40,14 +59,17 @@ class CatalogController extends Controller
             ]
         );
 
-        $catalog = $this->catalogRepository->create(
-            $request->get('value'),
-            new UserId(Auth::user()->getId())
-        );
+        $catalog = $this->catalogService->create($request->get('value'));
 
         return response()->json($catalog);
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function update(Request $request)
     {
         $this->validate($request, [
@@ -55,26 +77,37 @@ class CatalogController extends Controller
             'value' => 'required'
         ]);
 
-        $catalog = $this->catalogRepository->update(
+        $catalog = $this->catalogService->update(
             new CatalogId($request->get('id')),
-            $request->get('value'),
-            new UserId(Auth::user()->getId())
+            $request->get('value')
         );
 
         return response()->json($catalog);
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function delete(Request $request)
     {
         $this->validate($request, [
             'id' => 'integer|gt:0'
         ]);
 
-        $isSuccess = $this->catalogRepository->delete(new CatalogId($request->get('id')));
+        $isSuccess = $this->catalogService->delete(new CatalogId($request->get('id')));
 
         return response()->json($isSuccess);
     }
 
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     * @throws \Illuminate\Validation\ValidationException
+     */
     public function bulkCreate(Request $request)
     {
         $this->validate($request, [
@@ -83,10 +116,7 @@ class CatalogController extends Controller
 
         $values = $request->get('values');
 
-        $response = $this->catalogRepository->bulkCreate(
-            $values,
-            new UserId(Auth::user()->getId())
-        );
+        $response = $this->catalogService->bulkCreate($values);
 
         return response()->json($response);
     }

@@ -25,40 +25,44 @@ use Illuminate\Support\Facades\DB;
 class EloquentPeriodRepository implements PeriodRepository
 {
     /**
+     * @var EloquentPeriod
+     */
+    private $periodModel;
+
+    /**
+     * EloquentPeriodRepository constructor.
+     * @param EloquentPeriod $periodModel
+     */
+    public function __construct(EloquentPeriod $periodModel)
+    {
+        $this->periodModel = $periodModel;
+    }
+
+    /**
      * @return TypeaheadCollection
-     * @throws TimelineException
      */
     public function getTypeahead(): TypeaheadCollection
     {
-        try {
-            $payload = app(EloquentPeriod::class)
-                ->select(['id', 'value'])
-                ->get()
-                ->map(function (EloquentPeriod $period) {
-                    return new Typeahead($period->getId(), $period->getValue());
-                })
-                ->toArray();
-            return new TypeaheadCollection($payload);
-        } catch (QueryException $e) {
-            throw TimelineException::ofUnableToRetrievePeriods();
-        }
+        $payload = $this->periodModel
+            ->select(['id', 'value'])
+            ->get()
+            ->map(function (EloquentPeriod $period) {
+                return new Typeahead($period->getId(), $period->getValue());
+            })
+            ->toArray();
+        return new TypeaheadCollection($payload);
     }
 
     /**
      * @return PeriodCollection
-     * @throws TimelineException
      */
     public function getAll(): PeriodCollection
     {
-        try {
-            $eloquentCollection = app(EloquentPeriod::class)
-                ->with(['create_user', 'update_user'])
-                ->get();
+        $eloquentCollection = $this->periodModel
+            ->with(['create_user', 'update_user'])
+            ->get();
 
-            return $this->constructPeriodCollection($eloquentCollection);
-        } catch (QueryException $e) {
-            throw TimelineException::ofUnableToRetrievePeriods();
-        }
+        return $this->constructPeriodCollection($eloquentCollection);
     }
 
     /**
@@ -71,7 +75,7 @@ class EloquentPeriodRepository implements PeriodRepository
     {
         try {
             return $this->constructPeriod(
-                app(EloquentPeriod::class)->create([
+                $this->periodModel->create([
                     'value' => $value,
                     'create_user_id' => $createUserId->getValue(),
                     'update_user_id' => $createUserId->getValue()
@@ -86,9 +90,9 @@ class EloquentPeriodRepository implements PeriodRepository
                 throw TimelineException::ofDuplicatedPeriodValue($value);
             } elseif ($errorInfo['1'] === 1452) { // non-exist user id
                 throw TimelineException::ofUserWithIdDoesNotExist($createUserId);
-            } else {
-                throw TimelineException::ofUnknownDatabaseError();
             }
+
+            throw $e;
         }
     }
 
@@ -121,7 +125,7 @@ class EloquentPeriodRepository implements PeriodRepository
     public function update(PeriodId $id, string $value, UserId $updateUserId): Period
     {
         try {
-            $period = app(EloquentPeriod::class)->find($id->getValue());
+            $period = $this->periodModel->find($id->getValue());
 
             if ($period === null) {
                 throw TimelineException::ofPeriodWithIdDoesNotExist($id);
@@ -132,7 +136,7 @@ class EloquentPeriodRepository implements PeriodRepository
                 'update_user_id' => $updateUserId->getValue()
             ]);
 
-            return $this->constructPeriod(app(EloquentPeriod::class)->find($id->getValue()));
+            return $this->constructPeriod($this->periodModel->find($id->getValue()));
         } catch (QueryException $e) {
             /** @var \PDOException $pdoException */
             $pdoException = $e->getPrevious();
@@ -142,9 +146,9 @@ class EloquentPeriodRepository implements PeriodRepository
                 throw TimelineException::ofDuplicatedPeriodValue($value);
             } elseif ($errorInfo['1'] === 1452) { // non-exist user id
                 throw TimelineException::ofUserWithIdDoesNotExist($updateUserId);
-            } else {
-                throw TimelineException::ofUnknownDatabaseError();
             }
+
+            throw $e;
         }
     }
 
@@ -155,17 +159,13 @@ class EloquentPeriodRepository implements PeriodRepository
      */
     public function delete(PeriodId $id): bool
     {
-        try {
-            $catalog = app(EloquentPeriod::class)->find($id->getValue());
+        $catalog = $this->periodModel->find($id->getValue());
 
-            if ($catalog === null) {
-                throw TimelineException::ofPeriodWithIdDoesNotExist($id);
-            }
-
-            return $catalog->delete();
-        } catch (QueryException $e) {
-            throw TimelineException::ofUnableToDeletePeriod($id);
+        if ($catalog === null) {
+            throw TimelineException::ofPeriodWithIdDoesNotExist($id);
         }
+
+        return $catalog->delete();
     }
 
     private function constructPeriodCollection(Collection $eloquentCollection): PeriodCollection
