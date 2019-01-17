@@ -12,7 +12,6 @@ use App\Timeline\Domain\Collections\ImageCollection;
 use App\Timeline\Domain\Collections\ImageIdCollection;
 use App\Timeline\Domain\Models\Image;
 use App\Timeline\Domain\Models\TemporaryImage;
-use App\Timeline\Domain\Models\User;
 use App\Timeline\Domain\Repositories\ImageRepository;
 use App\Timeline\Domain\ValueObjects\ImageId;
 use App\Timeline\Domain\ValueObjects\UserId;

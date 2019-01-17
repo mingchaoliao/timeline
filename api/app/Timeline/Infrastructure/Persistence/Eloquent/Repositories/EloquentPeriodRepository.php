@@ -9,6 +9,7 @@
 namespace App\Timeline\Infrastructure\Persistence\Eloquent\Repositories;
 
 
+use App\Jobs\GenerateTimeline;
 use App\Timeline\Domain\Collections\PeriodCollection;
 use App\Timeline\Domain\Collections\TypeaheadCollection;
 use App\Timeline\Domain\Models\Period;
@@ -136,6 +137,8 @@ class EloquentPeriodRepository implements PeriodRepository
                 'update_user_id' => $updateUserId->getValue()
             ]);
 
+            GenerateTimeline::dispatch();
+
             return $this->constructPeriod($this->periodModel->find($id->getValue()));
         } catch (QueryException $e) {
             /** @var \PDOException $pdoException */
@@ -164,6 +167,8 @@ class EloquentPeriodRepository implements PeriodRepository
         if ($catalog === null) {
             throw TimelineException::ofPeriodWithIdDoesNotExist($id);
         }
+
+        GenerateTimeline::dispatch();
 
         return $catalog->delete();
     }

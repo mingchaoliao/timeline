@@ -18,5 +18,6 @@ use Illuminate\Database\Eloquent\Collection;
 interface ImageRepository
 {
     public function getRawByIds(ImageIdCollection $ids): Collection;
+
     public function createRaw(TemporaryImage $tempImage, UserId $createUserId): EloquentImage;
 }

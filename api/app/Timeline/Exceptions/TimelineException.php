@@ -9,6 +9,7 @@
 namespace App\Timeline\Exceptions;
 
 
+use App\Timeline\Domain\Collections\EventIdCollection;
 use App\Timeline\Domain\ValueObjects\CatalogId;
 use App\Timeline\Domain\ValueObjects\DateAttributeId;
 use App\Timeline\Domain\ValueObjects\Email;
@@ -381,11 +382,32 @@ class TimelineException extends \Exception
         ));
     }
 
-    public static function ofDuplicatedTemporaryImagePath($path): self
+    public static function ofDuplicatedTemporaryImagePath(string $path): self
     {
         return new static(sprintf(
             'temporary image file "%s" have already existed',
             $path
         ));
+    }
+
+    public static function ofUnableToRetrieveEventById(EventId $id): self
+    {
+        return new static(sprintf(
+            'unable to retrieve event with ID "%s"',
+            (string)$id
+        ));
+    }
+
+    public static function ofUnableToRetrieveEvents(): self
+    {
+        return new static('unable to retrieve events');
+    }
+
+    public static function ofStartDateIsRequired()
+    {
+    }
+
+    public static function ofStartDateFormatIdIsRequired()
+    {
     }
 }

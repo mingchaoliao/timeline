@@ -9,6 +9,7 @@
 namespace App\Timeline\Domain\Repositories;
 
 
+use App\Timeline\Domain\Collections\CreateEventRequestCollection;
 use App\Timeline\Domain\Collections\EventCollection;
 use App\Timeline\Domain\Collections\EventIdCollection;
 use App\Timeline\Domain\Models\Event;
@@ -30,6 +31,11 @@ interface EventRepository
         CreateEventRequest $request,
         UserId $createUserId
     ): Event;
+
+    public function bulkCreate(
+        CreateEventRequestCollection $requests,
+        UserId $createUserId
+    ): EventCollection;
 
     public function update(
         EventId $id,

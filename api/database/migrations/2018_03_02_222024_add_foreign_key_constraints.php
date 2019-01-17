@@ -86,10 +86,7 @@ class AddForeignKeyConstraints extends Migration
                 ->onDelete('cascade');
         });
 
-        \Illuminate\Support\Facades\Artisan::call('passport:client', [
-            '--password' => true,
-            '--name' => 'WebPasswordGrantClient'
-        ]); Schema::table('images', function (Blueprint $table) {
+        Schema::table('images', function (Blueprint $table) {
             $table->foreign('event_id')
                 ->references('id')->on('events')
                 ->onUpdate('cascade')
@@ -152,8 +149,6 @@ class AddForeignKeyConstraints extends Migration
                 ]
             ]
         ]);
-
-        \Illuminate\Support\Facades\Artisan::call('timeline:generate');
     }
 
     /**

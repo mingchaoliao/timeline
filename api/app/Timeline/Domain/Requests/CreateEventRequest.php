@@ -13,6 +13,7 @@ use App\Timeline\Domain\Collections\ImageIdCollection;
 use App\Timeline\Domain\ValueObjects\DateAttributeId;
 use App\Timeline\Domain\ValueObjects\DateFormatId;
 use App\Timeline\Domain\ValueObjects\PeriodId;
+use App\Timeline\Exceptions\TimelineException;
 use Carbon\Carbon;
 
 class CreateEventRequest
@@ -83,6 +84,73 @@ class CreateEventRequest
         $this->periodId = $periodId;
         $this->catalogIds = $catalogIds;
         $this->imageIds = $imageIds;
+    }
+
+    public static function fromArray(array $data): self {
+        $startDate = $data['startDate'] ?? null;
+        $startDateAttributeId = $data['startDateAttributeId'] ?? null;
+        $startDateFormatId = $data['startDateFormatId'] ?? null;
+        $endDate = $data['endDate'] ?? null;
+        $endDateAttributeId = $data['endDateAttributeId'] ?? null;
+        $endDateFormatId = $data['endDateFormatId'] ?? null;
+        $periodId = $data['periodId'] ?? null;
+        $catalogs = $data['catalogs'] ?? null;
+        $content = $data['content'] ?? null;
+        $images = $data['images'] ?? null;
+
+        // start date must be provided
+        if ($startDate === null) {
+            throw TimelineException::ofStartDateIsRequired();
+        }
+
+        // start date format must be provided
+        if ($startDateFormatId === null) {
+            throw TimelineException::ofStartDateFormatIdIsRequired();
+        }
+
+        $catalogIds = new CatalogIdCollection();
+
+        if ($catalogs !== null) {
+            $catalogIds = CatalogIdCollection::fromValueArray(array_unique($catalogs));
+        }
+
+        $imageIds = new ImageIdCollection();
+
+        if ($images !== null) {
+            $imageIds = ImageIdCollection::fromValueArray(array_unique($images));
+        }
+
+
+
+        try {
+            $startDate = Carbon::createFromFormat($startDatePhpFormat, $startDate);
+            if (!$startDateFormat->hasMonth() && !$startDateFormat->hasDay()) {
+                $startDate->firstOfYear();
+            } elseif (!$startDateFormat->hasDay()) {
+                $startDate->firstOfMonth();
+            }
+            $startDate->setTime(0, 0, 0);
+        } catch (\InvalidArgumentException $e) {
+            throw new BadRequestHttpException('Invalid startDate');
+        }
+// start date attribute should only be set when it is allowed
+        if (!$isStartDateAttributeAllowed && $startDateAttributeId !== null) {
+            throw new BadRequestHttpException('startDateAttributeId is not allowed here');
+        }
+
+        if ($startDateAttributeId !== null) {
+            try {
+                $this->dateAttributeRepository->getById($startDateAttributeId);
+            } catch (DateAttributeNotFoundException $e) {
+                throw new BadRequestHttpException('Invalid startDateAttributeId');
+            }
+        }
+
+        // endDateFormatId must be provided if endDate is provided
+        if ($endDate !== null && $endDateFormatId === null) {
+            throw new BadRequestHttpException('Missing endDateFormatId');
+        }
+
     }
 
     /**

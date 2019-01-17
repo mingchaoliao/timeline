@@ -13,7 +13,6 @@ use App\Timeline\Domain\Collections\PeriodCollection;
 use App\Timeline\Domain\Collections\TypeaheadCollection;
 use App\Timeline\Domain\Models\Period;
 use App\Timeline\Domain\Repositories\PeriodRepository;
-use App\Timeline\Domain\Repositories\UserRepository;
 use App\Timeline\Domain\ValueObjects\PeriodId;
 use App\Timeline\Exceptions\TimelineException;
 
@@ -24,19 +23,19 @@ class PeriodService
      */
     private $periodRepository;
     /**
-     * @var UserRepository
+     * @var UserService
      */
-    private $userRepository;
+    private $userService;
 
     /**
      * PeriodService constructor.
      * @param PeriodRepository $periodRepository
-     * @param UserRepository $userRepository
+     * @param UserService $userService
      */
-    public function __construct(PeriodRepository $periodRepository, UserRepository $userRepository)
+    public function __construct(PeriodRepository $periodRepository, UserService $userService)
     {
         $this->periodRepository = $periodRepository;
-        $this->userRepository = $userRepository;
+        $this->userService = $userService;
     }
 
     /**
@@ -77,13 +76,13 @@ class PeriodService
     public function create(string $value): Period
     {
         try {
-            $currentUser = $this->userRepository->getCurrentUser();
+            $currentUser = $this->userService->getCurrentUser();
 
             if ($currentUser === null) {
                 throw TimelineException::ofUnauthenticated();
             }
 
-            if(!$currentUser->isAdmin() && !$currentUser->isEditor()) {
+            if (!$currentUser->isAdmin() && !$currentUser->isEditor()) {
                 throw TimelineException::ofUnauthorizedToCreatePeriod();
             }
 
@@ -103,13 +102,13 @@ class PeriodService
     public function bulkCreate(array $values): PeriodCollection
     {
         try {
-            $currentUser = $this->userRepository->getCurrentUser();
+            $currentUser = $this->userService->getCurrentUser();
 
             if ($currentUser === null) {
                 throw TimelineException::ofUnauthenticated();
             }
 
-            if(!$currentUser->isAdmin() && !$currentUser->isEditor()) {
+            if (!$currentUser->isAdmin() && !$currentUser->isEditor()) {
                 throw TimelineException::ofUnauthorizedToCreatePeriod();
             }
 
@@ -130,13 +129,13 @@ class PeriodService
     public function update(PeriodId $id, string $value): Period
     {
         try {
-            $currentUser = $this->userRepository->getCurrentUser();
+            $currentUser = $this->userService->getCurrentUser();
 
             if ($currentUser === null) {
                 throw TimelineException::ofUnauthenticated();
             }
 
-            if(!$currentUser->isAdmin() && !$currentUser->isEditor()) {
+            if (!$currentUser->isAdmin() && !$currentUser->isEditor()) {
                 throw TimelineException::ofUnauthorizedToUpdatePeriod($id);
             }
 
@@ -156,13 +155,13 @@ class PeriodService
     public function delete(PeriodId $id): bool
     {
         try {
-            $currentUser = $this->userRepository->getCurrentUser();
+            $currentUser = $this->userService->getCurrentUser();
 
             if ($currentUser === null) {
                 throw TimelineException::ofUnauthenticated();
             }
 
-            if(!$currentUser->isAdmin() && !$currentUser->isEditor()) {
+            if (!$currentUser->isAdmin() && !$currentUser->isEditor()) {
                 throw TimelineException::ofUnauthorizedToDeletePeriod($id);
             }
 

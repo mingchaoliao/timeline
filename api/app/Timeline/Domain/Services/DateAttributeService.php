@@ -9,11 +9,11 @@
 namespace App\Timeline\Domain\Services;
 
 
+use App\Jobs\GenerateTimeline;
 use App\Timeline\Domain\Collections\DateAttributeCollection;
 use App\Timeline\Domain\Collections\TypeaheadCollection;
 use App\Timeline\Domain\Models\DateAttribute;
 use App\Timeline\Domain\Repositories\DateAttributeRepository;
-use App\Timeline\Domain\Repositories\UserRepository;
 use App\Timeline\Domain\ValueObjects\DateAttributeId;
 use App\Timeline\Exceptions\TimelineException;
 
@@ -24,19 +24,19 @@ class DateAttributeService
      */
     private $dateAttributeRepository;
     /**
-     * @var UserRepository
+     * @var UserService
      */
-    private $userRepository;
+    private $userService;
 
     /**
      * DateAttributeService constructor.
      * @param DateAttributeRepository $dateAttributeRepository
-     * @param UserRepository $userRepository
+     * @param UserService $userService
      */
-    public function __construct(DateAttributeRepository $dateAttributeRepository, UserRepository $userRepository)
+    public function __construct(DateAttributeRepository $dateAttributeRepository, UserService $userService)
     {
         $this->dateAttributeRepository = $dateAttributeRepository;
-        $this->userRepository = $userRepository;
+        $this->userService = $userService;
     }
 
     /**
@@ -77,7 +77,7 @@ class DateAttributeService
     public function create(string $value): DateAttribute
     {
         try {
-            $currentUser = $this->userRepository->getCurrentUser();
+            $currentUser = $this->userService->getCurrentUser();
 
             if ($currentUser === null) {
                 throw TimelineException::ofUnauthenticated();
@@ -103,7 +103,7 @@ class DateAttributeService
     public function bulkCreate(array $values): DateAttributeCollection
     {
         try {
-            $currentUser = $this->userRepository->getCurrentUser();
+            $currentUser = $this->userService->getCurrentUser();
 
             if ($currentUser === null) {
                 throw TimelineException::ofUnauthenticated();
@@ -130,7 +130,7 @@ class DateAttributeService
     public function update(DateAttributeId $id, string $value): DateAttribute
     {
         try {
-            $currentUser = $this->userRepository->getCurrentUser();
+            $currentUser = $this->userService->getCurrentUser();
 
             if ($currentUser === null) {
                 throw TimelineException::ofUnauthenticated();
@@ -139,6 +139,8 @@ class DateAttributeService
             if (!$currentUser->isAdmin() && !$currentUser->isEditor()) {
                 throw TimelineException::ofUnauthorizedToUpdateDateAttribute($id);
             }
+
+            GenerateTimeline::dispatch();
 
             return $this->dateAttributeRepository->update($id, $value, $currentUser->getId());
         } catch (TimelineException $e) {
@@ -156,11 +158,13 @@ class DateAttributeService
     public function delete(DateAttributeId $id): bool
     {
         try {
-            $currentUser = $this->userRepository->getCurrentUser();
+            $currentUser = $this->userService->getCurrentUser();
 
             if ($currentUser === null) {
                 throw TimelineException::ofUnauthorizedToUpdateDateAttribute();
             }
+
+            GenerateTimeline::dispatch();
 
             return $this->dateAttributeRepository->delete($id);
         } catch (TimelineException $e) {

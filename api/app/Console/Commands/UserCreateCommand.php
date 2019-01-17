@@ -67,7 +67,7 @@ class UserCreateCommand extends Command
                 $user->isAdmin() ? 'Admin account' : 'Normal user',
                 $name,
                 $email,
-                $user->getId()
+                $user->getId()->getValue()
             ));
         } catch (TimelineException $e) {
             $this->error($e->getMessage());

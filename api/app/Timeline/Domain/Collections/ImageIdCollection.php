@@ -9,7 +9,13 @@
 namespace App\Timeline\Domain\Collections;
 
 
+use App\Timeline\Domain\ValueObjects\ImageId;
+
 class ImageIdCollection extends SingleValueModelCollection
 {
-
+    public static function fromValueArray(array $ids): self {
+        return new static(array_map(function(int $id) {
+            return new ImageId($id);
+        },$ids));
+    }
 }

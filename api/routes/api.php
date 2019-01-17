@@ -34,10 +34,10 @@ Route::group(['middleware' => ['auth:api']], function () {
 Route::group(['middleware' => ['auth:api', 'admin']], function () {
     Route::post('/timeline', 'TimelineController@create');
 
-    Route::post('/event/bulkCreate', 'EventController@bulkCreate');
-    Route::post('/event', 'EventController@createNew');
-    Route::delete('/event/{id}', 'EventController@deleteById');
-    Route::put('/event/{id}', 'EventController@updateEvent');
+    Route::post('/event', 'EventController@create');
+    Route::post('/event/bulk', 'EventController@bulkCreate');
+    Route::put('/event', 'EventController@update');
+    Route::delete('/event', 'EventController@delete');
 
     Route::get('/period', 'PeriodController@getAll');
     Route::post('/period', 'PeriodController@createPeriod');

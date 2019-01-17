@@ -9,6 +9,7 @@
 namespace App\Timeline\Infrastructure\Persistence\Eloquent\Repositories;
 
 
+use App\Jobs\GenerateTimeline;
 use App\Timeline\Domain\Collections\CatalogCollection;
 use App\Timeline\Domain\Collections\CatalogIdCollection;
 use App\Timeline\Domain\Collections\TypeaheadCollection;
@@ -148,6 +149,8 @@ class EloquentCatalogRepository implements CatalogRepository
                 'update_user_id' => $updateUserId->getValue()
             ]);
 
+            GenerateTimeline::dispatch();
+
             return $this->constructCatalog($this->catalogModel->find($id->getValue()));
         } catch (QueryException $e) {
             /** @var \PDOException $pdoException */
@@ -176,6 +179,8 @@ class EloquentCatalogRepository implements CatalogRepository
         if ($catalog === null) {
             throw TimelineException::ofCatalogWithIdDoesNotExist($id);
         }
+
+        GenerateTimeline::dispatch();
 
         return $catalog->delete();
     }

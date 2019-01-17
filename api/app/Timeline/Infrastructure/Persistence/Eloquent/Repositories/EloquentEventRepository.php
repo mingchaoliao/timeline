@@ -8,18 +8,15 @@
 namespace App\Timeline\Infrastructure\Persistence\Eloquent\Repositories;
 
 use App\Jobs\CleanUnlinkedImages;
+use App\Jobs\GenerateTimeline;
 use App\Jobs\LinkImages;
+use App\Timeline\Domain\Collections\CreateEventRequestCollection;
 use App\Timeline\Domain\Collections\EventCollection;
 use App\Timeline\Domain\Collections\EventIdCollection;
+use App\Timeline\Domain\Collections\ImageCollection;
 use App\Timeline\Domain\Collections\ImageIdCollection;
 use App\Timeline\Domain\Models\Event;
-use App\Timeline\Domain\Models\Image;
-use App\Timeline\Domain\Repositories\CatalogRepository;
-use App\Timeline\Domain\Repositories\DateAttributeRepository;
-use App\Timeline\Domain\Repositories\DateFormatRepository;
 use App\Timeline\Domain\Repositories\EventRepository;
-use App\Timeline\Domain\Repositories\ImageRepository;
-use App\Timeline\Domain\Repositories\PeriodRepository;
 use App\Timeline\Domain\Requests\CreateEventRequest;
 use App\Timeline\Domain\Requests\PageableRequest;
 use App\Timeline\Domain\Requests\UpdateEventRequest;
@@ -28,7 +25,6 @@ use App\Timeline\Domain\ValueObjects\UserId;
 use App\Timeline\Exceptions\TimelineException;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentEvent;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentImage;
-use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -39,33 +35,50 @@ class EloquentEventRepository implements EventRepository
      */
     private $eventModel;
     /**
-     * @var ImageRepository
+     * @var EloquentImageRepository
      */
     private $imageRepository;
     /**
-     * @var CatalogRepository
+     * @var EloquentCatalogRepository
      */
     private $catalogRepository;
     /**
-     * @var DateAttributeRepository
+     * @var EloquentDateAttributeRepository
      */
     private $dateAttributeRepository;
     /**
-     * @var DateFormatRepository
+     * @var EloquentDateFormatRepository
      */
     private $dateFormatRepository;
     /**
-     * @var PeriodRepository
+     * @var EloquentPeriodRepository
      */
     private $periodRepository;
     /**
      * @var ConnectionInterface
      */
     private $dbh;
+
     /**
-     * @var Filesystem
+     * EloquentEventRepository constructor.
+     * @param EloquentEvent $eventModel
+     * @param EloquentImageRepository $imageRepository
+     * @param EloquentCatalogRepository $catalogRepository
+     * @param EloquentDateAttributeRepository $dateAttributeRepository
+     * @param EloquentDateFormatRepository $dateFormatRepository
+     * @param EloquentPeriodRepository $periodRepository
+     * @param ConnectionInterface $dbh
      */
-    private $fs;
+    public function __construct(EloquentEvent $eventModel, EloquentImageRepository $imageRepository, EloquentCatalogRepository $catalogRepository, EloquentDateAttributeRepository $dateAttributeRepository, EloquentDateFormatRepository $dateFormatRepository, EloquentPeriodRepository $periodRepository, ConnectionInterface $dbh)
+    {
+        $this->eventModel = $eventModel;
+        $this->imageRepository = $imageRepository;
+        $this->catalogRepository = $catalogRepository;
+        $this->dateAttributeRepository = $dateAttributeRepository;
+        $this->dateFormatRepository = $dateFormatRepository;
+        $this->periodRepository = $periodRepository;
+        $this->dbh = $dbh;
+    }
 
     public function getById(EventId $id): Event
     {
@@ -122,34 +135,83 @@ class EloquentEventRepository implements EventRepository
         UserId $createUserId
     ): Event
     {
-        $eloquentEvent = null;
+        $eventId = null;
 
-        $this->dbh->transaction(function () use ($eloquentEvent, $request, $createUserId) {
-            /**
-             * @var EloquentEvent $eloquentEvent
-             * */
-            $eloquentEvent = $this->eventModel->create([
-                'start_date' => $request->getStartDate(),
-                'end_date' => $request->getEndDate(),
-                'start_date_attribute_id' => $request->getStartDateAttributeId()->getValue(),
-                'start_date_format_id' => $request->getStartDateFormatId()->getValue(),
-                'end_date_format_id' => $request->getEndDateFormatId()->getValue(),
-                'end_date_attribute_id' => $request->getEndDateAttributeId()->getValue(),
-                'content' => $request->getContent(),
-                'period_id' => $request->getPeriodId(),
-                'create_user_id' => $createUserId->getValue(),
-                'update_user_id' => $createUserId->getValue(),
-            ]);
-
-            $eloquentImages = $this->imageRepository->getRawByIds($request->getImageIds());
-            $eloquentEvent->images()->saveMany($eloquentImages);
-
-            $eloquentEvent->catalogs()->attach($request->getCatalogIds()->toValueArray());
-
-            LinkImages::dispatch($eloquentImages);
+        $this->dbh->transaction(function () use (&$eventId, $request, $createUserId) {
+            $eventId = $this->createHelper($request, $createUserId);
         });
 
-        return $this->constructEvent($this->eventModel->find($eloquentEvent->getId()));
+        $eloquentEvent = $this->eventModel
+            ->with([
+                'start_date_attribute',
+                'end_date_attribute',
+                'period',
+                'catalogs',
+                'images',
+                'start_date_format',
+                'end_date_format'
+            ])
+            ->find($eventId);
+
+        LinkImages::dispatch(
+            $this->imageRepository
+                ->constructImageCollection(
+                    $eloquentEvent->getImageCollection()
+                )
+        );
+
+        GenerateTimeline::dispatch();
+
+        return $this->constructEvent($eloquentEvent);
+    }
+
+    /**
+     * @param CreateEventRequestCollection $requests
+     * @param UserId $createUserId
+     * @return EventCollection
+     * @throws \Throwable
+     */
+    public function bulkCreate(
+        CreateEventRequestCollection $requests,
+        UserId $createUserId
+    ): EventCollection
+    {
+        $eventIds = [];
+
+        $this->dbh->transaction(function () use (&$eventIds, $requests, $createUserId) {
+            foreach ($requests as $request) {
+                $eventIds[] = $this->createHelper($request, $createUserId);
+            }
+        });
+
+        $eloquentEvents = $this->eventModel
+            ->with([
+                'start_date_attribute',
+                'end_date_attribute',
+                'period',
+                'catalogs',
+                'images',
+                'start_date_format',
+                'end_date_format'
+            ])
+            ->findMany($eventIds);
+
+        $linkImages = new ImageCollection();
+
+        /** @var EloquentEvent $eloquentEvent */
+        foreach ($eloquentEvents as $eloquentEvent) {
+            $linkImages = $linkImages->merge(
+                $this->imageRepository
+                    ->constructImageCollection(
+                        $eloquentEvent->getImageCollection()
+                    )
+            );
+        }
+
+        LinkImages::dispatch($linkImages);
+        GenerateTimeline::dispatch();
+
+        return $this->constructEventCollection($eloquentEvents);
     }
 
     /**
@@ -203,6 +265,7 @@ class EloquentEventRepository implements EventRepository
 
             CleanUnlinkedImages::dispatch($unneededImages);
             LinkImages::dispatch($linkImages);
+            GenerateTimeline::dispatch();
         });
 
         return $this->constructEvent($this->eventModel->find($id->getValue()));
@@ -210,7 +273,15 @@ class EloquentEventRepository implements EventRepository
 
     public function delete(EventId $id): bool
     {
-        // TODO: Implement delete() method.
+        $eloquentEvent = $this->eventModel->find($id->getValue());
+
+        if ($eloquentEvent === null) {
+            throw TimelineException::ofEventWithIdDoesNotExist($id);
+        }
+
+        GenerateTimeline::dispatch();
+
+        return $eloquentEvent->delete();
     }
 
     private function constructEvent(EloquentEvent $eloquentEvent): Event
@@ -274,5 +345,31 @@ class EloquentEventRepository implements EventRepository
         }
 
         return $results;
+    }
+
+    private function createHelper(CreateEventRequest $request, UserId $createUserId): int
+    {
+        /**
+         * @var EloquentEvent $eloquentEvent
+         * */
+        $eloquentEvent = $this->eventModel->create([
+            'start_date' => $request->getStartDate(),
+            'end_date' => $request->getEndDate(),
+            'start_date_attribute_id' => $request->getStartDateAttributeId()->getValue(),
+            'start_date_format_id' => $request->getStartDateFormatId()->getValue(),
+            'end_date_format_id' => $request->getEndDateFormatId()->getValue(),
+            'end_date_attribute_id' => $request->getEndDateAttributeId()->getValue(),
+            'content' => $request->getContent(),
+            'period_id' => $request->getPeriodId(),
+            'create_user_id' => $createUserId->getValue(),
+            'update_user_id' => $createUserId->getValue(),
+        ]);
+
+        $eloquentImages = $this->imageRepository->getRawByIds($request->getImageIds());
+        $eloquentEvent->images()->saveMany($eloquentImages);
+
+        $eloquentEvent->catalogs()->attach($request->getCatalogIds()->toValueArray());
+
+        return $eloquentEvent->getId();
     }
 }

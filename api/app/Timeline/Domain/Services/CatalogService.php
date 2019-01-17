@@ -14,7 +14,6 @@ use App\Timeline\Domain\Collections\CatalogIdCollection;
 use App\Timeline\Domain\Collections\TypeaheadCollection;
 use App\Timeline\Domain\Models\Catalog;
 use App\Timeline\Domain\Repositories\CatalogRepository;
-use App\Timeline\Domain\Repositories\UserRepository;
 use App\Timeline\Domain\ValueObjects\CatalogId;
 use App\Timeline\Exceptions\TimelineException;
 
@@ -25,19 +24,19 @@ class CatalogService
      */
     private $catalogRepository;
     /**
-     * @var UserRepository
+     * @var UserService
      */
-    private $userRepository;
+    private $userService;
 
     /**
      * CatalogService constructor.
      * @param CatalogRepository $catalogRepository
-     * @param UserRepository $userRepository
+     * @param UserService $userService
      */
-    public function __construct(CatalogRepository $catalogRepository, UserRepository $userRepository)
+    public function __construct(CatalogRepository $catalogRepository, UserService $userService)
     {
         $this->catalogRepository = $catalogRepository;
-        $this->userRepository = $userRepository;
+        $this->userService = $userService;
     }
 
     /**
@@ -94,7 +93,7 @@ class CatalogService
     public function create(string $value): Catalog
     {
         try {
-            $currentUser = $this->userRepository->getCurrentUser();
+            $currentUser = $this->userService->getCurrentUser();
 
             if ($currentUser === null) {
                 throw TimelineException::ofUnauthenticated();
@@ -120,7 +119,7 @@ class CatalogService
     public function bulkCreate(array $values): CatalogCollection
     {
         try {
-            $currentUser = $this->userRepository->getCurrentUser();
+            $currentUser = $this->userService->getCurrentUser();
 
             if ($currentUser === null) {
                 throw TimelineException::ofUnauthenticated();
@@ -147,7 +146,7 @@ class CatalogService
     public function update(CatalogId $id, string $value): Catalog
     {
         try {
-            $currentUser = $this->userRepository->getCurrentUser();
+            $currentUser = $this->userService->getCurrentUser();
 
             if ($currentUser === null) {
                 throw TimelineException::ofUnauthenticated();
@@ -173,7 +172,7 @@ class CatalogService
     public function delete(CatalogId $id): bool
     {
         try {
-            $currentUser = $this->userRepository->getCurrentUser();
+            $currentUser = $this->userService->getCurrentUser();
 
             if ($currentUser === null) {
                 throw TimelineException::ofUnauthenticated();
