@@ -5,11 +5,11 @@
 export const environment = {
     production: false,
     title: 'Timeline',
-    wsRoot: 'https://api.timeline.localhost',
-    whitelistedDomains: ['api.timeline.localhost', 'api.timeline.localhost:9443'],
+    wsRoot: 'https://api.timeline.localhost/api',
+    whitelistedDomains: ['api.timeline.localhost:443'],
     company: {
         name: 'Mingchao Liao',
-        url: 'https://timeline.localhost'
+        url: 'https://localhot:4200'
     }
 };
 

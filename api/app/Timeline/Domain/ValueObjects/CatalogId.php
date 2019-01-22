@@ -9,7 +9,21 @@
 namespace App\Timeline\Domain\ValueObjects;
 
 
+use App\Timeline\Exceptions\TimelineException;
+use App\Timeline\Utils\Common;
+
 final class CatalogId extends SingleInteger
 {
+    /**
+     * @param string $value
+     * @return CatalogId
+     * @throws TimelineException
+     */
+    public static function createFromString(string $value): self {
+        if(!Common::isPosInt($value)) {
+            throw TimelineException::ofInvalidCatalogId($value);
+        }
 
+        return new static(intval($value));
+    }
 }

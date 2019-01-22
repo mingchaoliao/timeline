@@ -9,7 +9,22 @@
 namespace App\Timeline\Domain\ValueObjects;
 
 
+use App\Timeline\Exceptions\TimelineException;
+use App\Timeline\Utils\Common;
+
 final class DateAttributeId extends SingleInteger
 {
+    /**
+     * @param string $value
+     * @return DateAttributeId
+     * @throws TimelineException
+     */
+    public static function createFromString(string $value): self
+    {
+        if (!Common::isPosInt($value)) {
+            throw TimelineException::ofInvalidDateAttributeId($value);
+        }
 
+        return new static(intval($value));
+    }
 }

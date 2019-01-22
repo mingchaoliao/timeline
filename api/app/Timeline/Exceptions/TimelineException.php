@@ -87,6 +87,10 @@ class TimelineException extends \Exception implements HttpExceptionInterface
     public const INVALID_START_DATE_TO = 10066;
     public const INVALID_START_DATE_FROM = 10067;
     public const UNABLE_TO_SEARCH_EVENTS = 10068;
+    public const INVALID_PERIOD_ID = 10069;
+    public const INVALID_CATALOG_ID = 10070;
+    public const INVALID_DATE_ATTRIBUTE_ID = 10071;
+    public const INVALID_USER_ID = 10072;
 
     /**
      * @var int
@@ -612,5 +616,37 @@ class TimelineException extends \Exception implements HttpExceptionInterface
             [],
             $previous
         );
+    }
+
+    public static function ofInvalidPeriodId(string $value, \Throwable $previous = null): self
+    {
+        return new static(sprintf(
+            'invalid period id "%s", must be an positive integer',
+            $value
+        ), static::INVALID_PERIOD_ID, 400, [], $previous);
+    }
+
+    public static function ofInvalidDateAttributeId(string $value, \Throwable $previous = null): self
+    {
+        return new static(sprintf(
+            'invalid date attribute id "%s", must be an positive integer',
+            $value
+        ), static::INVALID_DATE_ATTRIBUTE_ID, 400, [], $previous);
+    }
+
+    public static function ofInvalidCatalogId(string $value, \Throwable $previous = null): self
+    {
+        return new static(sprintf(
+            'invalid catalog id "%s", must be an positive integer',
+            $value
+        ), static::INVALID_CATALOG_ID, 400, [], $previous);
+    }
+
+    public static function ofInvalidUserId(string $value, \Throwable $previous = null): self
+    {
+        return new static(sprintf(
+            'invalid user id "%s", must be an positive integer',
+            $value
+        ), static::INVALID_USER_ID, 400, [], $previous);
     }
 }

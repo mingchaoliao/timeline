@@ -65,20 +65,20 @@ class PeriodController extends Controller
     }
 
     /**
+     * @param string $id
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      * @throws \App\Timeline\Exceptions\TimelineException
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function update(Request $request)
+    public function update(string $id, Request $request)
     {
         $this->validate($request, [
-            'id' => 'integer|gt:0',
             'value' => 'required'
         ]);
 
         $period = $this->periodService->update(
-            new PeriodId($request->get('id')),
+            PeriodId::createFromString($id),
             $request->get('value')
         );
 
@@ -86,18 +86,13 @@ class PeriodController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param string $id
      * @return \Illuminate\Http\JsonResponse
      * @throws \App\Timeline\Exceptions\TimelineException
-     * @throws \Illuminate\Validation\ValidationException
      */
-    public function delete(Request $request)
+    public function delete(string $id)
     {
-        $this->validate($request, [
-            'id' => 'integer|gt:0'
-        ]);
-
-        $isSuccess = $this->periodService->delete(new PeriodId($request->get('id')));
+        $isSuccess = $this->periodService->delete(PeriodId::createFromString($id));
 
         return response()->json($isSuccess);
     }

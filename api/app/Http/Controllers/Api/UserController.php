@@ -74,10 +74,9 @@ class UserController extends Controller
         return response()->json($users);
     }
 
-    public function update(Request $request)
+    public function update(string $id, Request $request)
     {
         $this->validate($request, [
-            'id' => 'required|integer|gt:0',
             'name' => 'nullable|string',
             'password' => 'nullable|string',
             'isAdmin' => 'nullable|boolean',
@@ -85,7 +84,7 @@ class UserController extends Controller
         ]);
 
         $user = $this->userService->update(
-            new UserId($request->get('id')),
+            UserId::createFromString($id),
             $request->get('name'),
             $request->get('password'),
             $request->get('isAdmin'),

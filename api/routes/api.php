@@ -40,23 +40,23 @@ Route::group(['middleware' => ['auth:api', 'admin']], function () {
     Route::get('/period', 'PeriodController@getAll');
     Route::post('/period', 'PeriodController@createPeriod');
     Route::post('/period/bulk', 'PeriodController@bulkCreate');
-    Route::put('/period', 'PeriodController@update');
-    Route::delete('/period', 'PeriodController@delete');
+    Route::put('/period/{id}', 'PeriodController@update');
+    Route::delete('/period/{id}', 'PeriodController@delete');
 
     Route::get('/catalog', 'CatalogController@getAll');
     Route::post('/catalog', 'CatalogController@createCatalog');
     Route::post('/catalog/bulk', 'CatalogController@bulkCreate');
-    Route::put('/catalog', 'CatalogController@update');
-    Route::delete('/catalog', 'CatalogController@delete');
+    Route::put('/catalog/{id}', 'CatalogController@update');
+    Route::delete('/catalog/{id}', 'CatalogController@delete');
 
     Route::get('/dateAttribute', 'DateAttributeController@getAll');
     Route::post('/dateAttribute', 'DateAttributeController@createDateAttribute');
     Route::post('/dateAttribute/bulk', 'DateAttributeController@bulkCreate');
-    Route::put('/dateAttribute', 'DateAttributeController@update');
-    Route::delete('/dateAttribute', 'DateAttributeController@delete');
+    Route::put('/dateAttribute/{id}', 'DateAttributeController@update');
+    Route::delete('/dateAttribute/{id}', 'DateAttributeController@delete');
 
     Route::post('/image', 'ImageController@uploadImage');
 
     Route::get('/user', 'UserController@getAllUser');
-    Route::put('/user', 'UserController@update');
+    Route::put('/user/{id}', 'UserController@update');
 });

@@ -10,6 +10,7 @@ namespace App\Timeline\Domain\ValueObjects;
 
 
 use App\Timeline\Exceptions\TimelineException;
+use App\Timeline\Utils\Common;
 
 abstract class SingleInteger
 {
