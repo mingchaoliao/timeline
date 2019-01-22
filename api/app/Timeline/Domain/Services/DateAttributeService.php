@@ -8,8 +8,6 @@
 
 namespace App\Timeline\Domain\Services;
 
-
-use App\Jobs\GenerateTimeline;
 use App\Timeline\Domain\Collections\DateAttributeCollection;
 use App\Timeline\Domain\Collections\TypeaheadCollection;
 use App\Timeline\Domain\Models\DateAttribute;
@@ -50,7 +48,7 @@ class DateAttributeService
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToRetrieveDateAttributes();
+            throw TimelineException::ofUnableToRetrieveDateAttributes($e);
         }
     }
 
@@ -65,7 +63,7 @@ class DateAttributeService
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToRetrieveDateAttributes();
+            throw TimelineException::ofUnableToRetrieveDateAttributes($e);
         }
     }
 
@@ -91,7 +89,7 @@ class DateAttributeService
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToCreateDateAttribute();
+            throw TimelineException::ofUnableToCreateDateAttribute($e);
         }
     }
 
@@ -117,7 +115,7 @@ class DateAttributeService
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToCreateDateAttribute();
+            throw TimelineException::ofUnableToCreateDateAttribute($e);
         }
     }
 
@@ -140,13 +138,11 @@ class DateAttributeService
                 throw TimelineException::ofUnauthorizedToUpdateDateAttribute($id);
             }
 
-            GenerateTimeline::dispatch();
-
             return $this->dateAttributeRepository->update($id, $value, $currentUser->getId());
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToUpdateDateAttribute($id);
+            throw TimelineException::ofUnableToUpdateDateAttribute($id, $e);
         }
     }
 
@@ -161,16 +157,14 @@ class DateAttributeService
             $currentUser = $this->userService->getCurrentUser();
 
             if ($currentUser === null) {
-                throw TimelineException::ofUnauthorizedToUpdateDateAttribute();
+                throw TimelineException::ofUnauthorizedToUpdateDateAttribute($id);
             }
-
-            GenerateTimeline::dispatch();
 
             return $this->dateAttributeRepository->delete($id);
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToDeleteDateAttribute($id);
+            throw TimelineException::ofUnableToDeleteDateAttribute($id, $e);
         }
     }
 }

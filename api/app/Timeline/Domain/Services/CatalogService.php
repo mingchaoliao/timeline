@@ -9,6 +9,8 @@
 namespace App\Timeline\Domain\Services;
 
 
+use App\Events\TimelineCatalogDeleted;
+use App\Events\TimelineCatalogUpdated;
 use App\Timeline\Domain\Collections\CatalogCollection;
 use App\Timeline\Domain\Collections\CatalogIdCollection;
 use App\Timeline\Domain\Collections\TypeaheadCollection;
@@ -50,7 +52,7 @@ class CatalogService
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToRetrieveCatalogs();
+            throw TimelineException::ofUnableToRetrieveCatalogs($e);
         }
     }
 
@@ -65,7 +67,7 @@ class CatalogService
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToRetrieveCatalogs();
+            throw TimelineException::ofUnableToRetrieveCatalogs($e);
         }
     }
 
@@ -81,7 +83,7 @@ class CatalogService
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToRetrieveCatalogs();
+            throw TimelineException::ofUnableToRetrieveCatalogs($e);
         }
     }
 
@@ -107,7 +109,7 @@ class CatalogService
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToCreateCatalog();
+            throw TimelineException::ofUnableToCreateCatalog($e);
         }
     }
 
@@ -133,7 +135,7 @@ class CatalogService
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToCreateCatalog();
+            throw TimelineException::ofUnableToCreateCatalog($e);
         }
     }
 
@@ -156,11 +158,15 @@ class CatalogService
                 throw TimelineException::ofUnauthorizedToUpdateCatalog($id);
             }
 
-            return $this->catalogRepository->update($id, $value, $currentUser->getId());
+            $catalog = $this->catalogRepository->update($id, $value, $currentUser->getId());
+
+            TimelineCatalogUpdated::dispatch($id);
+
+            return $catalog;
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToUpdateCatalog($id);
+            throw TimelineException::ofUnableToUpdateCatalog($id, $e);
         }
     }
 
@@ -179,14 +185,18 @@ class CatalogService
             }
 
             if (!$currentUser->isAdmin() && !$currentUser->isEditor()) {
-                throw TimelineException::ofUnauthorizedToDeleteDateAttribute($id);
+                throw TimelineException::ofUnableToDeleteCatalog($id);
             }
 
-            return $this->catalogRepository->delete($id);
+            $success =  $this->catalogRepository->delete($id);
+
+            TimelineCatalogDeleted::dispatch();
+
+            return $success;
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToDeleteCatalog($id);
+            throw TimelineException::ofUnableToDeleteCatalog($id, $e);
         }
     }
 }

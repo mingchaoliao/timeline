@@ -16,10 +16,12 @@ class CreateEventsTable extends Migration
         Schema::create('events', function (Blueprint $table) {
             $table->increments('id');
             $table->dateTime('start_date');
-            $table->unsignedInteger('start_date_format_id');
+            $table->tinyInteger('start_date_has_month')->default(0);
+            $table->tinyInteger('start_date_has_day')->default(0);
             $table->unsignedInteger('start_date_attribute_id')->nullable();
             $table->dateTime('end_date')->nullable();
-            $table->unsignedInteger('end_date_format_id')->nullable();
+            $table->tinyInteger('end_date_has_month')->default(0);
+            $table->tinyInteger('end_date_has_day')->default(0);
             $table->unsignedInteger('end_date_attribute_id')->nullable();
             $table->text('content');
             $table->unsignedInteger('period_id')->nullable();

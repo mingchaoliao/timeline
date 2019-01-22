@@ -4,32 +4,36 @@ namespace App\Providers;
 
 use App\Timeline\Domain\Repositories\CatalogRepository;
 use App\Timeline\Domain\Repositories\DateAttributeRepository;
-use App\Timeline\Domain\Repositories\DateFormatRepository;
 use App\Timeline\Domain\Repositories\EventRepository;
+use App\Timeline\Domain\Repositories\ImageFileRepository;
 use App\Timeline\Domain\Repositories\ImageRepository;
 use App\Timeline\Domain\Repositories\PeriodRepository;
+use App\Timeline\Domain\Repositories\SearchEventRepository;
 use App\Timeline\Domain\Repositories\UserRepository;
 use App\Timeline\Domain\Services\CatalogService;
 use App\Timeline\Domain\Services\DateAttributeService;
-use App\Timeline\Domain\Services\DateFormatService;
 use App\Timeline\Domain\Services\EventService;
+use App\Timeline\Domain\Services\ImageService;
 use App\Timeline\Domain\Services\PeriodService;
+use App\Timeline\Domain\Services\TimelineService;
 use App\Timeline\Domain\Services\UserService;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentCatalog;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentDateAttribute;
-use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentDateFormat;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentEvent;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentImage;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentPeriod;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentUser;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentCatalogRepository;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentDateAttributeRepository;
-use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentDateFormatRepository;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentEventRepository;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentImageRepository;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentPeriodRepository;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentUserRepository;
+use App\Timeline\Infrastructure\Persistence\Filesystem\FSImageFileRepository;
+use App\Timeline\Infrastructure\SearchEngine\ESSearchEventRepository;
+use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\Hashing\Hasher;
+use Illuminate\Database\Connection;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
@@ -65,12 +69,9 @@ class TimelineServiceProvider extends ServiceProvider
             resolve(EloquentDateAttribute::class)
         );
 
-        $eloquentDateFormatRepository = new EloquentDateFormatRepository(
-            resolve(EloquentDateFormat::class)
-        );
-
         $eloquentImageRepository = new EloquentImageRepository(
-            resolve(EloquentImage::class)
+            resolve(EloquentImage::class),
+            resolve(ConnectionInterface::class)
         );
 
         $this->app->singleton(CatalogRepository::class, function () use ($eloquentCatalogRepository) {
@@ -85,19 +86,18 @@ class TimelineServiceProvider extends ServiceProvider
             return $eloquentDateAttributeRepository;
         });
 
-        $this->app->singleton(DateFormatRepository::class, function () use ($eloquentDateFormatRepository) {
-            return $eloquentDateFormatRepository;
-        });
-
         $this->app->singleton(ImageRepository::class, function () use ($eloquentImageRepository) {
             return $eloquentImageRepository;
+        });
+
+        $this->app->singleton(SearchEventRepository::class, function () {
+            return new ESSearchEventRepository(resolve(\Elasticsearch\Client::class));
         });
 
         $this->app->singleton(EventRepository::class, function () use (
             $eloquentImageRepository,
             $eloquentCatalogRepository,
             $eloquentDateAttributeRepository,
-            $eloquentDateFormatRepository,
             $eloquentPeriodRepository
         ) {
             return new EloquentEventRepository(
@@ -105,7 +105,6 @@ class TimelineServiceProvider extends ServiceProvider
                 $eloquentImageRepository,
                 $eloquentCatalogRepository,
                 $eloquentDateAttributeRepository,
-                $eloquentDateFormatRepository,
                 $eloquentPeriodRepository,
                 resolve(ConnectionInterface::class)
             );
@@ -117,6 +116,10 @@ class TimelineServiceProvider extends ServiceProvider
                 resolve(Hasher::class),
                 Auth::guard('api')
             );
+        });
+
+        $this->app->singleton(ImageFileRepository::class, function () {
+            return new FSImageFileRepository(resolve(Filesystem::class));
         });
 
         $this->app->singleton(UserService::class, function () {
@@ -139,12 +142,6 @@ class TimelineServiceProvider extends ServiceProvider
             );
         });
 
-        $this->app->singleton(DateFormatService::class, function () {
-            return new DateFormatService(
-                resolve(DateFormatRepository::class)
-            );
-        });
-
         $this->app->singleton(PeriodService::class, function () {
             return new PeriodService(
                 resolve(PeriodRepository::class),
@@ -152,9 +149,23 @@ class TimelineServiceProvider extends ServiceProvider
             );
         });
 
+        $this->app->singleton(ImageService::class, function () {
+            return new ImageService(
+                resolve(ImageRepository::class),
+                resolve(ImageFileRepository::class)
+            );
+        });
+
+        $this->app->singleton(TimelineService::class, function () {
+            return new TimelineService(
+                resolve(EventRepository::class)
+            );
+        });
+
         $this->app->singleton(EventService::class, function () {
             return new EventService(
                 resolve(EventRepository::class),
+                resolve(SearchEventRepository::class),
                 resolve(UserService::class)
             );
         });

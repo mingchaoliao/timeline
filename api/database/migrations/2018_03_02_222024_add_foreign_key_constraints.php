@@ -74,16 +74,6 @@ class AddForeignKeyConstraints extends Migration
                 ->references('id')->on('users')
                 ->onUpdate('cascade')
                 ->onDelete('cascade');
-
-            $table->foreign('start_date_format_id')
-                ->references('id')->on('date_formats')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
-
-            $table->foreign('end_date_format_id')
-                ->references('id')->on('date_formats')
-                ->onUpdate('cascade')
-                ->onDelete('cascade');
         });
 
         Schema::table('images', function (Blueprint $table) {

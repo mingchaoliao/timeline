@@ -10,6 +10,7 @@ namespace App\Timeline\Domain\Requests;
 
 
 use App\Timeline\Exceptions\TimelineException;
+use App\Timeline\Utils\Common;
 
 class PageableRequest
 {
@@ -40,6 +41,27 @@ class PageableRequest
         $this->page = $page;
         $this->pageSize = $pageSize;
         $this->maxPageSize = $maxPageSize;
+    }
+
+    /**
+     * @param array $data
+     * @param int $maxPageSize
+     * @return PageableRequest
+     * @throws TimelineException
+     */
+    public static function createFromArray(array $data, int $maxPageSize = 100): self {
+        if(isset($data['page']) && !Common::isPosInt($data['page'])) {
+            throw TimelineException::ofInvalidPageNumber($data['page']);
+        }
+
+        if(isset($data['pageSize']) && !Common::isPosInt($data['pageSize'])) {
+            throw TimelineException::ofInvalidPageSize($data['pageSize']);
+        }
+
+        $page = $data['page'] ?? 1;
+        $pageSize = $data['pageSize'] ?? 10;
+
+        return new static($page, $pageSize, $maxPageSize);
     }
 
     /**

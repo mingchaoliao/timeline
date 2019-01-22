@@ -36,8 +36,8 @@ Route::group(['middleware' => ['auth:api', 'admin']], function () {
 
     Route::post('/event', 'EventController@create');
     Route::post('/event/bulk', 'EventController@bulkCreate');
-    Route::put('/event', 'EventController@update');
-    Route::delete('/event', 'EventController@delete');
+    Route::put('/event/{id}', 'EventController@update');
+    Route::delete('/event/{id}', 'EventController@delete');
 
     Route::get('/period', 'PeriodController@getAll');
     Route::post('/period', 'PeriodController@createPeriod');

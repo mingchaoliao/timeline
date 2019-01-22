@@ -10,33 +10,27 @@ namespace App\Timeline\Domain\Requests;
 
 use App\Timeline\Domain\Collections\CatalogIdCollection;
 use App\Timeline\Domain\Collections\ImageIdCollection;
+use App\Timeline\Domain\Models\EventDate;
 use App\Timeline\Domain\ValueObjects\DateAttributeId;
 use App\Timeline\Domain\ValueObjects\DateFormatId;
 use App\Timeline\Domain\ValueObjects\PeriodId;
+use App\Timeline\Exceptions\TimelineException;
 use Carbon\Carbon;
 
 class UpdateEventRequest
 {
     /**
-     * @var Carbon
+     * @var EventDate
      */
     private $startDate;
-    /**
-     * @var DateFormatId
-     */
-    private $startDateFormatId;
     /**
      * @var DateAttributeId|null
      */
     private $startDateAttributeId;
     /**
-     * @var Carbon|null
+     * @var EventDate|null
      */
     private $endDate;
-    /**
-     * @var DateFormatId|null
-     */
-    private $endDateFormatId;
     /**
      * @var DateAttributeId|null
      */
@@ -60,24 +54,20 @@ class UpdateEventRequest
 
     /**
      * CreateEventRequest constructor.
-     * @param Carbon $startDate
-     * @param DateFormatId $startDateFormatId
+     * @param EventDate $startDate
      * @param DateAttributeId|null $startDateAttributeId
-     * @param Carbon|null $endDate
-     * @param DateFormatId|null $endDateFormatId
+     * @param EventDate|null $endDate
      * @param DateAttributeId|null $endDateAttributeId
      * @param string $content
      * @param PeriodId|null $periodId
      * @param CatalogIdCollection $catalogIds
      * @param ImageIdCollection $imageIds
      */
-    public function __construct(Carbon $startDate, DateFormatId $startDateFormatId, ?DateAttributeId $startDateAttributeId, ?Carbon $endDate, ?DateFormatId $endDateFormatId, ?DateAttributeId $endDateAttributeId, string $content, ?PeriodId $periodId, CatalogIdCollection $catalogIds, ImageIdCollection $imageIds)
+    public function __construct(EventDate $startDate, ?DateAttributeId $startDateAttributeId, ?EventDate $endDate, ?DateAttributeId $endDateAttributeId, string $content, ?PeriodId $periodId, CatalogIdCollection $catalogIds, ImageIdCollection $imageIds)
     {
         $this->startDate = $startDate;
-        $this->startDateFormatId = $startDateFormatId;
         $this->startDateAttributeId = $startDateAttributeId;
         $this->endDate = $endDate;
-        $this->endDateFormatId = $endDateFormatId;
         $this->endDateAttributeId = $endDateAttributeId;
         $this->content = $content;
         $this->periodId = $periodId;
@@ -86,19 +76,69 @@ class UpdateEventRequest
     }
 
     /**
-     * @return Carbon
+     * @param array $data
+     * @return UpdateEventRequest
+     * @throws TimelineException
      */
-    public function getStartDate(): Carbon
-    {
-        return $this->startDate;
+    public static function fromArray(array $data): self {
+        $startDate = $data['startDate'] ?? null;
+        $startDateAttributeId = $data['startDateAttributeId'] ?? null;
+        $endDate = $data['endDate'] ?? null;
+        $endDateAttributeId = $data['endDateAttributeId'] ?? null;
+        $periodId = $data['periodId'] ?? null;
+        $catalogs = $data['catalogs'] ?? null;
+        $content = $data['content'] ?? null;
+        $images = $data['images'] ?? null;
+
+        // start date must be provided
+        if ($startDate === null) {
+            throw TimelineException::ofStartDateIsRequired();
+        }
+
+        $startDate = EventDate::createFromArray($startDate);
+
+        if($startDate->hasMonth() && $startDateAttributeId !== null) {
+            throw TimelineException::ofStartDateAttributeShouldNotBeSet();
+        }
+
+        if($endDate !== null) {
+            $endDate = EventDate::createFromArray($endDate);
+
+            if($endDate->hasMonth() && $endDateAttributeId !== null) {
+                throw TimelineException::ofEndDateAttributeShouldNotBeSet();
+            }
+        }
+
+        $catalogIds = new CatalogIdCollection();
+
+        if ($catalogs !== null) {
+            $catalogIds = CatalogIdCollection::fromValueArray(array_unique($catalogs));
+        }
+
+        $imageIds = new ImageIdCollection();
+
+        if ($images !== null) {
+            $imageIds = ImageIdCollection::fromValueArray(array_unique($images));
+        }
+
+        return new static(
+            $startDate,
+            $startDateAttributeId,
+            $endDate,
+            $endDateAttributeId,
+            $content,
+            $periodId,
+            $catalogIds,
+            $imageIds
+        );
     }
 
     /**
-     * @return DateFormatId
+     * @return EventDate
      */
-    public function getStartDateFormatId(): DateFormatId
+    public function getStartDate(): EventDate
     {
-        return $this->startDateFormatId;
+        return $this->startDate;
     }
 
     /**
@@ -110,19 +150,11 @@ class UpdateEventRequest
     }
 
     /**
-     * @return Carbon|null
+     * @return EventDate|null
      */
-    public function getEndDate(): ?Carbon
+    public function getEndDate(): ?EventDate
     {
         return $this->endDate;
-    }
-
-    /**
-     * @return DateFormatId|null
-     */
-    public function getEndDateFormatId(): ?DateFormatId
-    {
-        return $this->endDateFormatId;
     }
 
     /**

@@ -74,24 +74,6 @@ class EloquentEvent extends Model
         );
     }
 
-    public function start_date_format(): BelongsTo
-    {
-        return $this->belongsTo(
-            EloquentDateFormat::class,
-            'start_date_format_id',
-            'id'
-        );
-    }
-
-    public function end_date_format(): BelongsTo
-    {
-        return $this->belongsTo(
-            EloquentDateFormat::class,
-            'end_date_format_id',
-            'id'
-        );
-    }
-
     public function scopeOrderByStartDate(Builder $query)
     {
         $query->orderBy('start_date');
@@ -171,124 +153,28 @@ class EloquentEvent extends Model
         return $this->updated_at;
     }
 
-    public function getStartDateFormat(): EloquentDateFormat
+    public function hasStartDateMonth(): bool
     {
-        return $this->start_date_format;
+        return $this->start_date_has_month;
     }
 
-    public function getEndDateFormat(): ?EloquentDateFormat
+    public function hasStartDateDay(): bool
     {
-        return $this->end_date_format;
+        return $this->start_date_has_day;
+    }
+
+    public function hasEndDateMonth(): bool
+    {
+        return $this->end_date_has_month;
+    }
+
+    public function hasEndDateDay(): bool
+    {
+        return $this->end_date_has_day;
     }
 
     public function scopeByIds(Builder $query, array $ids)
     {
         $query->whereIn('id', $ids);
-    }
-
-    public static function createNew(
-        Carbon $startDate,
-        string $content,
-        int $createUserId,
-        int $startDateFormatId,
-        int $endDateFormatId = null,
-        int $startDateAttributeId = null,
-        Carbon $endDate = null,
-        int $endDateAttributeId = null,
-        int $periodId = null,
-        array $catalogIds = [],
-        array $imageData = []
-    ): EloquentEvent {
-        /**
-         * @var EloquentEvent $eloquentEvent
-         * */
-        $eloquentEvent = static::create([
-            'start_date' => $startDate,
-            'end_date' => $endDate,
-            'start_date_attribute_id' => $startDateAttributeId,
-            'start_date_format_id' => $startDateFormatId,
-            'end_date_format_id' => $endDateFormatId,
-            'end_date_attribute_id' => $endDateAttributeId,
-            'content' => $content,
-            'period_id' => $periodId,
-            'create_user_id' => $createUserId
-        ]);
-
-        $images = [];
-        foreach ($imageData as $image) {
-            $images[] = new EloquentImage([
-                'path' => $image['path'],
-                'description' => $image['description'],
-                'create_user_id' => $createUserId
-            ]);
-        }
-        $eloquentEvent->images()->saveMany($images);
-
-        foreach ($imageData as $image) {
-            Storage::disk()->move(
-                Image::TMP_PATH . '/' . $image['path'],
-                Image::PATH . '/' . $image['path']
-            );
-        }
-
-        $eloquentEvent->catalogs()->attach($catalogIds);
-
-        return $eloquentEvent;
-    }
-
-    public static function updateById(
-        int $id,
-        Carbon $startDate,
-        string $content,
-        int $updateUserId,
-        int $startDateFormatId,
-        int $endDateFormatId = null,
-        int $startDateAttributeId = null,
-        Carbon $endDate = null,
-        int $endDateAttributeId = null,
-        int $periodId = null,
-        array $catalogIds = [],
-        array $imageData = []
-    ): EloquentEvent {
-        /**
-         * @var EloquentEvent $event
-         * */
-        $event = static::findOrFail($id);
-
-        $event->update([
-            'start_date' => $startDate,
-            'end_date' => $endDate,
-            'start_date_attribute_id' => $startDateAttributeId,
-            'start_date_format_id' => $startDateFormatId,
-            'end_date_format_id' => $endDateFormatId,
-            'end_date_attribute_id' => $endDateAttributeId,
-            'content' => $content,
-            'period_id' => $periodId,
-            'update_user_id' => $updateUserId
-        ]);
-
-        $images = [];
-        foreach ($imageData as $image) {
-            $images[] = new EloquentImage([
-                'path' => $image['path'],
-                'description' => $image['description'],
-                'create_user_id' => $updateUserId
-            ]);
-        }
-        $event->images()->delete();
-        $event->images()->saveMany($images);
-
-        foreach ($imageData as $image) {
-            if(Storage::exists(Image::TMP_PATH . '/' . $image['path'])) {
-                Storage::disk()->move(
-                    Image::TMP_PATH . '/' . $image['path'],
-                    Image::PATH . '/' . $image['path']
-                );
-            }
-        }
-
-        $event->catalogs()->sync($catalogIds);
-
-        return $event;
     }
 }

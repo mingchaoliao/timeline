@@ -9,6 +9,8 @@
 namespace App\Timeline\Domain\Services;
 
 
+use App\Events\TimelinePeriodDeleted;
+use App\Events\TimelinePeriodUpdated;
 use App\Timeline\Domain\Collections\PeriodCollection;
 use App\Timeline\Domain\Collections\TypeaheadCollection;
 use App\Timeline\Domain\Models\Period;
@@ -49,7 +51,7 @@ class PeriodService
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToRetrievePeriods();
+            throw TimelineException::ofUnableToRetrievePeriods($e);
         }
     }
 
@@ -64,7 +66,7 @@ class PeriodService
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToRetrievePeriods();
+            throw TimelineException::ofUnableToRetrievePeriods($e);
         }
     }
 
@@ -90,7 +92,7 @@ class PeriodService
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToCreatePeriod();
+            throw TimelineException::ofUnableToCreatePeriod($e);
         }
     }
 
@@ -116,7 +118,7 @@ class PeriodService
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToCreatePeriod();
+            throw TimelineException::ofUnableToCreatePeriod($e);
         }
     }
 
@@ -139,11 +141,15 @@ class PeriodService
                 throw TimelineException::ofUnauthorizedToUpdatePeriod($id);
             }
 
-            return $this->periodRepository->update($id, $value, $currentUser->getId());
+            $period = $this->periodRepository->update($id, $value, $currentUser->getId());
+
+            TimelinePeriodUpdated::dispatch($id);
+
+            return $period;
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToUpdatePeriod($id);
+            throw TimelineException::ofUnableToUpdatePeriod($id, $e);
         }
     }
 
@@ -165,11 +171,15 @@ class PeriodService
                 throw TimelineException::ofUnauthorizedToDeletePeriod($id);
             }
 
-            return $this->periodRepository->delete($id);
+            $success = $this->periodRepository->delete($id);
+
+            TimelinePeriodDeleted::dispatch();
+
+            return $success;
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToDeletePeriod($id);
+            throw TimelineException::AofUnableToDeletePeriod($id, $e);
         }
     }
 }

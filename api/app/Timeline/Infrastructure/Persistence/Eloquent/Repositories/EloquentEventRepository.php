@@ -8,7 +8,6 @@
 namespace App\Timeline\Infrastructure\Persistence\Eloquent\Repositories;
 
 use App\Jobs\CleanUnlinkedImages;
-use App\Jobs\GenerateTimeline;
 use App\Jobs\LinkImages;
 use App\Timeline\Domain\Collections\CreateEventRequestCollection;
 use App\Timeline\Domain\Collections\EventCollection;
@@ -16,17 +15,21 @@ use App\Timeline\Domain\Collections\EventIdCollection;
 use App\Timeline\Domain\Collections\ImageCollection;
 use App\Timeline\Domain\Collections\ImageIdCollection;
 use App\Timeline\Domain\Models\Event;
+use App\Timeline\Domain\Models\EventDate;
 use App\Timeline\Domain\Repositories\EventRepository;
 use App\Timeline\Domain\Requests\CreateEventRequest;
 use App\Timeline\Domain\Requests\PageableRequest;
 use App\Timeline\Domain\Requests\UpdateEventRequest;
+use App\Timeline\Domain\ValueObjects\CatalogId;
 use App\Timeline\Domain\ValueObjects\EventId;
+use App\Timeline\Domain\ValueObjects\PeriodId;
 use App\Timeline\Domain\ValueObjects\UserId;
 use App\Timeline\Exceptions\TimelineException;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentEvent;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentImage;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\QueryException;
 
 class EloquentEventRepository implements EventRepository
 {
@@ -47,10 +50,6 @@ class EloquentEventRepository implements EventRepository
      */
     private $dateAttributeRepository;
     /**
-     * @var EloquentDateFormatRepository
-     */
-    private $dateFormatRepository;
-    /**
      * @var EloquentPeriodRepository
      */
     private $periodRepository;
@@ -65,17 +64,15 @@ class EloquentEventRepository implements EventRepository
      * @param EloquentImageRepository $imageRepository
      * @param EloquentCatalogRepository $catalogRepository
      * @param EloquentDateAttributeRepository $dateAttributeRepository
-     * @param EloquentDateFormatRepository $dateFormatRepository
      * @param EloquentPeriodRepository $periodRepository
      * @param ConnectionInterface $dbh
      */
-    public function __construct(EloquentEvent $eventModel, EloquentImageRepository $imageRepository, EloquentCatalogRepository $catalogRepository, EloquentDateAttributeRepository $dateAttributeRepository, EloquentDateFormatRepository $dateFormatRepository, EloquentPeriodRepository $periodRepository, ConnectionInterface $dbh)
+    public function __construct(EloquentEvent $eventModel, EloquentImageRepository $imageRepository, EloquentCatalogRepository $catalogRepository, EloquentDateAttributeRepository $dateAttributeRepository, EloquentPeriodRepository $periodRepository, ConnectionInterface $dbh)
     {
         $this->eventModel = $eventModel;
         $this->imageRepository = $imageRepository;
         $this->catalogRepository = $catalogRepository;
         $this->dateAttributeRepository = $dateAttributeRepository;
-        $this->dateFormatRepository = $dateFormatRepository;
         $this->periodRepository = $periodRepository;
         $this->dbh = $dbh;
     }
@@ -98,6 +95,42 @@ class EloquentEventRepository implements EventRepository
         );
     }
 
+    public function getByPeriodId(PeriodId $id): EventCollection
+    {
+        $events = $this->eventModel
+            ->where('period_id', '=', $id->getValue())
+            ->get();
+
+        return $this->constructEventCollection($events);
+    }
+
+    public function getByCatalogId(CatalogId $id): EventCollection
+    {
+        $events = $this->eventModel
+            ->whereHas('catalogs', '=', $id->getValue())
+            ->get();
+
+        return $this->constructEventCollection($events);
+    }
+
+    public function getAll(): EventCollection
+    {
+        $eloquentCollection = $this->eventModel
+            ->with([
+                'start_date_attribute',
+                'end_date_attribute',
+                'period',
+                'catalogs',
+                'images'
+            ])
+            ->orderBy('start_date', 'asc')
+            ->get();
+
+        $events = $this->constructEventCollection($eloquentCollection);
+
+        return $events;
+    }
+
     public function get(PageableRequest $request): EventCollection
     {
         $count = $this->eventModel->count();
@@ -107,14 +140,12 @@ class EloquentEventRepository implements EventRepository
             'end_date_attribute',
             'period',
             'catalogs',
-            'images',
-            'start_date_format',
-            'end_date_format'
+            'images'
         ]);
 
         $query->offset($request->getOffset());
         $query->limit($request->getPageSize());
-        $query->orderBy('startDate', 'asc');
+        $query->orderBy('start_date', 'asc');
 
         $eloquentCollection = $query->get();
 
@@ -137,9 +168,43 @@ class EloquentEventRepository implements EventRepository
     {
         $eventId = null;
 
-        $this->dbh->transaction(function () use (&$eventId, $request, $createUserId) {
-            $eventId = $this->createHelper($request, $createUserId);
-        });
+        try {
+            $this->dbh->transaction(function () use (&$eventId, $request, $createUserId) {
+                $eventId = $this->createHelper($request, $createUserId);
+            });
+        } catch (QueryException $e) {
+            /** @var \PDOException $pdoException */
+            $pdoException = $e->getPrevious();
+            $errorInfo = $pdoException->errorInfo;
+
+            if ($errorInfo['1'] === 1452) { // integrity constraint violation
+                if (strpos($errorInfo[2], 'events_start_date_attribute_id_foreign') !== false) {
+                    throw TimelineException::ofDateAttributeWithIdDoesNotExist($request->getStartDateAttributeId(), $e);
+                }
+
+                if (strpos($errorInfo[2], 'events_end_date_attribute_id_foreign') !== false) {
+                    throw TimelineException::ofDateAttributeWithIdDoesNotExist($request->getEndDateAttributeId(), $e);
+                }
+
+                if (strpos($errorInfo[2], 'events_period_id_foreign') !== false) {
+                    throw TimelineException::ofPeriodWithIdDoesNotExist($request->getPeriodId(), $e);
+                }
+
+                if (strpos($errorInfo[2], 'events_create_user_id_foreign') !== false) {
+                    throw TimelineException::ofUserWithIdDoesNotExist($createUserId, $e);
+                }
+
+                if (strpos($errorInfo[2], 'events_update_user_id_foreign') !== false) {
+                    throw TimelineException::ofUserWithIdDoesNotExist($createUserId, $e);
+                }
+
+                if (strpos($errorInfo[2], 'catalog_event_catalog_id_foreign') !== false) {
+                    throw TimelineException::ofCatalogDoesNotExist($e);
+                }
+            }
+
+            throw $e;
+        }
 
         $eloquentEvent = $this->eventModel
             ->with([
@@ -147,9 +212,7 @@ class EloquentEventRepository implements EventRepository
                 'end_date_attribute',
                 'period',
                 'catalogs',
-                'images',
-                'start_date_format',
-                'end_date_format'
+                'images'
             ])
             ->find($eventId);
 
@@ -159,8 +222,6 @@ class EloquentEventRepository implements EventRepository
                     $eloquentEvent->getImageCollection()
                 )
         );
-
-        GenerateTimeline::dispatch();
 
         return $this->constructEvent($eloquentEvent);
     }
@@ -190,9 +251,7 @@ class EloquentEventRepository implements EventRepository
                 'end_date_attribute',
                 'period',
                 'catalogs',
-                'images',
-                'start_date_format',
-                'end_date_format'
+                'images'
             ])
             ->findMany($eventIds);
 
@@ -209,7 +268,6 @@ class EloquentEventRepository implements EventRepository
         }
 
         LinkImages::dispatch($linkImages);
-        GenerateTimeline::dispatch();
 
         return $this->constructEventCollection($eloquentEvents);
     }
@@ -234,39 +292,74 @@ class EloquentEventRepository implements EventRepository
             throw TimelineException::ofEventWithIdDoesNotExist($id);
         }
 
-        $this->dbh->transaction(function () use ($eloquentEvent, $request, $id, $updateUserId) {
-            $eloquentEvent->update([
-                'start_date' => $request->getStartDate(),
-                'end_date' => $request->getEndDate(),
-                'start_date_attribute_id' => $request->getStartDateAttributeId(),
-                'start_date_format_id' => $request->getStartDateFormatId(),
-                'end_date_format_id' => $request->getEndDateFormatId(),
-                'end_date_attribute_id' => $request->getEndDateAttributeId(),
-                'content' => $request->getContent(),
-                'period_id' => $request->getPeriodId(),
-                'update_user_id' => $updateUserId->getValue()
-            ]);
+        try {
+            $this->dbh->transaction(function () use ($eloquentEvent, $request, $id, $updateUserId) {
+                $eloquentEvent->update([
+                    'start_date' => $request->getStartDate()->getDate(),
+                    'end_date' => $request->getEndDate() === null ? null : $request->getEndDate()->getDate(),
+                    'start_date_has_month' => $request->getStartDate()->hasMonth() ? 1 : 0,
+                    'start_date_has_day' => $request->getStartDate()->hasDay() ? 1 : 0,
+                    'end_date_has_month' => $request->getEndDate() === null ? 0 : ($request->getEndDate()->hasMonth() ? 1 : 0),
+                    'end_date_has_day' => $request->getEndDate() === null ? 0 : ($request->getEndDate()->hasMonth() ? 1 : 0),
+                    'start_date_attribute_id' => $request->getStartDateAttributeId(),
+                    'end_date_attribute_id' => $request->getEndDateAttributeId(),
+                    'content' => $request->getContent(),
+                    'period_id' => $request->getPeriodId(),
+                    'update_user_id' => $updateUserId->getValue()
+                ]);
 
-            $unneededImages = $eloquentEvent->images()
-                ->whereNotIn('id', $request->getImageIds()->toValueArray())
-                ->get();
+                $unneededImages = $eloquentEvent->images()
+                    ->whereNotIn('id', $request->getImageIds()->toValueArray())
+                    ->get();
 
-            $unneededImages->delete();
+                $unneededImages->delete();
 
-            $existingImages = $eloquentEvent->images()->get();
-            $existingImageIds = $existingImages->map(function (EloquentImage $eloquentImage) {
-                return $eloquentImage->getId();
-            })->toArray();
+                $existingImages = $eloquentEvent->images()->get();
+                $existingImageIds = $existingImages->map(function (EloquentImage $eloquentImage) {
+                    return $eloquentImage->getId();
+                })->toArray();
 
-            $linkImageIds = array_diff($request->getImageIds()->toValueArray(), $existingImageIds);
-            $linkImages = $this->imageRepository->getRawByIds(new ImageIdCollection($linkImageIds));
-            $eloquentEvent->saveMany($linkImages);
-            $eloquentEvent->catalogs()->sync($request->getCatalogIds()->toValueArray());
+                $linkImageIds = array_diff($request->getImageIds()->toValueArray(), $existingImageIds);
+                $linkImages = $this->imageRepository->getRawByIds(new ImageIdCollection($linkImageIds));
+                $eloquentEvent->saveMany($linkImages);
+                $eloquentEvent->catalogs()->sync($request->getCatalogIds()->toValueArray());
 
-            CleanUnlinkedImages::dispatch($unneededImages);
-            LinkImages::dispatch($linkImages);
-            GenerateTimeline::dispatch();
-        });
+                CleanUnlinkedImages::dispatch($unneededImages);
+                LinkImages::dispatch($linkImages);
+            });
+        } catch (QueryException $e) {
+            /** @var \PDOException $pdoException */
+            $pdoException = $e->getPrevious();
+            $errorInfo = $pdoException->errorInfo;
+
+            if ($errorInfo['1'] === 1452) { // integrity constraint violation
+                if (strpos($errorInfo[2], 'events_start_date_attribute_id_foreign') !== false) {
+                    throw TimelineException::ofDateAttributeWithIdDoesNotExist($request->getStartDateAttributeId(), $e);
+                }
+
+                if (strpos($errorInfo[2], 'events_end_date_attribute_id_foreign') !== false) {
+                    throw TimelineException::ofDateAttributeWithIdDoesNotExist($request->getEndDateAttributeId(), $e);
+                }
+
+                if (strpos($errorInfo[2], 'events_period_id_foreign') !== false) {
+                    throw TimelineException::ofPeriodWithIdDoesNotExist($request->getPeriodId(), $e);
+                }
+
+                if (strpos($errorInfo[2], 'events_create_user_id_foreign') !== false) {
+                    throw TimelineException::ofUserWithIdDoesNotExist($updateUserId, $e);
+                }
+
+                if (strpos($errorInfo[2], 'events_update_user_id_foreign') !== false) {
+                    throw TimelineException::ofUserWithIdDoesNotExist($updateUserId, $e);
+                }
+
+                if (strpos($errorInfo[2], 'catalog_event_catalog_id_foreign') !== false) {
+                    throw TimelineException::ofCatalogDoesNotExist($e);
+                }
+            }
+
+            throw $e;
+        }
 
         return $this->constructEvent($this->eventModel->find($id->getValue()));
     }
@@ -278,8 +371,6 @@ class EloquentEventRepository implements EventRepository
         if ($eloquentEvent === null) {
             throw TimelineException::ofEventWithIdDoesNotExist($id);
         }
-
-        GenerateTimeline::dispatch();
 
         return $eloquentEvent->delete();
     }
@@ -298,15 +389,23 @@ class EloquentEventRepository implements EventRepository
                 ->constructDateAttribute($endDateAttribute);
         }
 
-        $startDateFormat = $eloquentEvent->getStartDateFormat();
-        $startDateFormat = $this->dateFormatRepository
-            ->constructDateFormat($startDateFormat);
+        $startDate = new EventDate(
+            $eloquentEvent->getStartDate(),
+            $eloquentEvent->hasStartDateMonth(),
+            $eloquentEvent->hasStartDateDay(),
+            true
+        );
 
-        $endDateFormat = $eloquentEvent->getEndDateFormat();
-        if ($endDateFormat !== null) {
-            $endDateFormat = $this->dateFormatRepository
-                ->constructDateFormat($endDateFormat);
+        $endDate = null;
+        if ($eloquentEvent->getEndDate()) {
+            $endDate = new EventDate(
+                $eloquentEvent->getEndDate(),
+                $eloquentEvent->hasEndDateMonth(),
+                $eloquentEvent->hasEndDateDay(),
+                false
+            );
         }
+
         $period = $eloquentEvent->getPeriod();
         if ($period !== null) {
             $period = $this->periodRepository
@@ -320,12 +419,10 @@ class EloquentEventRepository implements EventRepository
             ->constructImageCollection($eloquentEvent->getImageCollection());
         return new Event(
             new EventId($eloquentEvent->getId()),
-            $eloquentEvent->getStartDate(),
-            $eloquentEvent->getEndDate(),
+            $startDate,
+            $endDate,
             $startDateAttribute,
             $endDateAttribute,
-            $startDateFormat,
-            $endDateFormat,
             $period,
             $catalogCollection,
             $eloquentEvent->getContent(),
@@ -353,14 +450,16 @@ class EloquentEventRepository implements EventRepository
          * @var EloquentEvent $eloquentEvent
          * */
         $eloquentEvent = $this->eventModel->create([
-            'start_date' => $request->getStartDate(),
-            'end_date' => $request->getEndDate(),
-            'start_date_attribute_id' => $request->getStartDateAttributeId()->getValue(),
-            'start_date_format_id' => $request->getStartDateFormatId()->getValue(),
-            'end_date_format_id' => $request->getEndDateFormatId()->getValue(),
-            'end_date_attribute_id' => $request->getEndDateAttributeId()->getValue(),
+            'start_date' => $request->getStartDate()->getDate(),
+            'end_date' => $request->getEndDate() === null ? null : $request->getEndDate()->getDate(),
+            'start_date_has_month' => $request->getStartDate()->hasMonth() ? 1 : 0,
+            'start_date_has_day' => $request->getStartDate()->hasDay() ? 1 : 0,
+            'end_date_has_month' => $request->getEndDate() === null ? 0 : ($request->getEndDate()->hasMonth() ? 1 : 0),
+            'end_date_has_day' => $request->getEndDate() === null ? 0 : ($request->getEndDate()->hasMonth() ? 1 : 0),
+            'start_date_attribute_id' => $request->getStartDateAttributeId() === null ? null : $request->getStartDateAttributeId()->getValue(),
+            'end_date_attribute_id' => $request->getEndDateAttributeId() === null ? null : $request->getEndDateAttributeId()->getValue(),
             'content' => $request->getContent(),
-            'period_id' => $request->getPeriodId(),
+            'period_id' => $request->getPeriodId() === null ? null : $request->getPeriodId()->getValue(),
             'create_user_id' => $createUserId->getValue(),
             'update_user_id' => $createUserId->getValue(),
         ]);

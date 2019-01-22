@@ -21,11 +21,11 @@ class Event extends BaseModel
      */
     private $id;
     /**
-     * @var Carbon
+     * @var EventDate
      */
     private $startDate;
     /**
-     * @var Carbon|null
+     * @var EventDate|null
      */
     private $endDate;
     /**
@@ -36,14 +36,6 @@ class Event extends BaseModel
      * @var DateAttribute|null
      */
     private $endDateAttribute;
-    /**
-     * @var DateFormat
-     */
-    private $startDateFormat;
-    /**
-     * @var DateFormat|null
-     */
-    private $endDateFormat;
     /**
      * @var Period|null
      */
@@ -80,12 +72,10 @@ class Event extends BaseModel
     /**
      * Event constructor.
      * @param EventId $id
-     * @param Carbon $startDate
-     * @param Carbon|null $endDate
+     * @param EventDate $startDate
+     * @param EventDate|null $endDate
      * @param DateAttribute|null $startDateAttribute
      * @param DateAttribute|null $endDateAttribute
-     * @param DateFormat $startDateFormat
-     * @param DateFormat|null $endDateFormat
      * @param Period|null $period
      * @param CatalogCollection $catalogCollection
      * @param string $content
@@ -95,15 +85,13 @@ class Event extends BaseModel
      * @param Carbon $createdAt
      * @param Carbon $updatedAt
      */
-    public function __construct(EventId $id, Carbon $startDate, ?Carbon $endDate, ?DateAttribute $startDateAttribute, ?DateAttribute $endDateAttribute, DateFormat $startDateFormat, ?DateFormat $endDateFormat, ?Period $period, CatalogCollection $catalogCollection, string $content, ImageCollection $imageCollection, UserId $createUserId, UserId $updateUserId, Carbon $createdAt, Carbon $updatedAt)
+    public function __construct(EventId $id, EventDate $startDate, ?EventDate $endDate, ?DateAttribute $startDateAttribute, ?DateAttribute $endDateAttribute, ?Period $period, CatalogCollection $catalogCollection, string $content, ImageCollection $imageCollection, UserId $createUserId, UserId $updateUserId, Carbon $createdAt, Carbon $updatedAt)
     {
         $this->id = $id;
         $this->startDate = $startDate;
         $this->endDate = $endDate;
         $this->startDateAttribute = $startDateAttribute;
         $this->endDateAttribute = $endDateAttribute;
-        $this->startDateFormat = $startDateFormat;
-        $this->endDateFormat = $endDateFormat;
         $this->period = $period;
         $this->catalogCollection = $catalogCollection;
         $this->content = $content;
@@ -123,17 +111,17 @@ class Event extends BaseModel
     }
 
     /**
-     * @return Carbon
+     * @return EventDate
      */
-    public function getStartDate(): Carbon
+    public function getStartDate(): EventDate
     {
         return $this->startDate;
     }
 
     /**
-     * @return Carbon|null
+     * @return EventDate|null
      */
-    public function getEndDate(): ?Carbon
+    public function getEndDate(): ?EventDate
     {
         return $this->endDate;
     }
@@ -152,22 +140,6 @@ class Event extends BaseModel
     public function getEndDateAttribute(): ?DateAttribute
     {
         return $this->endDateAttribute;
-    }
-
-    /**
-     * @return DateFormat
-     */
-    public function getStartDateFormat(): DateFormat
-    {
-        return $this->startDateFormat;
-    }
-
-    /**
-     * @return DateFormat|null
-     */
-    public function getEndDateFormat(): ?DateFormat
-    {
-        return $this->endDateFormat;
     }
 
     /**
@@ -236,13 +208,6 @@ class Event extends BaseModel
 
     public function toArray(): array
     {
-        $startDateFormat = $this->getStartDateFormat();
-        $endDate = $this->getEndDate();
-        $endDateFormat = $this->getEndDateFormat();
-        if ($endDate !== null) {
-            $endDate = $endDate->format($endDateFormat->getPhpFormat());
-        }
-
         $startDateAttribute = $this->getStartDateAttribute();
         if ($startDateAttribute !== null) {
             $startDateAttribute = $startDateAttribute->toArray();
@@ -260,12 +225,10 @@ class Event extends BaseModel
 
         return [
             'id' => $this->getId()->getValue(),
-            'startDate' => $this->getStartDate()->format($startDateFormat->getPhpFormat()),
-            'endDate' => $endDate,
+            'startDate' => $this->getStartDate()->toArray(),
+            'endDate' => $this->getEndDate() === null ? null : $this->getEndDate()->toArray(),
             'startDateAttribute' => $startDateAttribute,
             'endDateAttribute' => $endDateAttribute,
-            'startDateFormat' => $startDateFormat->toArray(),
-            'endDateFormat' => $endDateFormat === null ? null : $endDateFormat->toArray(),
             'period' => $period,
             'catalogCollection' => $this->getCatalogCollection()->toValueArray(),
             'content' => $this->getContent(),
@@ -277,7 +240,7 @@ class Event extends BaseModel
         ];
     }
 
-    public function toEsArray(): array
+    public function toEsBody(): array
     {
         $period = $this->getPeriod();
         if ($period !== null) {
@@ -289,52 +252,43 @@ class Event extends BaseModel
                 return $catalog->getId();
             })->toArray();
 
+        $endDate = $this->getEndDate();
+
+        $startDate = $this->getStartDate();
+
+        if ($endDate === null) {
+            if ($startDate->hasDay()) {
+                $endDate = $startDate->getDate()->copy();
+            } elseif ($startDate->hasMonth()) {
+                $endDate = $startDate->getDate()->copy()->lastOfMonth();
+            } else {
+                $endDate = $startDate->getDate()->copy()->lastOfYear();
+            }
+        } else {
+            $endDate = $endDate->getDate();
+        }
+
         $body = [
             'id' => $this->getId()->getValue(),
-            'startDate' => $this->getStartDate()->format('Y-m-d'),
+            'startDate' => $startDate->getDate()->format('Y-m-d'),
+            'endDate' => $endDate->format('Y-m-d'),
             'period' => $period,
             'catalogs' => $catalogs,
             'content' => $this->getContent()
         ];
 
-        return [
-            'body' => $body,
-            'index' => 'timelines',
-            'type' => 'event',
-            'id' => $this->getId()->getValue(),
-        ];
+        return $body;
     }
 
     public function toTimelineArray(): array
     {
-        $startDate = [];
-        if ($this->getStartDateFormat()->hasYear()) {
-            $startDate['year'] = $this->getStartDate()->year;
-        }
-        if ($this->getStartDateFormat()->hasMonth()) {
-            $startDate['month'] = $this->getStartDate()->month;
-        }
-        if ($this->getStartDateFormat()->hasDay()) {
-            $startDate['day'] = $this->getStartDate()->day;
-        }
-
         $eventsConfig = [
-            'start_date' => $startDate,
+            'start_date' => $this->getStartDate()->toDateArray(),
             'unique_id' => $this->getId()
         ];
 
         if ($this->getEndDate() !== null) {
-            $endDate = [];
-            if ($this->getEndDateFormat()->hasYear()) {
-                $endDate['year'] = $this->getEndDate()->year;
-            }
-            if ($this->getEndDateFormat()->hasMonth()) {
-                $endDate['month'] = $this->getEndDate()->month;
-            }
-            if ($this->getEndDateFormat()->hasDay()) {
-                $endDate['day'] = $this->getEndDate()->day;
-            }
-            $eventsConfig['end_date'] = $endDate;
+            $eventsConfig['end_date'] = $this->getEndDate()->toDateArray();
         }
 
         $text = $this->getContent();

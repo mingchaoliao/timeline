@@ -8,8 +8,6 @@
 
 namespace App\Timeline\Infrastructure\Persistence\Eloquent\Repositories;
 
-
-use App\Jobs\GenerateTimeline;
 use App\Timeline\Domain\Collections\PeriodCollection;
 use App\Timeline\Domain\Collections\TypeaheadCollection;
 use App\Timeline\Domain\Models\Period;
@@ -88,9 +86,9 @@ class EloquentPeriodRepository implements PeriodRepository
             $errorInfo = $pdoException->errorInfo;
 
             if ($errorInfo['1'] === 1062) { // duplicated value
-                throw TimelineException::ofDuplicatedPeriodValue($value);
+                throw TimelineException::ofDuplicatedPeriodValue($value, $e);
             } elseif ($errorInfo['1'] === 1452) { // non-exist user id
-                throw TimelineException::ofUserWithIdDoesNotExist($createUserId);
+                throw TimelineException::ofUserWithIdDoesNotExist($createUserId, $e);
             }
 
             throw $e;
@@ -105,6 +103,16 @@ class EloquentPeriodRepository implements PeriodRepository
      */
     public function bulkCreate(array $values, UserId $createUserId): PeriodCollection
     {
+        $existingPeriods = $this->periodModel
+            ->whereIn('value', $values)
+            ->get();
+
+        $existingValues = $existingPeriods->map(function (EloquentPeriod $model) {
+            return $model->getValue();
+        })
+            ->toArray();
+        $values = array_diff($values, $existingValues);
+
         $collection = new PeriodCollection();
 
         DB::transaction(function () use ($collection, $values, $createUserId) {
@@ -113,7 +121,7 @@ class EloquentPeriodRepository implements PeriodRepository
             }
         });
 
-        return $collection;
+        return $this->constructPeriodCollection($existingPeriods)->merge($collection);
     }
 
     /**
@@ -136,8 +144,6 @@ class EloquentPeriodRepository implements PeriodRepository
                 'value' => $value,
                 'update_user_id' => $updateUserId->getValue()
             ]);
-
-            GenerateTimeline::dispatch();
 
             return $this->constructPeriod($this->periodModel->find($id->getValue()));
         } catch (QueryException $e) {
@@ -167,8 +173,6 @@ class EloquentPeriodRepository implements PeriodRepository
         if ($catalog === null) {
             throw TimelineException::ofPeriodWithIdDoesNotExist($id);
         }
-
-        GenerateTimeline::dispatch();
 
         return $catalog->delete();
     }

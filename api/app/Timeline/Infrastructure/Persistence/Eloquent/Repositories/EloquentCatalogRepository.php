@@ -9,7 +9,6 @@
 namespace App\Timeline\Infrastructure\Persistence\Eloquent\Repositories;
 
 
-use App\Jobs\GenerateTimeline;
 use App\Timeline\Domain\Collections\CatalogCollection;
 use App\Timeline\Domain\Collections\CatalogIdCollection;
 use App\Timeline\Domain\Collections\TypeaheadCollection;
@@ -100,9 +99,9 @@ class EloquentCatalogRepository implements CatalogRepository
             $errorInfo = $pdoException->errorInfo;
 
             if ($errorInfo['1'] === 1062) { // duplicated value
-                throw TimelineException::ofDuplicatedCatalogValue($value);
+                throw TimelineException::ofDuplicatedCatalogValue($value, $e);
             } elseif ($errorInfo['1'] === 1452) { // non-exist user id
-                throw TimelineException::ofUserWithIdDoesNotExist($createUserId);
+                throw TimelineException::ofUserWithIdDoesNotExist($createUserId, $e);
             }
 
             throw $e;
@@ -117,6 +116,16 @@ class EloquentCatalogRepository implements CatalogRepository
      */
     public function bulkCreate(array $values, UserId $createUserId): CatalogCollection
     {
+        $existingCatalogs = $this->catalogModel
+            ->whereIn('value', $values)
+            ->get();
+
+        $existingValues = $existingCatalogs->map(function (EloquentCatalog $model) {
+            return $model->getValue();
+        })
+            ->toArray();
+        $values = array_diff($values, $existingValues);
+
         $collection = new CatalogCollection();
 
         DB::transaction(function () use ($collection, $values, $createUserId) {
@@ -125,7 +134,7 @@ class EloquentCatalogRepository implements CatalogRepository
             }
         });
 
-        return $collection;
+        return $this->constructCatalogCollection($existingCatalogs)->merge($collection);
     }
 
     /**
@@ -149,8 +158,6 @@ class EloquentCatalogRepository implements CatalogRepository
                 'update_user_id' => $updateUserId->getValue()
             ]);
 
-            GenerateTimeline::dispatch();
-
             return $this->constructCatalog($this->catalogModel->find($id->getValue()));
         } catch (QueryException $e) {
             /** @var \PDOException $pdoException */
@@ -158,9 +165,9 @@ class EloquentCatalogRepository implements CatalogRepository
             $errorInfo = $pdoException->errorInfo;
 
             if ($errorInfo['1'] === 1062) { // duplicated value
-                throw TimelineException::ofDuplicatedCatalogValue($value);
+                throw TimelineException::ofDuplicatedCatalogValue($value, $e);
             } elseif ($errorInfo['1'] === 1452) { // non-exist user id
-                throw TimelineException::ofUserWithIdDoesNotExist($updateUserId);
+                throw TimelineException::ofUserWithIdDoesNotExist($updateUserId, $e);
             }
 
             throw $e;
@@ -179,8 +186,6 @@ class EloquentCatalogRepository implements CatalogRepository
         if ($catalog === null) {
             throw TimelineException::ofCatalogWithIdDoesNotExist($id);
         }
-
-        GenerateTimeline::dispatch();
 
         return $catalog->delete();
     }

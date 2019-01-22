@@ -130,7 +130,7 @@ class EloquentUserRepository implements UserRepository
             $errorInfo = $pdoException->errorInfo;
 
             if ($errorInfo['1'] === 1062) { // duplicated value
-                throw TimelineException::ofDuplicatedUserEmail($email);
+                throw TimelineException::ofDuplicatedUserEmail($email, $e);
             }
 
             throw $e;

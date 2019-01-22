@@ -55,7 +55,7 @@ class UserService
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToRegister();
+            throw TimelineException::ofUnableToRegister($e);
         }
     }
 
@@ -72,7 +72,7 @@ class UserService
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToLogin();
+            throw TimelineException::ofUnableToLogin($e);
         }
     }
 
@@ -87,7 +87,7 @@ class UserService
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToRetrieveCurrentUser();
+            throw TimelineException::ofUnableToRetrieveCurrentUser($e);
         }
     }
 
@@ -112,7 +112,7 @@ class UserService
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToRetrieveUsers();
+            throw TimelineException::ofUnableToRetrieveUsers($e);
         }
     }
 
@@ -160,7 +160,7 @@ class UserService
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToUpdateUserProfile();
+            throw TimelineException::ofUnableToUpdateUserProfile($e);
         }
     }
 }

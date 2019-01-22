@@ -9,6 +9,8 @@
 namespace App\Timeline\Domain\ValueObjects;
 
 
+use App\Timeline\Exceptions\TimelineException;
+
 abstract class SingleInteger
 {
     /**

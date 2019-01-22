@@ -9,15 +9,11 @@
 namespace App\Timeline\Domain\Repositories;
 
 
-use App\Timeline\Domain\Collections\ImageIdCollection;
-use App\Timeline\Domain\Models\TemporaryImage;
-use App\Timeline\Domain\ValueObjects\UserId;
-use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentImage;
-use Illuminate\Database\Eloquent\Collection;
+use App\Timeline\Domain\Collections\ImageCollection;
 
 interface ImageRepository
 {
-    public function getRawByIds(ImageIdCollection $ids): Collection;
+    public function getUnusedImagesFor(int $days): ImageCollection;
 
-    public function createRaw(TemporaryImage $tempImage, UserId $createUserId): EloquentImage;
+    public function deleteImages(ImageCollection $images): void;
 }

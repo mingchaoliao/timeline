@@ -10,8 +10,8 @@ namespace App\Timeline\Domain\Requests;
 
 use App\Timeline\Domain\Collections\CatalogIdCollection;
 use App\Timeline\Domain\Collections\ImageIdCollection;
+use App\Timeline\Domain\Models\EventDate;
 use App\Timeline\Domain\ValueObjects\DateAttributeId;
-use App\Timeline\Domain\ValueObjects\DateFormatId;
 use App\Timeline\Domain\ValueObjects\PeriodId;
 use App\Timeline\Exceptions\TimelineException;
 use Carbon\Carbon;
@@ -19,25 +19,17 @@ use Carbon\Carbon;
 class CreateEventRequest
 {
     /**
-     * @var Carbon
+     * @var EventDate
      */
     private $startDate;
-    /**
-     * @var DateFormatId
-     */
-    private $startDateFormatId;
     /**
      * @var DateAttributeId|null
      */
     private $startDateAttributeId;
     /**
-     * @var Carbon|null
+     * @var EventDate|null
      */
     private $endDate;
-    /**
-     * @var DateFormatId|null
-     */
-    private $endDateFormatId;
     /**
      * @var DateAttributeId|null
      */
@@ -61,24 +53,20 @@ class CreateEventRequest
 
     /**
      * CreateEventRequest constructor.
-     * @param Carbon $startDate
-     * @param DateFormatId $startDateFormatId
+     * @param EventDate $startDate
      * @param DateAttributeId|null $startDateAttributeId
-     * @param Carbon|null $endDate
-     * @param DateFormatId|null $endDateFormatId
+     * @param EventDate|null $endDate
      * @param DateAttributeId|null $endDateAttributeId
      * @param string $content
      * @param PeriodId|null $periodId
      * @param CatalogIdCollection $catalogIds
      * @param ImageIdCollection $imageIds
      */
-    public function __construct(Carbon $startDate, DateFormatId $startDateFormatId, ?DateAttributeId $startDateAttributeId, ?Carbon $endDate, ?DateFormatId $endDateFormatId, ?DateAttributeId $endDateAttributeId, string $content, ?PeriodId $periodId, CatalogIdCollection $catalogIds, ImageIdCollection $imageIds)
+    public function __construct(EventDate $startDate, ?DateAttributeId $startDateAttributeId, ?EventDate $endDate, ?DateAttributeId $endDateAttributeId, string $content, ?PeriodId $periodId, CatalogIdCollection $catalogIds, ImageIdCollection $imageIds)
     {
         $this->startDate = $startDate;
-        $this->startDateFormatId = $startDateFormatId;
         $this->startDateAttributeId = $startDateAttributeId;
         $this->endDate = $endDate;
-        $this->endDateFormatId = $endDateFormatId;
         $this->endDateAttributeId = $endDateAttributeId;
         $this->content = $content;
         $this->periodId = $periodId;
@@ -86,26 +74,50 @@ class CreateEventRequest
         $this->imageIds = $imageIds;
     }
 
+    /**
+     * @param array $data
+     * @return CreateEventRequest
+     * @throws TimelineException
+     */
     public static function fromArray(array $data): self {
         $startDate = $data['startDate'] ?? null;
         $startDateAttributeId = $data['startDateAttributeId'] ?? null;
-        $startDateFormatId = $data['startDateFormatId'] ?? null;
         $endDate = $data['endDate'] ?? null;
         $endDateAttributeId = $data['endDateAttributeId'] ?? null;
-        $endDateFormatId = $data['endDateFormatId'] ?? null;
         $periodId = $data['periodId'] ?? null;
-        $catalogs = $data['catalogs'] ?? null;
-        $content = $data['content'] ?? null;
-        $images = $data['images'] ?? null;
+        $catalogs = $data['catalogIds'] ?? null;
+        $content = $data['content'] ?? '';
+        $images = $data['imageIds'] ?? null;
 
         // start date must be provided
         if ($startDate === null) {
             throw TimelineException::ofStartDateIsRequired();
         }
 
-        // start date format must be provided
-        if ($startDateFormatId === null) {
-            throw TimelineException::ofStartDateFormatIdIsRequired();
+        $startDate = EventDate::createFromArray($startDate);
+
+        if($startDate->hasMonth() && $startDateAttributeId !== null) {
+            throw TimelineException::ofStartDateAttributeShouldNotBeSet();
+        }
+
+        if($endDate !== null) {
+            $endDate = EventDate::createFromArray($endDate);
+
+            if($endDate->hasMonth() && $endDateAttributeId !== null) {
+                throw TimelineException::ofEndDateAttributeShouldNotBeSet();
+            }
+        }
+
+        if($startDateAttributeId !== null) {
+            $startDateAttributeId = new DateAttributeId($startDateAttributeId);
+        }
+
+        if($endDateAttributeId !== null) {
+            $endDateAttributeId = new DateAttributeId($endDateAttributeId);
+        }
+
+        if($periodId !== null) {
+            $periodId = new PeriodId($periodId);
         }
 
         $catalogIds = new CatalogIdCollection();
@@ -120,53 +132,24 @@ class CreateEventRequest
             $imageIds = ImageIdCollection::fromValueArray(array_unique($images));
         }
 
-
-
-        try {
-            $startDate = Carbon::createFromFormat($startDatePhpFormat, $startDate);
-            if (!$startDateFormat->hasMonth() && !$startDateFormat->hasDay()) {
-                $startDate->firstOfYear();
-            } elseif (!$startDateFormat->hasDay()) {
-                $startDate->firstOfMonth();
-            }
-            $startDate->setTime(0, 0, 0);
-        } catch (\InvalidArgumentException $e) {
-            throw new BadRequestHttpException('Invalid startDate');
-        }
-// start date attribute should only be set when it is allowed
-        if (!$isStartDateAttributeAllowed && $startDateAttributeId !== null) {
-            throw new BadRequestHttpException('startDateAttributeId is not allowed here');
-        }
-
-        if ($startDateAttributeId !== null) {
-            try {
-                $this->dateAttributeRepository->getById($startDateAttributeId);
-            } catch (DateAttributeNotFoundException $e) {
-                throw new BadRequestHttpException('Invalid startDateAttributeId');
-            }
-        }
-
-        // endDateFormatId must be provided if endDate is provided
-        if ($endDate !== null && $endDateFormatId === null) {
-            throw new BadRequestHttpException('Missing endDateFormatId');
-        }
-
+        return new static(
+            $startDate,
+            $startDateAttributeId,
+            $endDate,
+            $endDateAttributeId,
+            $content,
+            $periodId,
+            $catalogIds,
+            $imageIds
+        );
     }
 
     /**
-     * @return Carbon
+     * @return EventDate
      */
-    public function getStartDate(): Carbon
+    public function getStartDate(): EventDate
     {
         return $this->startDate;
-    }
-
-    /**
-     * @return DateFormatId
-     */
-    public function getStartDateFormatId(): DateFormatId
-    {
-        return $this->startDateFormatId;
     }
 
     /**
@@ -178,19 +161,11 @@ class CreateEventRequest
     }
 
     /**
-     * @return Carbon|null
+     * @return EventDate|null
      */
-    public function getEndDate(): ?Carbon
+    public function getEndDate(): ?EventDate
     {
         return $this->endDate;
-    }
-
-    /**
-     * @return DateFormatId|null
-     */
-    public function getEndDateFormatId(): ?DateFormatId
-    {
-        return $this->endDateFormatId;
     }
 
     /**

@@ -9,15 +9,23 @@
 namespace App\Timeline\Domain\Services;
 
 
+use App\Events\TimelineEventCreated;
+use App\Events\TimelineEventDeleted;
+use App\Events\TimelineEventsCreated;
+use App\Events\TimelineEventUpdated;
 use App\Timeline\Domain\Collections\CreateEventRequestCollection;
 use App\Timeline\Domain\Collections\EventCollection;
 use App\Timeline\Domain\Collections\EventIdCollection;
 use App\Timeline\Domain\Models\Event;
 use App\Timeline\Domain\Repositories\EventRepository;
+use App\Timeline\Domain\Repositories\SearchEventRepository;
 use App\Timeline\Domain\Requests\CreateEventRequest;
 use App\Timeline\Domain\Requests\PageableRequest;
+use App\Timeline\Domain\Requests\SearchEventRequest;
 use App\Timeline\Domain\Requests\UpdateEventRequest;
+use App\Timeline\Domain\ValueObjects\CatalogId;
 use App\Timeline\Domain\ValueObjects\EventId;
+use App\Timeline\Domain\ValueObjects\PeriodId;
 use App\Timeline\Exceptions\TimelineException;
 
 class EventService
@@ -27,6 +35,10 @@ class EventService
      */
     private $eventRepository;
     /**
+     * @var SearchEventRepository
+     */
+    private $searchRepository;
+    /**
      * @var UserService
      */
     private $userService;
@@ -34,11 +46,13 @@ class EventService
     /**
      * EventService constructor.
      * @param EventRepository $eventRepository
+     * @param SearchEventRepository $searchRepository
      * @param UserService $userService
      */
-    public function __construct(EventRepository $eventRepository, UserService $userService)
+    public function __construct(EventRepository $eventRepository, SearchEventRepository $searchRepository, UserService $userService)
     {
         $this->eventRepository = $eventRepository;
+        $this->searchRepository = $searchRepository;
         $this->userService = $userService;
     }
 
@@ -55,6 +69,38 @@ class EventService
             throw $e;
         } catch (\Exception $e) {
             throw TimelineException::ofUnableToRetrieveEventById($id);
+        }
+    }
+
+    public function getByPeriodId(PeriodId $id): EventCollection
+    {
+        return $this->eventRepository->getByPeriodId($id);
+    }
+
+    public function getByCatalogId(CatalogId $id): EventCollection
+    {
+        return $this->eventRepository->getByCatalogId($id);
+    }
+
+    /**
+     * @param SearchEventRequest $request
+     * @return EventCollection
+     * @throws TimelineException
+     */
+    public function search(SearchEventRequest $request): EventCollection
+    {
+        try {
+            $eventIds = $this->searchRepository->search($request);
+
+            $events = $this->eventRepository->getByIds($eventIds);
+
+            $events->setCount($eventIds->getCount());
+
+            return $events;
+        } catch (TimelineException $e) {
+            throw $e;
+        } catch (\Exception $e) {
+            throw TimelineException::ofUnableToSearchEvents();
         }
     }
 
@@ -86,7 +132,7 @@ class EventService
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToRetrieveEvents();
+            throw TimelineException::ofUnableToRetrieveEvents($e);
         }
     }
 
@@ -108,11 +154,15 @@ class EventService
                 throw TimelineException::ofUnauthorizedToCreateEvent();
             }
 
-            return $this->eventRepository->create($request, $currentUser->getId());
+            $event = $this->eventRepository->create($request, $currentUser->getId());
+
+            TimelineEventCreated::dispatch($event);
+
+            return $event;
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToCreateEvent();
+            throw TimelineException::ofUnableToCreateEvent($e);
         }
     }
 
@@ -134,11 +184,15 @@ class EventService
                 throw TimelineException::ofUnauthorizedToCreateEvent();
             }
 
-            return $this->eventRepository->bulkCreate($requests, $currentUser->getId());
+            $events = $this->eventRepository->bulkCreate($requests, $currentUser->getId());
+
+            TimelineEventsCreated::dispatch($events);
+
+            return $events;
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToCreateEvent();
+            throw TimelineException::ofUnableToCreateEvent($e);
         }
     }
 
@@ -161,15 +215,19 @@ class EventService
                 throw TimelineException::ofUnauthorizedToUpdateEvent($id);
             }
 
-            return $this->eventRepository->update(
+            $event = $this->eventRepository->update(
                 $id,
                 $request,
                 $currentUser->getId()
             );
+
+            TimelineEventUpdated::dispatch($event);
+
+            return $event;
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToUpdateEvent($id);
+            throw TimelineException::ofUnableToUpdateEvent($id, $e);
         }
     }
 
@@ -191,11 +249,36 @@ class EventService
                 throw TimelineException::ofUnauthorizedToDeleteEvent($id);
             }
 
-            return $this->eventRepository->delete($id);
+            $success = $this->eventRepository->delete($id);
+
+            TimelineEventDeleted::dispatch($id);
+
+            return $success;
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToDeleteEvent($id);
+            throw TimelineException::ofUnableToDeleteEvent($id, $e);
         }
+    }
+
+    public function index(Event $event): void
+    {
+        $this->searchRepository->index($event);
+    }
+
+    public function indexAll(): void
+    {
+        $events = $this->eventRepository->getAll();
+        $this->bulkIndex($events);
+    }
+
+    public function bulkIndex(EventCollection $events): void
+    {
+        $this->searchRepository->bulkIndex($events);
+    }
+
+    public function deleteDocument(EventId $eventId): void
+    {
+        $this->searchRepository->deleteDocument($eventId);
     }
 }

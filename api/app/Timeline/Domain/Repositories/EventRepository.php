@@ -16,7 +16,9 @@ use App\Timeline\Domain\Models\Event;
 use App\Timeline\Domain\Requests\CreateEventRequest;
 use App\Timeline\Domain\Requests\PageableRequest;
 use App\Timeline\Domain\Requests\UpdateEventRequest;
+use App\Timeline\Domain\ValueObjects\CatalogId;
 use App\Timeline\Domain\ValueObjects\EventId;
+use App\Timeline\Domain\ValueObjects\PeriodId;
 use App\Timeline\Domain\ValueObjects\UserId;
 
 interface EventRepository
@@ -24,6 +26,12 @@ interface EventRepository
     public function getById(EventId $id): Event;
 
     public function getByIds(EventIdCollection $ids): EventCollection;
+
+    public function getByPeriodId(PeriodId $id): EventCollection;
+
+    public function getByCatalogId(CatalogId $id): EventCollection;
+
+    public function getAll(): EventCollection;
 
     public function get(PageableRequest $request): EventCollection;
 

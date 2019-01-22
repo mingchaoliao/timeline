@@ -11,15 +11,13 @@ namespace App\Timeline\Infrastructure\Persistence\Eloquent\Repositories;
 use App\Timeline\Domain\Collections\ImageCollection;
 use App\Timeline\Domain\Collections\ImageIdCollection;
 use App\Timeline\Domain\Models\Image;
-use App\Timeline\Domain\Models\TemporaryImage;
 use App\Timeline\Domain\Repositories\ImageRepository;
 use App\Timeline\Domain\ValueObjects\ImageId;
 use App\Timeline\Domain\ValueObjects\UserId;
-use App\Timeline\Exceptions\TimelineException;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentImage;
-use Illuminate\Contracts\Filesystem\Filesystem;
+use Carbon\Carbon;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\QueryException;
 
 class EloquentImageRepository implements ImageRepository
 {
@@ -29,53 +27,19 @@ class EloquentImageRepository implements ImageRepository
     private $imageModel;
 
     /**
-     * @var Filesystem
+     * @var ConnectionInterface
      */
-    private $fs;
+    private $connection;
 
     /**
      * EloquentImageRepository constructor.
      * @param EloquentImage $imageModel
+     * @param ConnectionInterface $connection
      */
-    public function __construct(EloquentImage $imageModel)
+    public function __construct(EloquentImage $imageModel, ConnectionInterface $connection)
     {
         $this->imageModel = $imageModel;
-    }
-
-    /**
-     * @param TemporaryImage $tempImage
-     * @param UserId $createUserId
-     * @return EloquentImage
-     * @throws TimelineException
-     */
-    public function createRaw(TemporaryImage $tempImage, UserId $createUserId): EloquentImage
-    {
-        try {
-            if (!$this->fs->exists(Image::TMP_PATH . '/' . $tempImage->getPath())) {
-                throw TimelineException::ofTemporaryImagePathDoesNotExist($tempImage->getPath());
-            }
-
-            $eloquentImage = $this->imageModel->create([
-                'path' => $tempImage->getPath(),
-                'description' => $tempImage->getDescription(),
-                'create_user_id' => $createUserId->getValue(),
-                'update_user_id' => $createUserId->getValue()
-            ]);
-
-            return $eloquentImage;
-        } catch (QueryException $e) {
-            /** @var \PDOException $pdoException */
-            $pdoException = $e->getPrevious();
-            $errorInfo = $pdoException->errorInfo;
-
-            if ($errorInfo['1'] === 1062) { // duplicated value
-                throw TimelineException::ofDuplicatedTemporaryImagePath($tempImage->getPath());
-            } elseif ($errorInfo['1'] === 1452) { // non-exist user id
-                throw TimelineException::ofUserWithIdDoesNotExist($createUserId);
-            }
-
-            throw $e;
-        }
+        $this->connection = $connection;
     }
 
     public function constructImage(EloquentImage $eloquentImage): Image
@@ -102,8 +66,32 @@ class EloquentImageRepository implements ImageRepository
 
     public function getRawByIds(ImageIdCollection $ids): Collection
     {
-        return $this->constructImageCollection(
-            $this->catalogModel->findMany($ids->toValueArray())
-        );
+        return $this->imageModel->findMany($ids->toValueArray());
+    }
+
+    public function getUnusedImagesFor(int $days): ImageCollection
+    {
+        $eloquentImages = $this->imageModel
+            ->whereNull('event_id')
+            ->where('updatedAt', '<', Carbon::now()->subDays($days))
+            ->get();
+
+        return $this->constructImageCollection($eloquentImages);
+    }
+
+    public function deleteImages(ImageCollection $images): void
+    {
+        $ids = new ImageIdCollection($images->map(function(Image $image) {
+            return $image->getId();
+        })->toArray());
+
+        $this->connection->transaction(function () use ($ids) {
+            $chunks = $ids->chunk(100);
+
+            /** @var ImageIdCollection $chunk */
+            foreach ($chunks as $chunk) {
+                $this->imageModel->findMany($chunk->toValueArray())->get()->delete();
+            }
+        });
     }
 }

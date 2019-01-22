@@ -3,11 +3,12 @@
 namespace App\Jobs;
 
 use App\Timeline\Domain\Collections\ImageCollection;
+use App\Timeline\Domain\Services\ImageService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
 class LinkImages implements ShouldQueue
 {
@@ -19,8 +20,7 @@ class LinkImages implements ShouldQueue
     private $images;
 
     /**
-     * Create a new job instance.
-     *
+     * LinkImages constructor.
      * @param ImageCollection $images
      */
     public function __construct(ImageCollection $images)
@@ -31,10 +31,11 @@ class LinkImages implements ShouldQueue
     /**
      * Execute the job.
      *
+     * @param ImageService $imageService
      * @return void
      */
-    public function handle()
+    public function handle(ImageService $imageService)
     {
-        //
+        $imageService->publishImages($this->images);
     }
 }

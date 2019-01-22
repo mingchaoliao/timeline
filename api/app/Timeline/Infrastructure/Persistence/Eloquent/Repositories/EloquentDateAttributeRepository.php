@@ -86,9 +86,9 @@ class EloquentDateAttributeRepository implements DateAttributeRepository
             $errorInfo = $pdoException->errorInfo;
 
             if ($errorInfo['1'] === 1062) { // duplicated value
-                throw TimelineException::ofDuplicatedDateAttributeValue($value);
+                throw TimelineException::ofDuplicatedDateAttributeValue($value, $e);
             } elseif ($errorInfo['1'] === 1452) { // non-exist user id
-                throw TimelineException::ofUserWithIdDoesNotExist($createUserId);
+                throw TimelineException::ofUserWithIdDoesNotExist($createUserId, $e);
             }
 
             throw $e;
@@ -103,6 +103,16 @@ class EloquentDateAttributeRepository implements DateAttributeRepository
      */
     public function bulkCreate(array $values, UserId $createUserId): DateAttributeCollection
     {
+        $existingDateAttributes = $this->dateAttributeModel
+            ->whereIn('value', $values)
+            ->get();
+
+        $existingValues = $existingDateAttributes->map(function (EloquentDateAttribute $model) {
+            return $model->getValue();
+        })
+            ->toArray();
+        $values = array_diff($values, $existingValues);
+
         $collection = new DateAttributeCollection();
 
         DB::transaction(function () use ($collection, $values, $createUserId) {
@@ -111,7 +121,7 @@ class EloquentDateAttributeRepository implements DateAttributeRepository
             }
         });
 
-        return $collection;
+        return $this->constructDateAttributeCollection($existingDateAttributes)->merge($collection);
     }
 
     /**
@@ -142,9 +152,9 @@ class EloquentDateAttributeRepository implements DateAttributeRepository
             $errorInfo = $pdoException->errorInfo;
 
             if ($errorInfo['1'] === 1062) { // duplicated value
-                throw TimelineException::ofDuplicatedDateAttributeValue($value);
+                throw TimelineException::ofDuplicatedDateAttributeValue($value, $e);
             } elseif ($errorInfo['1'] === 1452) { // non-exist user id
-                throw TimelineException::ofUserWithIdDoesNotExist($updateUserId);
+                throw TimelineException::ofUserWithIdDoesNotExist($updateUserId, $e);
             }
 
             throw $e;

@@ -3,25 +3,25 @@
 namespace App\Jobs;
 
 use App\Timeline\Domain\Collections\ImageCollection;
+use App\Timeline\Domain\Services\ImageService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
 class CleanUnlinkedImages implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     /**
-     * @var ImageCollection
+     * @var ImageCollection|null
      */
     private $images;
 
     /**
-     * Create a new job instance.
-     *
-     * @param ImageCollection $images
+     * CleanUnlinkedImages constructor.
+     * @param ImageCollection|null $images
      */
     public function __construct(ImageCollection $images = null)
     {
@@ -31,10 +31,15 @@ class CleanUnlinkedImages implements ShouldQueue
     /**
      * Execute the job.
      *
+     * @param ImageService $imageServices
      * @return void
      */
-    public function handle()
+    public function handle(ImageService $imageServices)
     {
-        //
+        if ($this->images === null) {
+            $imageServices->cleanUnusedImagesFor(1);
+        } else {
+            $imageServices->deletePublishedImages($this->images);
+        }
     }
 }
