@@ -1,4 +1,4 @@
-FROM php:7.2.13-fpm-alpine3.8
+FROM php:7.2.13-cli-alpine3.8
 
 # Configure PHP
 
@@ -39,5 +39,4 @@ RUN mkdir -p /apidist/storage/framework/views
 
 #RUN composer install --prefer-source --prefer-dist --no-dev --optimize-autoloader --no-interaction
 RUN composer install
-
-CMD ["php", "artisan", "horizon"]
+RUN ln -sf /apidist/storage/app/public /apidist/public/storage

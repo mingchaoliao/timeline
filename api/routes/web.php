@@ -12,26 +12,22 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('horizon.index');
+});
+
+Route::get('/home', function () {
+    return redirect()->route('horizon.index');
 });
 
 Route::get('/admin/image/{path}', function ($path) {
     $image = null;
-    if(Storage::exists(\App\Timeline\Domain\Models\Image::TMP_PATH . '/' . $path)) {
+    if (Storage::exists(\App\Timeline\Domain\Models\Image::TMP_PATH . '/' . $path)) {
         $image = Storage::get(\App\Timeline\Domain\Models\Image::TMP_PATH . '/' . $path);
     }
-    if(Storage::exists(\App\Timeline\Domain\Models\Image::PATH . '/' . $path)) {
+    if (Storage::exists(\App\Timeline\Domain\Models\Image::PATH . '/' . $path)) {
         $image = Storage::get(\App\Timeline\Domain\Models\Image::PATH . '/' . $path);
     }
     return \Intervention\Image\Facades\Image::make($image)->response();
 });
 
-Route::get('/image/{path}', function ($path) {
-    return \Intervention\Image\Facades\Image::make(
-        \Illuminate\Support\Facades\Storage::get(
-            \App\Timeline\Domain\Models\Image::PATH . '/' . $path
-        )
-    )->response();
-});
-
-Route::get('/home', 'HomeController@index')->name('home');
+Auth::routes();

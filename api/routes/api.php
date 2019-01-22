@@ -18,8 +18,6 @@ Route::get('/event/{id}', 'EventController@getById');
 
 Route::get('/dateAttribute/typeahead', 'DateAttributeController@getTypeahead');
 
-Route::get('/dateFormat', 'DateFormatController@getAll');
-
 Route::get('/catalog/typeahead', 'CatalogController@getTypeahead');
 
 Route::get('/period/typeahead', 'PeriodController@getTypeahead');

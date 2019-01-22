@@ -102,6 +102,7 @@ class EloquentUserRepository implements UserRepository
      * @param bool $isAdmin
      * @param bool $isEditor
      * @return User
+     * @throws TimelineException
      */
     public function create(
         string $name,

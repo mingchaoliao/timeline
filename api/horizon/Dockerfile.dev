@@ -1,4 +1,4 @@
-FROM php:7.2.13-fpm-alpine3.8
+FROM php:7.2.13-cli-alpine3.8
 
 # Configure PHP
 
@@ -24,4 +24,4 @@ RUN curl -sS https://getcomposer.org/installer | php \
 WORKDIR /apidist
 COPY . /apidist
 
-RUN ln -sf /apidist/storage/app/public /apidist/public/storage
+CMD ["php", "artisan", "horizon"]
