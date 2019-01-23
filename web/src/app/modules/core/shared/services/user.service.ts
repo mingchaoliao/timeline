@@ -44,7 +44,7 @@ export class UserService {
 
     public grantOrRevokeAdminPrivilege(id: number, isAdmin: boolean): Observable<boolean> {
         return new Observable<boolean>(observer => {
-            this.httpService.put(Url.grantOrRevokeAdminPrivilege(), {}, {
+            this.httpService.put(Url.updateUser(id), {}, {
                 id: id,
                 isAdmin: isAdmin
             }).subscribe(
@@ -86,7 +86,7 @@ export class UserService {
                     responseBody => {
                         try {
                             UserService.currentUser = User.fromJson(responseBody);
-                            localStorage.setItem('access_token', responseBody['accessToken']);
+                            localStorage.setItem('access_token', responseBody['token']);
                             observer.next(UserService.currentUser);
                         } catch (e) {
                             observer.error(e);

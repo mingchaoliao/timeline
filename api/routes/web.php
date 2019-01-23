@@ -19,15 +19,13 @@ Route::get('/home', function () {
     return redirect()->route('horizon.index');
 });
 
-Route::get('/admin/image/{path}', function ($path) {
+Route::get('/admin/images/{path}', function ($path) {
     $image = null;
     if (Storage::exists(\App\Timeline\Domain\Models\Image::TMP_PATH . '/' . $path)) {
         $image = Storage::get(\App\Timeline\Domain\Models\Image::TMP_PATH . '/' . $path);
+        return \Intervention\Image\Facades\Image::make($image)->response();
     }
-    if (Storage::exists(\App\Timeline\Domain\Models\Image::PATH . '/' . $path)) {
-        $image = Storage::get(\App\Timeline\Domain\Models\Image::PATH . '/' . $path);
-    }
-    return \Intervention\Image\Facades\Image::make($image)->response();
+    return response()->json(false, 404);
 });
 
 Auth::routes();

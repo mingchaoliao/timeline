@@ -1,7 +1,7 @@
 <div class="row">
   <div class="col-12" style="padding: 0 15px 0 30px;">
     <div class="col-12" style="border: 1px solid #DDDDDD; padding-top: 15px; padding-bottom: 15px; margin-top: 15px;"
-         *ngFor="let i of images; let index = index;">
+         *ngFor="let image of images; let index = index;">
       <div class="row">
         <div class="col">
           <div class="form-group">
@@ -15,13 +15,13 @@
               <ng-container i18n="description">Description</ng-container>
             </label>
             <input class="form-control" type="text" id="imageDescription{{index}}"
-                   (change)="changeDescription($event, index)" value="{{images[index].description}}">
+                   (change)="changeDescription($event, index)" value="{{image ? image.description : ''}}">
           </div>
           <button class="btn btn-outline-danger btn-sm" (click)="onDelete(index)">Delete</button>
-          <span class='ml-2' style="color: #3c763d;">{{ images[index].uploadStatus }}</span>
+          <span class='ml-2' style="color: #3c763d;" *ngIf="imageUploadStatus[index]">{{ imageUploadStatus[index] }}</span>
         </div>
-        <div class="col" *ngIf="images[index].path">
-          <img style="max-width: 100%;" src="{{getImageUrl(images[index].path)}}" alt="image">
+        <div class="col" *ngIf="image">
+          <img style="max-width: 100%;" src="{{getImageUrl(image)}}" alt="image">
         </div>
       </div>
     </div>

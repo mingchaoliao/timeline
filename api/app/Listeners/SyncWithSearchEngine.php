@@ -16,42 +16,46 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 class SyncWithSearchEngine implements ShouldQueue
 {
     /**
+     * @var EventService
+     */
+    private $eventService;
+
+    /**
      * Create the event listener.
      *
-     * @return void
+     * @param EventService $eventService
      */
-    public function __construct()
+    public function __construct(EventService $eventService)
     {
-        //
+        $this->eventService = $eventService;
     }
 
     /**
      * Handle the event.
      *
      * @param  object $event
-     * @param EventService $eventService
      * @return void
      */
-    public function handle($event, EventService $eventService)
+    public function handle($event)
     {
         if ($event instanceof TimelineEventsCreated) {
-            $eventService->bulkIndex($event->getEvents());
+            $this->eventService->bulkIndex($event->getEvents());
         } elseif ($event instanceof TimelineEventUpdated) {
-            $eventService->index($event->getEvent());
+            $this->eventService->index($event->getEvent());
         } elseif ($event instanceof TimelineEventCreated) {
-            $eventService->index($event->getEvent());
+            $this->eventService->index($event->getEvent());
         } elseif ($event instanceof TimelineEventDeleted) {
-            $eventService->deleteDocument($event->getEventId());
+            $this->eventService->deleteDocument($event->getEventId());
         } elseif ($event instanceof TimelinePeriodUpdated) {
-            $events = $eventService->getByPeriodId($event->getPeriodId());
-            $eventService->bulkIndex($events);
+            $events = $this->eventService->getByPeriodId($event->getPeriodId());
+            $this->eventService->bulkIndex($events);
         } elseif ($event instanceof TimelinePeriodDeleted) {
-            $eventService->indexAll();
+            $this->eventService->indexAll();
         } elseif ($event instanceof TimelineCatalogUpdated) {
-            $events = $eventService->getByCatalogId($event->getCatalogId());
-            $eventService->bulkIndex($events);
+            $events = $this->eventService->getByCatalogId($event->getCatalogId());
+            $this->eventService->bulkIndex($events);
         } elseif ($event instanceof TimelineCatalogDeleted) {
-            $eventService->indexAll();
+            $this->eventService->indexAll();
         }
     }
 }

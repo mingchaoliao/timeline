@@ -8,14 +8,15 @@
 namespace App\Timeline\Domain\Models;
 
 
+use App\Timeline\Domain\ValueObjects\EventId;
 use App\Timeline\Domain\ValueObjects\ImageId;
 use App\Timeline\Domain\ValueObjects\UserId;
 use Illuminate\Support\Carbon;
 
 class Image extends BaseModel
 {
-    public const TMP_PATH = 'images/tmp';
-    public const PATH = 'images';
+    public const TMP_PATH = 'images';
+    public const PATH = 'public/images';
 
     /**
      * @var ImageId
@@ -29,6 +30,10 @@ class Image extends BaseModel
      * @var string|null
      */
     private $description;
+    /**
+     * @var EventId|null
+     */
+    private $eventId;
     /**
      * @var UserId
      */
@@ -51,16 +56,18 @@ class Image extends BaseModel
      * @param ImageId $id
      * @param string $path
      * @param null|string $description
+     * @param EventId|null $eventId
      * @param UserId $createUserId
      * @param UserId $updateUserId
      * @param Carbon $createdAt
      * @param Carbon $updatedAt
      */
-    public function __construct(ImageId $id, string $path, ?string $description, UserId $createUserId, UserId $updateUserId, Carbon $createdAt, Carbon $updatedAt)
+    public function __construct(ImageId $id, string $path, ?string $description, ?EventId $eventId, UserId $createUserId, UserId $updateUserId, Carbon $createdAt, Carbon $updatedAt)
     {
         $this->id = $id;
         $this->path = $path;
         $this->description = $description;
+        $this->eventId = $eventId;
         $this->createUserId = $createUserId;
         $this->updateUserId = $updateUserId;
         $this->createdAt = $createdAt;
@@ -89,6 +96,14 @@ class Image extends BaseModel
     public function getDescription(): ?string
     {
         return $this->description;
+    }
+
+    /**
+     * @return EventId|null
+     */
+    public function getEventId(): ?EventId
+    {
+        return $this->eventId;
     }
 
     /**
@@ -129,6 +144,7 @@ class Image extends BaseModel
             'id' => $this->getId()->getValue(),
             'path' => $this->getPath(),
             'description' => $this->getDescription(),
+            'eventId' => $this->getEventId() === null ? null : $this->getEventId()->getValue(),
             'createUserId' => $this->getCreateUserId()->getValue(),
             'updateUserId' => $this->getUpdateUserId()->getValue(),
             'createdAt' => $this->getCreatedAt()->format(DATE_ISO8601),

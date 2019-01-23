@@ -1,17 +1,49 @@
 import {DateAttribute} from './dateAttribute';
-import {DateFormat} from './dateFormat';
 import {Period} from './period';
 import {Catalog} from './catalog';
 import {Image} from './image';
 
+export class EventDate {
+  private readonly _date: Date;
+  private readonly _hasMonth: boolean;
+  private readonly _hasDay: boolean;
+
+  constructor(date: Date, hasMonth: boolean, hasDay: boolean) {
+    this._date = date;
+    this._hasMonth = hasMonth;
+    this._hasDay = hasDay;
+  }
+
+  get date(): Date {
+    return this._date;
+  }
+
+  get hasMonth(): boolean {
+    return this._hasMonth;
+  }
+
+  get hasDay(): boolean {
+    return this._hasDay;
+  }
+
+  static fromJson(json: any): EventDate {
+    if (json === null) {
+      return null;
+    }
+    return new EventDate(
+      json['date'],
+      json['hasMonth'],
+      json['hasDay']
+    );
+  }
+}
+
 export class Event {
   private readonly _id: number;
-  private readonly _startDate: Date;
-  private readonly _endDate: Date;
+  private readonly _startDate: EventDate;
+  private readonly _endDate: EventDate;
   private readonly _startDateAttribute: DateAttribute;
   private readonly _endDateAttribute: DateAttribute;
-  private readonly _startDateFormat: DateFormat;
-  private readonly _endDateFormat: DateFormat;
   private readonly _period: Period;
   private readonly _catalogs: Array<Catalog>;
   private readonly _content: string;
@@ -21,16 +53,12 @@ export class Event {
   private readonly _createdAt: Date;
   private readonly _updatedAt: Date;
 
-  constructor(id: number, startDate: Date, endDate: Date, startDateAttribute: DateAttribute, endDateAttribute: DateAttribute,
-              startDateFormat: DateFormat, endDateFormat: DateFormat, period: Period, catalogs: Array<Catalog>, content: string,
-              images: Array<Image>, createUserId: number, updateUserId: number, createdAt: Date, updatedAt: Date) {
+  constructor(id: number, startDate: EventDate, endDate: EventDate, startDateAttribute: DateAttribute, endDateAttribute: DateAttribute, period: Period, catalogs: Array<Catalog>, content: string, images: Array<Image>, createUserId: number, updateUserId: number, createdAt: Date, updatedAt: Date) {
     this._id = id;
     this._startDate = startDate;
     this._endDate = endDate;
     this._startDateAttribute = startDateAttribute;
     this._endDateAttribute = endDateAttribute;
-    this._startDateFormat = startDateFormat;
-    this._endDateFormat = endDateFormat;
     this._period = period;
     this._catalogs = catalogs;
     this._content = content;
@@ -45,11 +73,11 @@ export class Event {
     return this._id;
   }
 
-  get startDate(): Date {
+  get startDate(): EventDate {
     return this._startDate;
   }
 
-  get endDate(): Date {
+  get endDate(): EventDate {
     return this._endDate;
   }
 
@@ -59,14 +87,6 @@ export class Event {
 
   get endDateAttribute(): DateAttribute {
     return this._endDateAttribute;
-  }
-
-  get startDateFormat(): DateFormat {
-    return this._startDateFormat;
-  }
-
-  get endDateFormat(): DateFormat {
-    return this._endDateFormat;
   }
 
   get period(): Period {
@@ -107,12 +127,10 @@ export class Event {
     }
     return new Event(
       json['id'],
-      json['startDate'],
-      json['endDate'],
+      EventDate.fromJson(json['startDate']),
+      EventDate.fromJson(json['endDate']),
       DateAttribute.fromJson(json['startDateAttribute']),
       DateAttribute.fromJson(json['endDateAttribute']),
-      DateFormat.fromJson(json['startDateFormat']),
-      DateFormat.fromJson(json['endDateFormat']),
       Period.fromJson(json['period']),
       Catalog.fromArray(json['catalogCollection']),
       json['content'],

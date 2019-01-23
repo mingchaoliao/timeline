@@ -13,6 +13,7 @@ use App\Timeline\Domain\ValueObjects\CatalogId;
 use App\Timeline\Domain\ValueObjects\DateAttributeId;
 use App\Timeline\Domain\ValueObjects\Email;
 use App\Timeline\Domain\ValueObjects\EventId;
+use App\Timeline\Domain\ValueObjects\ImageId;
 use App\Timeline\Domain\ValueObjects\PeriodId;
 use App\Timeline\Domain\ValueObjects\UserId;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
@@ -91,6 +92,8 @@ class TimelineException extends \Exception implements HttpExceptionInterface
     public const INVALID_CATALOG_ID = 10070;
     public const INVALID_DATE_ATTRIBUTE_ID = 10071;
     public const INVALID_USER_ID = 10072;
+    public const IMAGE_WITH_ID_DOES_NOT_EXIST = 10073;
+    public const INVALID_IMAGE_ID = 10074;
 
     /**
      * @var int
@@ -648,5 +651,21 @@ class TimelineException extends \Exception implements HttpExceptionInterface
             'invalid user id "%s", must be an positive integer',
             $value
         ), static::INVALID_USER_ID, 400, [], $previous);
+    }
+
+    public static function ofInvalidImageId($value, \Throwable $previous = null): self
+    {
+        return new static(sprintf(
+            'invalid image id "%s", must be an positive integer',
+            $value
+        ), static::INVALID_IMAGE_ID, 400, [], $previous);
+    }
+
+    public static function ofImageWithIdDoesNotExist(ImageId $id, \Throwable $previous = null): self
+    {
+        return new static(sprintf(
+            'image with id "%s" does not exist',
+            (string)$id
+        ), static::IMAGE_WITH_ID_DOES_NOT_EXIST, 404, [], $previous);
     }
 }

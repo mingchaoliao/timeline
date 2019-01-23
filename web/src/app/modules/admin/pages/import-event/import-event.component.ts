@@ -7,9 +7,7 @@ import {PeriodService} from '../../../core/shared/services/period.service';
 import {CatalogService} from '../../../core/shared/services/catalog.service';
 import {DateAttributeService} from '../../../core/shared/services/dateAttribute.service';
 import {ImageService} from '../../../core/shared/services/image.service';
-import {DateFormatService} from '../../../core/shared/services/dateFormat.service';
 import {EventService} from '../../../core/shared/services/event.service';
-
 
 @Component({
   selector: 'app-import-event',
@@ -33,7 +31,6 @@ export class ImportEventComponent implements OnInit {
     private catalogService: CatalogService,
     private dateAttributeService: DateAttributeService,
     private imageService: ImageService,
-    private dateFormatService: DateFormatService,
     private eventService: EventService
   ) {
     this.importEventForm = formBuilder.group({
@@ -134,55 +131,45 @@ export class ImportEventComponent implements OnInit {
       e => this.handleError(e),
       () => {
         this.percentage = Math.floor(++numOfCompletedTasks / totalNumOfTasks * 100);
-        this.dateFormatService.get().subscribe(
-          dateFormats => {
-            const dateFormatMap = this.common.kvArrToMap(dateFormats, 'value', 'id');
-            this.periodService.bulkCreate(periods).subscribe(
-              periods => {
-                periodKvMap = this.common.kvArrToMap(
-                  periods,
-                  'value',
-                  'id'
-                );
+        this.periodService.bulkCreate(periods).subscribe(
+          periods => {
+            periodKvMap = this.common.kvArrToMap(
+              periods,
+              'value',
+              'id'
+            );
+            this.percentage = Math.floor(++numOfCompletedTasks / totalNumOfTasks * 100);
+            this.dateAttributeService.bulkCreate(dateAttributes).subscribe(
+              dateAttributes => {
+                dateAttributeKvMap = this.common.kvArrToMap(dateAttributes, 'value', 'id');
                 this.percentage = Math.floor(++numOfCompletedTasks / totalNumOfTasks * 100);
-                this.dateAttributeService.bulkCreate(dateAttributes).subscribe(
-                  dateAttributes => {
-                    dateAttributeKvMap = this.common.kvArrToMap(dateAttributes, 'value', 'id');
+                this.catalogService.bulkCreate(catalogs).subscribe(
+                  catalogs => {
+                    catalogKvMap = this.common.kvArrToMap(catalogs, 'value', 'id');
+                    for (let i = 0; i < this.eventsData.length; i++) {
+                      if (this.eventsData[i]['startDateAttribute']) {
+                        this.eventsData[i]['startDateAttributeId'] = dateAttributeKvMap[this.eventsData[i]['startDateAttribute']];
+                      }
+                      if (this.eventsData[i]['endDateAttribute']) {
+                        this.eventsData[i]['endDateAttributeId'] = dateAttributeKvMap[this.eventsData[i]['endDateAttribute']];
+                      }
+                      if (this.eventsData[i]['period']) {
+                        this.eventsData[i]['periodId'] = periodKvMap[this.eventsData[i]['period']];
+                      }
+                      for (let j = 0; j < this.eventsData[i].images.length; j++) {
+                        this.eventsData[i].images[j]['path'] = imageKvMap[this.eventsData[i].images[j]['name']];
+                      }
+                      this.eventsData[i].catalogIds = [];
+                      for (let j = 0; j < this.eventsData[i].catalogs.length; j++) {
+                        this.eventsData[i].catalogIds.push(catalogKvMap[this.eventsData[i].catalogs[j]]);
+                      }
+                      this.eventsData[i].catalogs = this.eventsData[i].catalogIds;
+                    }
                     this.percentage = Math.floor(++numOfCompletedTasks / totalNumOfTasks * 100);
-                    this.catalogService.bulkCreate(catalogs).subscribe(
-                      catalogs => {
-                        catalogKvMap = this.common.kvArrToMap(catalogs, 'value', 'id');
-                        for (let i = 0; i < this.eventsData.length; i++) {
-                          this.eventsData[i]['startDateFormatId'] = dateFormatMap[this.eventsData[i]['startDateFormat']];
-                          if (this.eventsData[i].endDateFormat !== null) {
-                            this.eventsData[i]['endDateFormatId'] = dateFormatMap[this.eventsData[i]['endDateFormat']];
-                          }
-                          if (this.eventsData[i]['startDateAttribute']) {
-                            this.eventsData[i]['startDateAttributeId'] = dateAttributeKvMap[this.eventsData[i]['startDateAttribute']];
-                          }
-                          if (this.eventsData[i]['endDateAttribute']) {
-                            this.eventsData[i]['endDateAttributeId'] = dateAttributeKvMap[this.eventsData[i]['endDateAttribute']];
-                          }
-                          if (this.eventsData[i]['period']) {
-                            this.eventsData[i]['periodId'] = periodKvMap[this.eventsData[i]['period']];
-                          }
-                          for (let j = 0; j < this.eventsData[i].images.length; j++) {
-                            this.eventsData[i].images[j]['path'] = imageKvMap[this.eventsData[i].images[j]['name']];
-                          }
-                          this.eventsData[i].catalogIds = [];
-                          for (let j = 0; j < this.eventsData[i].catalogs.length; j++) {
-                            this.eventsData[i].catalogIds.push(catalogKvMap[this.eventsData[i].catalogs[j]]);
-                          }
-                          this.eventsData[i].catalogs = this.eventsData[i].catalogIds;
-                        }
+                    this.eventService.bulkCreate(this.eventsData).subscribe(
+                      success => {
                         this.percentage = Math.floor(++numOfCompletedTasks / totalNumOfTasks * 100);
-                        this.eventService.bulkCreate(this.eventsData).subscribe(
-                          success => {
-                            this.percentage = Math.floor(++numOfCompletedTasks / totalNumOfTasks * 100);
-                            this.router.navigate(['/']);
-                          },
-                          e => this.handleError(e)
-                        );
+                        this.router.navigate(['/']);
                       },
                       e => this.handleError(e)
                     );

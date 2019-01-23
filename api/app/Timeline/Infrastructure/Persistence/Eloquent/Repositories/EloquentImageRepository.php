@@ -12,8 +12,10 @@ use App\Timeline\Domain\Collections\ImageCollection;
 use App\Timeline\Domain\Collections\ImageIdCollection;
 use App\Timeline\Domain\Models\Image;
 use App\Timeline\Domain\Repositories\ImageRepository;
+use App\Timeline\Domain\ValueObjects\EventId;
 use App\Timeline\Domain\ValueObjects\ImageId;
 use App\Timeline\Domain\ValueObjects\UserId;
+use App\Timeline\Exceptions\TimelineException;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentImage;
 use Carbon\Carbon;
 use Illuminate\Database\ConnectionInterface;
@@ -48,6 +50,7 @@ class EloquentImageRepository implements ImageRepository
             new ImageId($eloquentImage->getId()),
             $eloquentImage->getPath(),
             $eloquentImage->getDescription(),
+            $eloquentImage->getEventId() === null ? null : new EventId($eloquentImage->getEventId()),
             new UserId($eloquentImage->getCreateUserId()),
             new UserId($eloquentImage->getUpdateUserId()),
             $eloquentImage->getCreatedAt(),
@@ -93,5 +96,40 @@ class EloquentImageRepository implements ImageRepository
                 $this->imageModel->findMany($chunk->toValueArray())->get()->delete();
             }
         });
+    }
+
+    /**
+     * @param ImageId $id
+     * @param string $description
+     * @param UserId $updateUserId
+     * @return Image
+     * @throws TimelineException
+     */
+    public function update(ImageId $id, string $description, UserId $updateUserId): Image
+    {
+        $eloquentImage = $this->imageModel->find($id->getValue());
+
+        if($eloquentImage === null) {
+            throw TimelineException::ofImageWithIdDoesNotExist($id);
+        }
+
+        $eloquentImage->update([
+            'description' => $description,
+            'update_user_id' => $updateUserId->getValue()
+        ]);
+
+        return $this->constructImage($this->imageModel->find($id->getValue()));
+    }
+
+    public function create(string $name, ?string $description, UserId $createUserId): Image
+    {
+        $eloquentImage = $this->imageModel->create([
+            'path' => $name,
+            'description' => $description,
+            'create_user_id' => $createUserId->getValue(),
+            'update_user_id' => $createUserId->getValue()
+        ]);
+
+        return $this->constructImage($eloquentImage);
     }
 }

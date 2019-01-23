@@ -33,7 +33,6 @@ use App\Timeline\Infrastructure\Persistence\Filesystem\FSImageFileRepository;
 use App\Timeline\Infrastructure\SearchEngine\ESSearchEventRepository;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\Hashing\Hasher;
-use Illuminate\Database\Connection;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\ServiceProvider;
@@ -152,7 +151,8 @@ class TimelineServiceProvider extends ServiceProvider
         $this->app->singleton(ImageService::class, function () {
             return new ImageService(
                 resolve(ImageRepository::class),
-                resolve(ImageFileRepository::class)
+                resolve(ImageFileRepository::class),
+                resolve(UserService::class)
             );
         });
 

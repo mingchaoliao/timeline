@@ -7,6 +7,8 @@ import {Url} from '../../shared/classes/url';
 import {EventService} from '../../shared/services/event.service';
 import {Notification} from '../../shared/models/notification';
 import {NotificationEmitter} from '../../shared/events/notificationEmitter';
+import * as moment from 'moment';
+import {EventDate} from '../../shared/models/event';
 
 @Component({
   selector: 'app-event-card',
@@ -27,10 +29,7 @@ export class EventCardComponent implements OnInit {
   }
 
   getImageUrl(path: string): string {
-    return Url.getImageByPath(
-      path,
-      UserService.getCurrentUser() === null ? false : UserService.getCurrentUser().isAdmin
-    );
+    return Url.getImage(path);
   }
 
   public getUser(): User {
@@ -38,6 +37,19 @@ export class EventCardComponent implements OnInit {
   }
 
   ngOnInit() {
+  }
+
+  getReadableDate(eventDate: EventDate): string {
+    if (!eventDate) {
+      return '';
+    }
+    const date = moment(eventDate.date);
+    if (eventDate.hasDay) {
+      return date.format('YYYY-MM-DD');
+    } else if (eventDate.hasMonth) {
+      return date.format('YYYY-MM');
+    }
+    return date.format('YYYY');
   }
 
   public onDelete(id: number) {

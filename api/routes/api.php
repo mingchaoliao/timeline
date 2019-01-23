@@ -55,7 +55,8 @@ Route::group(['middleware' => ['auth:api', 'admin']], function () {
     Route::put('/dateAttribute/{id}', 'DateAttributeController@update');
     Route::delete('/dateAttribute/{id}', 'DateAttributeController@delete');
 
-    Route::post('/image', 'ImageController@uploadImage');
+    Route::post('/image', 'ImageController@upload');
+    Route::put('/image/{id}', 'ImageController@update');
 
     Route::get('/user', 'UserController@getAllUser');
     Route::put('/user/{id}', 'UserController@update');

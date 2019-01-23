@@ -10,26 +10,36 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 class GenerateTimeline implements ShouldQueue
 {
     /**
+     * @var TimelineService
+     */
+    private $timelineService;
+    /**
+     * @var Filesystem
+     */
+    private $fs;
+
+    /**
      * Create the event listener.
      *
-     * @return void
+     * @param TimelineService $timelineService
+     * @param Filesystem $fs
      */
-    public function __construct()
+    public function __construct(TimelineService $timelineService, Filesystem $fs)
     {
-        //
+        $this->timelineService = $timelineService;
+        $this->fs = $fs;
     }
 
     /**
      * Handle the event.
      *
      * @param  object $event
-     * @param TimelineService $timelineService
      * @return void
      */
-    public function handle($event, TimelineService $timelineService, Filesystem $fs)
+    public function handle($event)
     {
-        $timelineData = $timelineService->getTimelineArray();
+        $timelineData = $this->timelineService->getTimelineArray();
         $json = json_encode($timelineData);
-        $fs->put('public/timeline.json', $json);
+        $this->fs->put('public/timeline.json', $json);
     }
 }

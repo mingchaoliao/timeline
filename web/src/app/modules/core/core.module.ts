@@ -12,7 +12,6 @@ import {PeriodService} from './shared/services/period.service';
 import {CatalogService} from './shared/services/catalog.service';
 import {DateAttributeService} from './shared/services/dateAttribute.service';
 import {ImageService} from './shared/services/image.service';
-import {DateFormatService} from './shared/services/dateFormat.service';
 import {TimelineService} from './shared/services/timeline.service';
 import { NotificationComponent } from './components/notification/notification.component';
 import { ButtonComponent } from './components/button/button.component';
@@ -47,7 +46,6 @@ import {AutofocusDirective} from './shared/directives/autofocus.directive';
     CatalogService,
     DateAttributeService,
     ImageService,
-    DateFormatService,
     TimelineService
   ]
 })

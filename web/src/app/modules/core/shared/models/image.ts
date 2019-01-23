@@ -2,19 +2,25 @@ export class Image {
   private readonly _id: number;
   private readonly _path: string;
   private readonly _description: string;
+  private readonly _eventId: number;
   private readonly _createUserId: number;
   private readonly _updateUserId: number;
   private readonly _createdAt: Date;
   private readonly _updatedAt: Date;
 
-  constructor(id: number, path: string, description: string, createUserId: number, updateUserId: number, createdAt: Date, updatedAt: Date) {
+  constructor(id: number, path: string, description: string, eventId: number, createUserId: number, updateUserId: number, createdAt: Date, updatedAt: Date) {
     this._id = id;
     this._path = path;
     this._description = description;
+    this._eventId = eventId;
     this._createUserId = createUserId;
     this._updateUserId = updateUserId;
     this._createdAt = createdAt;
     this._updatedAt = updatedAt;
+  }
+
+  get eventId(): number {
+    return this._eventId;
   }
 
   get id(): number {
@@ -53,6 +59,7 @@ export class Image {
       json['id'],
       json['path'],
       json['description'],
+      json['eventId'],
       json['createUserId'],
       json['updateUserId'],
       json['createdAt'],

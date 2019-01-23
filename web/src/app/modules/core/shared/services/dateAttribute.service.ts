@@ -38,8 +38,7 @@ export class DateAttributeService {
     public update(id: number, value: string): Observable<DateAttribute> {
         return new Observable<DateAttribute>(
             observer => {
-                this.httpService.put(Url.updateDateAttribute(), {}, {
-                    id: id,
+                this.httpService.put(Url.updateDateAttribute(id), {}, {
                     value: value
                 }).subscribe(
                     responseBody => observer.next(DateAttribute.fromJson(responseBody)),
@@ -53,7 +52,7 @@ export class DateAttributeService {
     public delete(id: number): Observable<boolean> {
         return new Observable<boolean>(
             observer => {
-                this.httpService.delete(Url.deleteDateAttribute(), {id: id}).subscribe(
+                this.httpService.delete(Url.deleteDateAttribute(id)).subscribe(
                     responseBody => observer.next(true),
                     error => observer.error(error),
                     () => observer.complete()

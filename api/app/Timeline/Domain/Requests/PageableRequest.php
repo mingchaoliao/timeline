@@ -120,6 +120,6 @@ class PageableRequest
      */
     public function getOffset(): int
     {
-        return ($this->page - 1) * $this->pageSize + 1;
+        return ($this->page - 1) * $this->pageSize;
     }
 }

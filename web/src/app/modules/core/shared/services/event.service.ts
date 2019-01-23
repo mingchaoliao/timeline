@@ -10,18 +10,12 @@ export class EventService {
   constructor(private httpService: HttpService) {
   }
 
-  get(page: number = 1, pageSize: number = 10, order: string = 'startDate', direction: string = 'asc'): Observable<Array<Event>> {
-    const query = {};
-    if (page) {
-      query['offset'] = (page - 1) * pageSize;
-      query['limit'] = pageSize;
-    }
-    if (order) {
-      query['order'] = order;
-    }
-    if (direction) {
-      query['direction'] = direction;
-    }
+  get(page: number = 1, pageSize: number = 10): Observable<Array<Event>> {
+    const query = {
+      page: page,
+      pageSize: pageSize
+    };
+
     return new Observable<Array<Event>>(
       observer => {
         this.httpService.get(Url.getEvents(), query, {}, true)
@@ -99,7 +93,7 @@ export class EventService {
 
     return new Observable<Array<Event>>(
       observer => {
-        this.httpService.get(environment.wsRoot + '/event/search', query, {}, true).subscribe(
+        this.httpService.get(Url.searchEvent(), query, {}, true).subscribe(
           response => {
             let arr: Array<Event> = Event.fromArray(response['body']);
             arr['total'] = response['headers'].get('X-Total-Count');
@@ -155,7 +149,7 @@ export class EventService {
   deleteById(id: number): Observable<null> {
     return new Observable(
       observer => {
-        this.httpService.delete(environment.wsRoot + '/event/' + id).subscribe(
+        this.httpService.delete(Url.deleteEvent(id)).subscribe(
           success => observer.next(),
           error => observer.error(error),
           () => observer.complete()

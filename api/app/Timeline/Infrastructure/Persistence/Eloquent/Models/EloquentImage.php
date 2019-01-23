@@ -31,7 +31,7 @@ class EloquentImage extends Model
         return $this->description;
     }
 
-    public function getEventId(): int
+    public function getEventId(): ?int
     {
         return $this->event_id;
     }

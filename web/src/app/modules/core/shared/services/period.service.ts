@@ -38,8 +38,7 @@ export class PeriodService {
     public update(id: number, value: string): Observable<Period> {
         return new Observable<Period>(
             observer => {
-                this.httpService.put(Url.updatePeriod(), {}, {
-                    id: id,
+                this.httpService.put(Url.updatePeriod(id), {}, {
                     value: value
                 }).subscribe(
                     responseBody => observer.next(Period.fromJson(responseBody)),
@@ -53,7 +52,7 @@ export class PeriodService {
     public delete(id: number): Observable<boolean> {
         return new Observable<boolean>(
             observer => {
-                this.httpService.delete(Url.deletePeriod(), {id: id}).subscribe(
+                this.httpService.delete(Url.deletePeriod(id)).subscribe(
                     responseBody => observer.next(true),
                     error => observer.error(error),
                     () => observer.complete()

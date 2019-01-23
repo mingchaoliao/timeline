@@ -12,6 +12,8 @@ namespace App\Timeline\Infrastructure\Persistence\Filesystem;
 use App\Timeline\Domain\Collections\ImageCollection;
 use App\Timeline\Domain\Models\Image;
 use App\Timeline\Domain\Repositories\ImageFileRepository;
+use Carbon\Carbon;
+use Illuminate\Http\UploadedFile;
 
 class FSImageFileRepository extends BaseFsRepository implements ImageFileRepository
 {
@@ -62,5 +64,21 @@ class FSImageFileRepository extends BaseFsRepository implements ImageFileReposit
             $dir,
             $image->getPath()
         );
+    }
+
+    public function upload(UploadedFile $file): string
+    {
+        $extension = $file->getClientOriginalExtension();
+
+        $name = sprintf(
+            '%s-%s.%s',
+            Carbon::now()->format('YmdHis'),
+            str_random(8),
+            $extension
+        );
+
+        $file->storeAs(Image::TMP_PATH, $name);
+
+        return $name;
     }
 }

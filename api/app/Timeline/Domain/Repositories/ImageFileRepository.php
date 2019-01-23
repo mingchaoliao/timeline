@@ -10,6 +10,7 @@ namespace App\Timeline\Domain\Repositories;
 
 
 use App\Timeline\Domain\Collections\ImageCollection;
+use Illuminate\Http\UploadedFile;
 
 interface ImageFileRepository
 {
@@ -18,4 +19,6 @@ interface ImageFileRepository
     public function deleteImageFiles(ImageCollection $images): void;
 
     public function deleteTemporaryImageFiles(ImageCollection $images): void;
+
+    public function upload(UploadedFile $file): string;
 }

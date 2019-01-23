@@ -38,8 +38,7 @@ export class CatalogService {
     public update(id: number, value: string): Observable<Catalog> {
         return new Observable<Catalog>(
             observer => {
-                this.httpService.put(Url.updateCatalog(), {}, {
-                    id: id,
+                this.httpService.put(Url.updateCatalog(id), {}, {
                     value: value
                 }).subscribe(
                     responseBody => observer.next(Catalog.fromJson(responseBody)),
@@ -53,7 +52,7 @@ export class CatalogService {
     public delete(id: number): Observable<boolean> {
         return new Observable<boolean>(
             observer => {
-                this.httpService.delete(Url.deleteCatalog(), {id: id}).subscribe(
+                this.httpService.delete(Url.deleteCatalog(id)).subscribe(
                     responseBody => observer.next(true),
                     error => observer.error(error),
                     () => observer.complete()
