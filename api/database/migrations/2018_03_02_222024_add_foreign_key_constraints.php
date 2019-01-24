@@ -139,6 +139,8 @@ class AddForeignKeyConstraints extends Migration
                 ]
             ]
         ]);
+
+        \Illuminate\Support\Facades\Artisan::call('timeline:generate');
     }
 
     /**

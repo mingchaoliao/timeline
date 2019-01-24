@@ -100,7 +100,7 @@ class EventService
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {
-            throw TimelineException::ofUnableToSearchEvents();
+            throw TimelineException::ofUnableToSearchEvents($e);
         }
     }
 

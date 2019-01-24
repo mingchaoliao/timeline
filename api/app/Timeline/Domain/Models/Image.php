@@ -31,6 +31,10 @@ class Image extends BaseModel
      */
     private $description;
     /**
+     * @var string
+     */
+    private $originalName;
+    /**
      * @var EventId|null
      */
     private $eventId;
@@ -55,18 +59,20 @@ class Image extends BaseModel
      * Image constructor.
      * @param ImageId $id
      * @param string $path
-     * @param null|string $description
+     * @param string|null $description
+     * @param string $originalName
      * @param EventId|null $eventId
      * @param UserId $createUserId
      * @param UserId $updateUserId
      * @param Carbon $createdAt
      * @param Carbon $updatedAt
      */
-    public function __construct(ImageId $id, string $path, ?string $description, ?EventId $eventId, UserId $createUserId, UserId $updateUserId, Carbon $createdAt, Carbon $updatedAt)
+    public function __construct(ImageId $id, string $path, ?string $description, string $originalName, ?EventId $eventId, UserId $createUserId, UserId $updateUserId, Carbon $createdAt, Carbon $updatedAt)
     {
         $this->id = $id;
         $this->path = $path;
         $this->description = $description;
+        $this->originalName = $originalName;
         $this->eventId = $eventId;
         $this->createUserId = $createUserId;
         $this->updateUserId = $updateUserId;
@@ -91,11 +97,19 @@ class Image extends BaseModel
     }
 
     /**
-     * @return null|string
+     * @return string|null
      */
     public function getDescription(): ?string
     {
         return $this->description;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOriginalName(): string
+    {
+        return $this->originalName;
     }
 
     /**
@@ -144,6 +158,7 @@ class Image extends BaseModel
             'id' => $this->getId()->getValue(),
             'path' => $this->getPath(),
             'description' => $this->getDescription(),
+            'originalName' => $this->getOriginalName(),
             'eventId' => $this->getEventId() === null ? null : $this->getEventId()->getValue(),
             'createUserId' => $this->getCreateUserId()->getValue(),
             'updateUserId' => $this->getUpdateUserId()->getValue(),

@@ -125,7 +125,7 @@ export class ImportEventComponent implements OnInit {
 
     concat(...uploadImageObservers).subscribe(
       imageUploadReceipt => {
-        imageKvMap[imageUploadReceipt.originalName] = imageUploadReceipt.path;
+        imageKvMap[imageUploadReceipt.originalName] = imageUploadReceipt.id;
         this.percentage = Math.floor(++numOfCompletedTasks / totalNumOfTasks * 100);
       },
       e => this.handleError(e),
@@ -156,8 +156,9 @@ export class ImportEventComponent implements OnInit {
                       if (this.eventsData[i]['period']) {
                         this.eventsData[i]['periodId'] = periodKvMap[this.eventsData[i]['period']];
                       }
+                      this.eventsData[i].imageIds = [];
                       for (let j = 0; j < this.eventsData[i].images.length; j++) {
-                        this.eventsData[i].images[j]['path'] = imageKvMap[this.eventsData[i].images[j]['name']];
+                        this.eventsData[i].imageIds.push(imageKvMap[this.eventsData[i].images[j]['name']]);
                       }
                       this.eventsData[i].catalogIds = [];
                       for (let j = 0; j < this.eventsData[i].catalogs.length; j++) {
@@ -211,21 +212,21 @@ export class ImportEventComponent implements OnInit {
       if (startDateStr === null) {
         this.makeError('A', i + 2, 'startDate is required');
       }
+      const startDate = this.constructEventDate(startDateStr);
       if (!this.common.isDateValid(startDateStr)) {
         this.makeError('A', i + 2, 'invalid startDate');
       }
-      const startDateFormat = this.common.getFormatByDateStr(startDateStr);
       const startDateAttribute: string = this.trim(sheet[i][1]);
 
       const endDateStr: string = this.trim(sheet[i][2]);
-      let endDateFormat: string = null;
       let endDateAttribute: string = null;
+      let endDate = null;
       if (endDateStr !== null) {
         if (!this.common.isDateValid(endDateStr)) {
           this.makeError('C', i + 2, 'invalid endDate');
         }
-        endDateFormat = this.common.getFormatByDateStr(endDateStr);
         endDateAttribute = this.trim(sheet[i][3]);
+        endDate = this.constructEventDate(endDateStr);
       }
 
       const content: string = this.trim(sheet[i][4]);
@@ -289,11 +290,9 @@ export class ImportEventComponent implements OnInit {
       }
 
       data.push({
-        startDate: startDateStr,
-        startDateFormat: startDateFormat,
+        startDate: startDate,
         startDateAttribute: startDateAttribute,
-        endDate: endDateStr,
-        endDateFormat: endDateFormat,
+        endDate: endDate,
         endDateAttribute: endDateAttribute,
         content: content,
         period: period,
@@ -302,6 +301,24 @@ export class ImportEventComponent implements OnInit {
       });
     }
     return data;
+  }
+
+  private constructEventDate(str: string) {
+    const parts = str.split('-');
+
+    const date = {
+      year: Number(parts[0])
+    };
+
+    if (parts[1]) {
+      date['month'] = Number(parts[1]);
+    }
+
+    if (parts[2]) {
+      date['day'] = Number(parts[2]);
+    }
+
+    return date;
   }
 
   private trim(str: string): string {

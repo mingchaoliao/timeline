@@ -21,24 +21,48 @@ export class UserManagementComponent implements OnInit {
     );
   }
 
-  public grantOrRevokeAdminFor(user: User, event) {
+  public grantOrRevokeAdminPrivilege(user: User, event) {
     const isChecked = event.srcElement.checked;
-    user['isLoading'] = true;
+    user['adminLoading'] = true;
     if(isChecked !== user.isAdmin) {
       this.userService.grantOrRevokeAdminPrivilege(user.id, isChecked).subscribe(
           s => {
             user.isAdmin = isChecked;
-            user['isLoading'] = false;
+            user['adminLoading'] = false;
             NotificationEmitter.emit(Notification.success('Grant/revoke successfully'));
           },
           error => {
             event.srcElement.checked = user.isAdmin;
-            user['isLoading'] = false;
+            user['adminLoading'] = false;
             NotificationEmitter.emit(Notification.error(error.error.message, `Unable to grant/revoke admin privilege to "${user.name}"`));
           }
 
       );
     }
+  }
+
+  public grantOrRevokeEditorPrivilege(user: User, event) {
+    const isChecked = event.srcElement.checked;
+    user['editorLoading'] = true;
+    if(isChecked !== user.isEditor) {
+      this.userService.grantOrRevokeEditorPrivilege(user.id, isChecked).subscribe(
+        s => {
+          user.isEditor = isChecked;
+          user['editorLoading'] = false;
+          NotificationEmitter.emit(Notification.success('Grant/revoke successfully'));
+        },
+        error => {
+          event.srcElement.checked = user.isEditor;
+          user['editorLoading'] = false;
+          NotificationEmitter.emit(Notification.error(error.error.message, `Unable to grant/revoke editor privilege to "${user.name}"`));
+        }
+
+      );
+    }
+  }
+
+  public getCurrentUserId() {
+    return UserService.getCurrentUser().id;
   }
 
   ngOnInit() {

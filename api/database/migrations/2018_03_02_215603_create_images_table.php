@@ -17,6 +17,7 @@ class CreateImagesTable extends Migration
             $table->increments('id');
             $table->string('path')->unique();
             $table->text('description')->nullable();
+            $table->string('original_name');
             $table->unsignedInteger('event_id')->nullable();
             $table->unsignedInteger('create_user_id');
             $table->unsignedInteger('update_user_id');

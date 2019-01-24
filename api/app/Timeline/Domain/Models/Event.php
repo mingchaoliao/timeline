@@ -244,12 +244,12 @@ class Event extends BaseModel
     {
         $period = $this->getPeriod();
         if ($period !== null) {
-            $period = $period->getId();
+            $period = $period->getId()->getValue();
         }
 
         $catalogs = $this->getCatalogCollection()
             ->map(function (Catalog $catalog) {
-                return $catalog->getId();
+                return $catalog->getId()->getValue();
             })->toArray();
 
         $endDate = $this->getEndDate();
@@ -301,7 +301,7 @@ class Event extends BaseModel
         $images = $this->getImageCollection();
         if (count($images) !== 0) {
             $eventsConfig['media'] = [
-                'url' => url('/') . '/image/' . $images->get(0)->getPath()
+                'url' => url('/') . '/storage/images/' . $images->get(0)->getPath()
             ];
         }
 

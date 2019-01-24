@@ -72,6 +72,16 @@ services:
       discovery.type: single-node
     networks:
       - internal
+  elastichq:
+    image: elastichq/elasticsearch-hq
+    ports:
+      - 5000:5000
+    environment:
+      HQ_DEFAULT_URL: "http://elasticsearch:9200"
+    networks:
+      - internal
+    depends_on:
+      - elasticsearch
   web:
     build:
       context: web

@@ -103,6 +103,8 @@ class EloquentDateAttributeRepository implements DateAttributeRepository
      */
     public function bulkCreate(array $values, UserId $createUserId): DateAttributeCollection
     {
+        $values = array_unique($values);
+
         $existingDateAttributes = $this->dateAttributeModel
             ->whereIn('value', $values)
             ->get();

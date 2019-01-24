@@ -10,6 +10,8 @@ import {DateAttributeService} from '../../../core/shared/services/dateAttribute.
 import {EventService} from '../../../core/shared/services/event.service';
 import {Notification} from '../../../core/shared/models/notification';
 import {NotificationEmitter} from '../../../core/shared/events/notificationEmitter';
+import {EventDate} from '../../../core/shared/models/event';
+import {Image} from '../../../core/shared/models/image';
 
 export function dateValidator(): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {
@@ -157,7 +159,7 @@ export class CreateEventComponent
 
   ngOnInit() {
     this.createEventForm = this.formBuilder.group({
-      'startDate': [this.eventData ? this.eventData.startDate : null, [
+      'startDate': [this.eventData && this.eventData.startDate ? this.toInputDate(this.eventData.startDate) : null, [
         Validators.required,
         Validators.pattern('(^[0-9]{4}$)|(^[0-9]{4}-[0-9]{2}$)|(^[0-9]{4}-[0-9]{2}-[0-9]{2}$)'),
         dateValidator()
@@ -165,7 +167,7 @@ export class CreateEventComponent
       'startDateAttributeId': [
         this.eventData ? (this.eventData.startDateAttribute ? this.eventData.startDateAttribute.id : null) : null, []
       ],
-      'endDate': [this.eventData ? this.eventData.endDate : null, [
+      'endDate': [this.eventData && this.eventData.endDate ? this.toInputDate(this.eventData.endDate) : null, [
         Validators.pattern('(^[0-9]{4}$)|(^[0-9]{4}-[0-9]{2}$)|(^[0-9]{4}-[0-9]{2}-[0-9]{2}$)'),
         dateValidator()
       ]],
@@ -176,9 +178,19 @@ export class CreateEventComponent
       }) : null, []],
       'content': [this.eventData ? this.eventData.content : null, [Validators.required]],
       'images': [this.eventData ? this.eventData.images.map(function (image) {
-        return {path: image.path, description: image.description};
+        return Image.fromJson(image);
       }) : null, [imageValidator()]]
     });
+  }
+
+  private toInputDate(eventDate: EventDate): string {
+    const date = moment(eventDate.date);
+    if (eventDate.hasDay) {
+      return date.format('YYYY-MM-DD');
+    } else if (eventDate.hasMonth) {
+      return date.format('YYYY-MM');
+    }
+    return date.format('YYYY');
   }
 
   onStartDateChange() {

@@ -116,6 +116,8 @@ class EloquentCatalogRepository implements CatalogRepository
      */
     public function bulkCreate(array $values, UserId $createUserId): CatalogCollection
     {
+        $values = array_unique($values);
+
         $existingCatalogs = $this->catalogModel
             ->whereIn('value', $values)
             ->get();

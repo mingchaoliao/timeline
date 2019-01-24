@@ -66,8 +66,8 @@ export class EventService {
     pageSize: number = 10
   ): Observable<Array<Event>> {
     const query = {
-      offset: (page - 1) * pageSize,
-      limit: pageSize
+      page: page,
+      pageSize: pageSize
     };
     if (startDateFrom) {
       query['startDateFrom'] = startDateFrom;
@@ -137,7 +137,7 @@ export class EventService {
   bulkCreate(events: Array<any>): Observable<boolean> {
     return new Observable<boolean>(
       observer => {
-        this.httpService.post(Url.bulkCreateEvents(), {}, {events: events}).subscribe(
+        this.httpService.post(Url.bulkCreateEvents(), {}, events).subscribe(
           responseBody => observer.next(true),
           error => observer.error(error),
           () => observer.complete()

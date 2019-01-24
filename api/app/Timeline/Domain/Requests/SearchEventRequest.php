@@ -89,8 +89,8 @@ class SearchEventRequest
         $endDateTo = $data['endDateTo'] ?? null;
         $periodId = $data['periodId'] ?? null;
         $catalogIds = $data['catalogIds'] ?? null;
-        $page = $data['page'] ?? null;
-        $pageSize = $data['pageSize'] ?? null;
+        $page = $data['page'] ?? 1;
+        $pageSize = $data['pageSize'] ?? 10;
 
         try {
             if ($startDateFrom !== null) {
@@ -133,6 +133,8 @@ class SearchEventRequest
                 throw TimelineException::ofCatalogIdsMustBeAnArray();
             }
             $catalogIds = CatalogIdCollection::fromValueArray($catalogIds);
+        } else {
+            $catalogIds = new CatalogIdCollection();
         }
 
         return new static(
@@ -142,7 +144,9 @@ class SearchEventRequest
             $endDateFrom,
             $endDateTo,
             $periodId,
-            $catalogIds
+            $catalogIds,
+            $page,
+            $pageSize
         );
     }
 

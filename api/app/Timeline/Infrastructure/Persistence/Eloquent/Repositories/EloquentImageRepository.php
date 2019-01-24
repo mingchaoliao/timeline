@@ -50,6 +50,7 @@ class EloquentImageRepository implements ImageRepository
             new ImageId($eloquentImage->getId()),
             $eloquentImage->getPath(),
             $eloquentImage->getDescription(),
+            $eloquentImage->getOriginalName(),
             $eloquentImage->getEventId() === null ? null : new EventId($eloquentImage->getEventId()),
             new UserId($eloquentImage->getCreateUserId()),
             new UserId($eloquentImage->getUpdateUserId()),
@@ -84,7 +85,7 @@ class EloquentImageRepository implements ImageRepository
 
     public function deleteImages(ImageCollection $images): void
     {
-        $ids = new ImageIdCollection($images->map(function(Image $image) {
+        $ids = new ImageIdCollection($images->map(function (Image $image) {
             return $image->getId();
         })->toArray());
 
@@ -109,7 +110,7 @@ class EloquentImageRepository implements ImageRepository
     {
         $eloquentImage = $this->imageModel->find($id->getValue());
 
-        if($eloquentImage === null) {
+        if ($eloquentImage === null) {
             throw TimelineException::ofImageWithIdDoesNotExist($id);
         }
 
@@ -121,11 +122,12 @@ class EloquentImageRepository implements ImageRepository
         return $this->constructImage($this->imageModel->find($id->getValue()));
     }
 
-    public function create(string $name, ?string $description, UserId $createUserId): Image
+    public function create(string $name, string $originalName, ?string $description, UserId $createUserId): Image
     {
         $eloquentImage = $this->imageModel->create([
             'path' => $name,
             'description' => $description,
+            'original_name' => $originalName,
             'create_user_id' => $createUserId->getValue(),
             'update_user_id' => $createUserId->getValue()
         ]);

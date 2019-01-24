@@ -55,4 +55,8 @@ class EloquentImage extends Model
     {
         return $this->updated_at;
     }
+
+    public function getOriginalName(): string {
+        return $this->original_name;
+    }
 }

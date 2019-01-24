@@ -22,5 +22,5 @@ interface ImageRepository
 
     public function deleteImages(ImageCollection $images): void;
 
-    public function create(string $name, ?string $description, UserId $createUserId): Image;
+    public function create(string $name, string $originalName, ?string $description, UserId $createUserId): Image;
 }

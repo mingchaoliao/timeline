@@ -93,7 +93,7 @@ class ESSearchEventRepository implements SearchEventRepository
             ]);
         }
 
-        if ($catalogIds !== null) {
+        if ($catalogIds->count() !== 0) {
             $catalogIdStr = explode(',', $catalogIds);
             array_push($query['bool']['must'], [
                 'constant_score' => [
@@ -129,7 +129,7 @@ class ESSearchEventRepository implements SearchEventRepository
             'size' => $pageSize,
         ];
 
-        if (!empty($query)) {
+        if (!empty($query['bool'])) {
             $elasticSearch['body']['query'] = $query;
         }
 
@@ -147,7 +147,7 @@ class ESSearchEventRepository implements SearchEventRepository
         $eventIdCollection = new EventIdCollection($eventIds);
         $eventIdCollection->setCount($total);
 
-        return new $eventIdCollection;
+        return $eventIdCollection;
     }
 
     public function index(Event $event): void
@@ -162,7 +162,7 @@ class ESSearchEventRepository implements SearchEventRepository
 
     public function bulkIndex(EventCollection $events): void
     {
-        if (count($events) === null) {
+        if (count($events) === 0) {
             return;
         }
 

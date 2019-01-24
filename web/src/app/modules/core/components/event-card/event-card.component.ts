@@ -9,6 +9,7 @@ import {Notification} from '../../shared/models/notification';
 import {NotificationEmitter} from '../../shared/events/notificationEmitter';
 import * as moment from 'moment';
 import {EventDate} from '../../shared/models/event';
+import {Image} from '../../shared/models/image';
 
 @Component({
   selector: 'app-event-card',
@@ -28,8 +29,12 @@ export class EventCardComponent implements OnInit {
 
   }
 
-  getImageUrl(path: string): string {
-    return Url.getImage(path);
+  getImageUrl(image: Image): string {
+    if (image && image.eventId) {
+      return Url.getImage(image.path);
+    } else {
+      return Url.getTempImage(image.path);
+    }
   }
 
   public getUser(): User {

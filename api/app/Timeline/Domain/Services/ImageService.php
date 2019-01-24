@@ -44,28 +44,38 @@ class ImageService
         $this->userService = $userService;
     }
 
-    public function publishImages(ImageCollection $images): void {
+    public function publishImages(ImageCollection $images): void
+    {
         $this->imageFileRepository->publishImageFiles($images);
     }
 
-    public function deletePublishedImages(ImageCollection $images): void {
+    public function deletePublishedImages(ImageCollection $images): void
+    {
         $this->imageFileRepository->deleteImageFiles($images);
     }
 
-    public function cleanUnusedImagesFor(int $days): void {
+    public function cleanUnusedImagesFor(int $days): void
+    {
         $unusedImages = $this->imageRepository->getUnusedImagesFor($days);
         $this->imageFileRepository->deleteTemporaryImageFiles($unusedImages);
         $this->imageRepository->deleteImages($unusedImages);
     }
 
-    public function update(ImageId $id, string $description): Image {
+    public function update(ImageId $id, string $description): Image
+    {
         $currentUser = $this->userService->getCurrentUser();
         return $this->imageRepository->update($id, $description, $currentUser->getId());
     }
 
-    public function upload(UploadedFile $file, ?string $description): Image {
+    public function upload(UploadedFile $file, ?string $description): Image
+    {
         $currentUser = $this->userService->getCurrentUser();
         $name = $this->imageFileRepository->upload($file);
-        return $this->imageRepository->create($name, $description, $currentUser->getId());
+        return $this->imageRepository->create(
+            $name,
+            $file->getClientOriginalName(),
+            $description,
+            $currentUser->getId()
+        );
     }
 }

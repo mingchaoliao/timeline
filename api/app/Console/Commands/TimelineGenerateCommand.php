@@ -3,10 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Timeline\Domain\Services\TimelineService;
-use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentEventRepository;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 

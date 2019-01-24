@@ -103,6 +103,8 @@ class EloquentPeriodRepository implements PeriodRepository
      */
     public function bulkCreate(array $values, UserId $createUserId): PeriodCollection
     {
+        $values = array_unique($values);
+
         $existingPeriods = $this->periodModel
             ->whereIn('value', $values)
             ->get();
