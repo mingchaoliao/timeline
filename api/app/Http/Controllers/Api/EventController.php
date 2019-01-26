@@ -48,10 +48,10 @@ class EventController extends Controller
     {
         $searchRequest = SearchEventRequest::createFromArray($request->all());
 
-        $events = $this->eventService->search($searchRequest);
+        $result = $this->eventService->search($searchRequest);
 
-        return response()->json($events)
-            ->header('X-Total-Count', $events->getCount());
+        return response()->json($result)
+            ->header('X-Total-Count', $result->getHits()->getCount());
     }
 
     public function create(Request $request)

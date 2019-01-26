@@ -119,20 +119,48 @@ class AddForeignKeyConstraints extends Migration
                 'mappings' => [
                     'event' => [
                         'properties' => [
+                            'id' => [
+                                'type' => 'long',
+                            ],
                             'startDate' => [
                                 'type' => 'date',
                                 'format' => 'yyyy-MM-dd'
                             ],
+                            'startDateHasMonth' => [
+                                'type' => 'boolean',
+                            ],
+                            'startDateHasDay' => [
+                                'type' => 'boolean',
+                            ],
+                            'startDateAttribute' => [
+                                'type' => 'keyword',
+                            ],
+                            'hasEndDate' => [
+                                'type' => 'boolean',
+                            ],
+                            'endDate' => [
+                                'type' => 'date',
+                                'format' => 'yyyy-MM-dd'
+                            ],
+                            'endDateHasMonth' => [
+                                'type' => 'boolean',
+                            ],
+                            'endDateHasDay' => [
+                                'type' => 'boolean',
+                            ],
+                            'endDateAttribute' => [
+                                'type' => 'keyword',
+                            ],
                             'period' => [
-                                'type' => 'long'
+                                'type' => 'keyword'
                             ],
                             'catalogs' => [
-                                'type' => 'long'
+                                'type' => 'keyword'
                             ],
                             'content' => [
                                 'type' => 'text',
                                 'analyzer' => 'ik_max_word',
-                                'search_analyzer' => 'ik_max_word'
+                                'search_analyzer' => 'ik_smart'
                             ],
                         ]
                     ]

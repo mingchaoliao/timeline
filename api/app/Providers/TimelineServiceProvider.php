@@ -8,7 +8,7 @@ use App\Timeline\Domain\Repositories\EventRepository;
 use App\Timeline\Domain\Repositories\ImageFileRepository;
 use App\Timeline\Domain\Repositories\ImageRepository;
 use App\Timeline\Domain\Repositories\PeriodRepository;
-use App\Timeline\Domain\Repositories\SearchEventRepository;
+use App\Timeline\Domain\Repositories\SearchEventRepository as SearchEventRepositoryInterface;
 use App\Timeline\Domain\Repositories\UserRepository;
 use App\Timeline\Domain\Services\CatalogService;
 use App\Timeline\Domain\Services\DateAttributeService;
@@ -30,7 +30,7 @@ use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentImageR
 use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentPeriodRepository;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentUserRepository;
 use App\Timeline\Infrastructure\Persistence\Filesystem\FSImageFileRepository;
-use App\Timeline\Infrastructure\SearchEngine\ESSearchEventRepository;
+use App\Timeline\Infrastructure\Elasticsearch\SearchEventRepository;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Database\ConnectionInterface;
@@ -89,8 +89,8 @@ class TimelineServiceProvider extends ServiceProvider
             return $eloquentImageRepository;
         });
 
-        $this->app->singleton(SearchEventRepository::class, function () {
-            return new ESSearchEventRepository(resolve(\Elasticsearch\Client::class));
+        $this->app->singleton(SearchEventRepositoryInterface::class, function () {
+            return new SearchEventRepository(resolve(\Elasticsearch\Client::class));
         });
 
         $this->app->singleton(EventRepository::class, function () use (
@@ -165,7 +165,7 @@ class TimelineServiceProvider extends ServiceProvider
         $this->app->singleton(EventService::class, function () {
             return new EventService(
                 resolve(EventRepository::class),
-                resolve(SearchEventRepository::class),
+                resolve(SearchEventRepositoryInterface::class),
                 resolve(UserService::class)
             );
         });

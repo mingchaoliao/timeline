@@ -27,9 +27,10 @@ Route::post('/login', 'UserController@login');
 
 Route::group(['middleware' => ['auth:api']], function () {
     Route::get('/user/current', 'UserController@getCurrentUser');
+    Route::put('/user/{id}', 'UserController@update');
 });
 
-Route::group(['middleware' => ['auth:api', 'admin']], function () {
+Route::group(['middleware' => ['auth:api', 'editor', 'admin']], function () {
     Route::post('/timeline', 'TimelineController@create');
 
     Route::post('/event', 'EventController@create');
@@ -58,6 +59,9 @@ Route::group(['middleware' => ['auth:api', 'admin']], function () {
     Route::post('/image', 'ImageController@upload');
     Route::put('/image/{id}', 'ImageController@update');
 
+
+});
+
+Route::group(['middleware' => ['auth:api', 'admin']], function () {
     Route::get('/user', 'UserController@getAllUser');
-    Route::put('/user/{id}', 'UserController@update');
 });

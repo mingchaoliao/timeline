@@ -21,10 +21,12 @@
       <div class="col-12" *ngIf="!data.content" i18n="empty event content@@emptyEventContent">
         There is no content for this event.
       </div>
-      <div class="col-12" [innerHtml]="sanitizer.bypassSecurityTrustHtml(data.content)" *ngIf="data.content"></div>
+      <div class="col-12" [innerHtml]="sanitizer.bypassSecurityTrustHtml(data.content)" *ngIf="data.content">
+        loading ...
+      </div>
     </div>
     <div class="row">
-      <div class="col-12 text-center" *ngFor="let image of data.images">
+      <div class="col-lg-6 col-xs-12 text-center" *ngFor="let image of data.images">
         <div class="row">
           <div class="col-12 event-image-container">
             <img class="event-image"

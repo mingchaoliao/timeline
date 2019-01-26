@@ -17,6 +17,7 @@ use App\Timeline\Domain\Collections\CreateEventRequestCollection;
 use App\Timeline\Domain\Collections\EventCollection;
 use App\Timeline\Domain\Collections\EventIdCollection;
 use App\Timeline\Domain\Models\Event;
+use App\Timeline\Domain\Models\EventSearchResult;
 use App\Timeline\Domain\Repositories\EventRepository;
 use App\Timeline\Domain\Repositories\SearchEventRepository;
 use App\Timeline\Domain\Requests\CreateEventRequest;
@@ -27,6 +28,7 @@ use App\Timeline\Domain\ValueObjects\CatalogId;
 use App\Timeline\Domain\ValueObjects\EventId;
 use App\Timeline\Domain\ValueObjects\PeriodId;
 use App\Timeline\Exceptions\TimelineException;
+use Illuminate\Support\Facades\Log;
 
 class EventService
 {
@@ -84,19 +86,15 @@ class EventService
 
     /**
      * @param SearchEventRequest $request
-     * @return EventCollection
+     * @return EventSearchResult
      * @throws TimelineException
      */
-    public function search(SearchEventRequest $request): EventCollection
+    public function search(SearchEventRequest $request): EventSearchResult
     {
         try {
-            $eventIds = $this->searchRepository->search($request);
+            $result = $this->searchRepository->search($request);
 
-            $events = $this->eventRepository->getByIds($eventIds);
-
-            $events->setCount($eventIds->getCount());
-
-            return $events;
+            return $result;
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {

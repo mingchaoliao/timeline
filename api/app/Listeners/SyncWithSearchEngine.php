@@ -12,6 +12,7 @@ use App\Events\TimelinePeriodDeleted;
 use App\Events\TimelinePeriodUpdated;
 use App\Timeline\Domain\Services\EventService;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Support\Facades\Log;
 
 class SyncWithSearchEngine implements ShouldQueue
 {

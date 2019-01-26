@@ -176,6 +176,10 @@ class EventDate extends BaseModel
         ];
     }
 
+    public function asEndDate(): Carbon {
+
+    }
+
     public function toDateArray(): array
     {
         $arr = ['year' => $this->date->year];

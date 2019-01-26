@@ -20,6 +20,11 @@ use App\Timeline\Exceptions\TimelineException;
 class UserService
 {
     /**
+     * @var User
+     */
+    private static $currentUser = null;
+
+    /**
      * @var UserRepository
      */
     private $userRepository;
@@ -83,7 +88,11 @@ class UserService
     public function getCurrentUser(): ?User
     {
         try {
-            return $this->userRepository->getCurrentUser();
+            if(static::$currentUser === null) {
+                static::$currentUser = $this->userRepository->getCurrentUser();
+            }
+
+            return static::$currentUser;
         } catch (TimelineException $e) {
             throw $e;
         } catch (\Exception $e) {

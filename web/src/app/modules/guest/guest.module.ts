@@ -8,6 +8,8 @@ import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import {CoreModule} from '../core/core.module';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgSelectModule} from '@ng-select/ng-select';
+import { FacetedSearchBarComponent } from './components/faceted-search-bar/faceted-search-bar.component';
+import { EventsComponent } from './pages/events/events.component';
 
 @NgModule({
   imports: [
@@ -22,7 +24,9 @@ import {NgSelectModule} from '@ng-select/ng-select';
   declarations: [
     SearchEventFormComponent,
     AboutComponent,
-    SearchEventComponent
+    SearchEventComponent,
+    FacetedSearchBarComponent,
+    EventsComponent
   ]
 })
 export class GuestModule {

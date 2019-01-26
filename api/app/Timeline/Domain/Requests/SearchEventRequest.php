@@ -23,6 +23,10 @@ class SearchEventRequest
      */
     private $content;
     /**
+     * @var bool
+     */
+    private $isFuzzy;
+    /**
      * @var Carbon|null
      */
     private $startDateFrom;
@@ -39,13 +43,13 @@ class SearchEventRequest
      */
     private $endDateTo;
     /**
-     * @var PeriodId|null
+     * @var string|null
      */
-    private $periodId;
+    private $period;
     /**
-     * @var CatalogIdCollection
+     * @var array
      */
-    private $catalogIds;
+    private $catalogs;
     /**
      * @var int
      */
@@ -57,25 +61,27 @@ class SearchEventRequest
 
     /**
      * SearchEventRequest constructor.
-     * @param string|null $content
+     * @param null|string $content
+     * @param bool $isFuzzy
      * @param Carbon|null $startDateFrom
      * @param Carbon|null $startDateTo
      * @param Carbon|null $endDateFrom
      * @param Carbon|null $endDateTo
-     * @param PeriodId|null $periodId
-     * @param CatalogIdCollection $catalogIds
+     * @param string|null $period
+     * @param array $catalogs
      * @param int $page
      * @param int $pageSize
      */
-    public function __construct(?string $content, ?Carbon $startDateFrom, ?Carbon $startDateTo, ?Carbon $endDateFrom, ?Carbon $endDateTo, ?PeriodId $periodId, CatalogIdCollection $catalogIds, int $page = 1, int $pageSize = 10)
+    public function __construct(?string $content, bool $isFuzzy, ?Carbon $startDateFrom, ?Carbon $startDateTo, ?Carbon $endDateFrom, ?Carbon $endDateTo, ?string $period, array $catalogs, int $page, int $pageSize)
     {
         $this->content = $content;
+        $this->isFuzzy = $isFuzzy;
         $this->startDateFrom = $startDateFrom;
         $this->startDateTo = $startDateTo;
         $this->endDateFrom = $endDateFrom;
         $this->endDateTo = $endDateTo;
-        $this->periodId = $periodId;
-        $this->catalogIds = $catalogIds;
+        $this->period = $period;
+        $this->catalogs = $catalogs;
         $this->page = $page;
         $this->pageSize = $pageSize;
     }
@@ -83,14 +89,21 @@ class SearchEventRequest
     public static function createFromArray(array $data): self
     {
         $content = $data['content'] ?? null;
+        $isFuzzy = $data['isFuzzy'] ?? true;
         $startDateFrom = $data['startDateFrom'] ?? null;
         $startDateTo = $data['startDateTo'] ?? null;
         $endDateFrom = $data['endDateFrom'] ?? null;
         $endDateTo = $data['endDateTo'] ?? null;
-        $periodId = $data['periodId'] ?? null;
-        $catalogIds = $data['catalogIds'] ?? null;
+        $period = $data['period'] ?? null;
+        $catalogs = $data['catalogs'] ?? [];
         $page = $data['page'] ?? 1;
         $pageSize = $data['pageSize'] ?? 10;
+
+        if ($isFuzzy === 'true') {
+            $isFuzzy = true;
+        } elseif ($isFuzzy === 'false') {
+            $isFuzzy = false;
+        }
 
         try {
             if ($startDateFrom !== null) {
@@ -124,27 +137,15 @@ class SearchEventRequest
             throw TimelineException::ofInvalidEndDateTo($e);
         }
 
-        if ($periodId !== null) {
-            $periodId = new PeriodId($periodId);
-        }
-
-        if ($catalogIds !== null) {
-            if (!is_array($catalogIds)) {
-                throw TimelineException::ofCatalogIdsMustBeAnArray();
-            }
-            $catalogIds = CatalogIdCollection::fromValueArray($catalogIds);
-        } else {
-            $catalogIds = new CatalogIdCollection();
-        }
-
         return new static(
             $content,
+            $isFuzzy,
             $startDateFrom,
             $startDateTo,
             $endDateFrom,
             $endDateTo,
-            $periodId,
-            $catalogIds,
+            $period,
+            $catalogs,
             $page,
             $pageSize
         );
@@ -156,6 +157,14 @@ class SearchEventRequest
     public function getContent(): ?string
     {
         return $this->content;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isFuzzy(): bool
+    {
+        return $this->isFuzzy;
     }
 
     /**
@@ -191,19 +200,19 @@ class SearchEventRequest
     }
 
     /**
-     * @return PeriodId|null
+     * @return string|null
      */
-    public function getPeriodId(): ?PeriodId
+    public function getPeriod(): ?string
     {
-        return $this->periodId;
+        return $this->period;
     }
 
     /**
-     * @return CatalogIdCollection
+     * @return array
      */
-    public function getCatalogIds(): CatalogIdCollection
+    public function getCatalogs(): array
     {
-        return $this->catalogIds;
+        return $this->catalogs;
     }
 
     /**
