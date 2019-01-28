@@ -88,19 +88,19 @@ class EloquentEvent extends Model
     }
 
     /**
-     * @return Carbon
+     * @return string
      */
-    public function getStartDate(): Carbon
+    public function getStartDateStr(): string
     {
-        return $this->start_date;
+        return $this->start_date_str;
     }
 
     /**
-     * @return Carbon|null
+     * @return string|null
      */
-    public function getEndDate(): ?Carbon
+    public function getEndDateStr(): ?string
     {
-        return $this->end_date;
+        return $this->end_date_str;
     }
 
     public function getStartDateAttributeObj(): ?EloquentDateAttribute
@@ -151,26 +151,6 @@ class EloquentEvent extends Model
     public function getUpdatedAt(): ?Carbon
     {
         return $this->updated_at;
-    }
-
-    public function hasStartDateMonth(): bool
-    {
-        return $this->start_date_has_month;
-    }
-
-    public function hasStartDateDay(): bool
-    {
-        return $this->start_date_has_day;
-    }
-
-    public function hasEndDateMonth(): bool
-    {
-        return $this->end_date_has_month;
-    }
-
-    public function hasEndDateDay(): bool
-    {
-        return $this->end_date_has_day;
     }
 
     public function scopeByIds(Builder $query, array $ids)

@@ -225,8 +225,8 @@ class Event extends BaseModel
 
         return [
             'id' => $this->getId()->getValue(),
-            'startDate' => $this->getStartDate()->toArray(),
-            'endDate' => $this->getEndDate() === null ? null : $this->getEndDate()->toArray(),
+            'startDate' => (string)$this->getStartDate(),
+            'endDate' => $this->getEndDate() === null ? null : (string)$this->getEndDate(),
             'startDateAttribute' => $startDateAttribute,
             'endDateAttribute' => $endDateAttribute,
             'period' => $period,
@@ -242,51 +242,18 @@ class Event extends BaseModel
 
     public function toEsBody(): array
     {
-        $period = $this->getPeriod();
-        if ($period !== null) {
-            $period = $period->getValue();
-        }
-
-        $catalogs = $this->getCatalogCollection()
-            ->map(function (Catalog $catalog) {
-                return $catalog->getValue();
-            })->toArray();
-
-        $endDate = $this->getEndDate();
-
-        $startDate = $this->getStartDate();
-
-        if ($endDate === null) {
-            if ($startDate->hasDay()) {
-                $endDate = $startDate->getDate()->copy();
-            } elseif ($startDate->hasMonth()) {
-                $endDate = $startDate->getDate()->copy()->lastOfMonth();
-            } else {
-                $endDate = $startDate->getDate()->copy()->lastOfYear();
-            }
-            $hasEndDate = false;
-            $endDateHasMonth = false;
-            $endDateHasDay = false;
-        } else {
-            $endDateHasMonth = $endDate->hasMonth();
-            $endDateHasDay = $endDate->hasDay();
-            $endDate = $endDate->getDate();
-            $hasEndDate = true;
-        }
-
         $body = [
             'id' => $this->getId()->getValue(),
-            'startDate' => $startDate->getDate()->format('Y-m-d'),
-            'startDateHasMonth' => $startDate->hasMonth(),
-            'startDateHasDay' => $startDate->hasDay(),
+            'startDateStr' => $this->getStartDate()->getDate(),
+            'startDate' => $this->getStartDate()->toStartDate()->format('Y-m-d'),
             'startDateAttribute' => $this->getStartDateAttribute() === null ? null : $this->getStartDateAttribute()->getValue(),
-            'endDate' => $endDate->format('Y-m-d'),
-            'endDateHasMonth' => $endDateHasMonth,
-            'endDateHasDay' => $endDateHasDay,
-            'endDateAttribute' => $this->getEndDateAttribute() === null ? null : $this->getEndDateAttribute()->getValue(),
-            'period' => $period,
-            'catalogs' => $catalogs,
-            'hasEndDate' => $hasEndDate,
+            'endDateStr' => $this->getEndDate() === null ? null : $this->getEndDate()->getDate(),
+            'endDate' => $this->getEndDate() === null ? null : $this->getEndDate()->toEndDate()->format('Y-m-d'),
+            'period' => $this->getPeriod() === null ? null : (string)$this->getPeriod(),
+            'catalogs' => $this->getCatalogCollection()
+                ->map(function (Catalog $catalog) {
+                    return $catalog->getValue();
+                })->toArray(),
             'content' => $this->getContent()
         ];
 
@@ -319,6 +286,7 @@ class Event extends BaseModel
         }
 
         $period = $this->getPeriod();
+
         if ($period !== null) {
             $eventsConfig['group'] = $period->getValue();
         }

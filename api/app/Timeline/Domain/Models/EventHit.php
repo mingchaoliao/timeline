@@ -109,8 +109,8 @@ class EventHit extends BaseModel
     {
         return [
             'id' => $this->getId()->getValue(),
-            'startDate' => $this->getStartDate()->toArray(),
-            'endDate' => $this->getEndDate() === null ? null : $this->getEndDate()->toArray(),
+            'startDate' => (string)$this->getStartDate(),
+            'endDate' => $this->getEndDate() === null ? null : (string)$this->getEndDate(),
             'startDateAttribute' => $this->getStartDateAttribute(),
             'endDateAttribute' => $this->getEndDateAttribute(),
             'content' => $this->getContent()

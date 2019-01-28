@@ -52,11 +52,20 @@ class SearchEventRepository implements SearchEventRepositoryInterface
 
         $eventHits = $this->constructEventHits($hits);
         $eventHits->setCount($total);
+
+        $filterBucket = function (array $bucket) {
+            return $bucket['doc_count'] > 0;
+        };
+
         return new EventSearchResult(
             $eventHits,
             $this->constructBuckets($periodBuckets),
-            $this->constructBuckets($catalogBuckets),
-            $this->constructDateBuckets($dateBuckets)
+            $this->constructBuckets(
+                array_filter($catalogBuckets, $filterBucket)
+            ),
+            $this->constructDateBuckets(
+                array_filter($dateBuckets, $filterBucket)
+            )
         );
     }
 
@@ -74,7 +83,8 @@ class SearchEventRepository implements SearchEventRepositoryInterface
     {
         return new BucketCollection(array_map(function (array $bucket) {
             return new Bucket(
-                $bucket['key_as_string'],
+                Carbon::createFromFormat('Y-m-d', $bucket['key_as_string'])
+                    ->format('Y'),
                 $bucket['doc_count']
             );
         }, $buckets));
@@ -87,19 +97,11 @@ class SearchEventRepository implements SearchEventRepositoryInterface
             $hit = $hit['_source'];
             return new EventHit(
                 new EventId($hit['id']),
-                new EventDate(
-                    Carbon::createFromFormat('Y-m-d', $hit['startDate']),
-                    $hit['startDateHasMonth'],
-                    $hit['startDateHasDay']
-                ),
-                !$hit['hasEndDate'] ? null : new EventDate(
-                    Carbon::createFromFormat('Y-m-d', $hit['endDate']),
-                    $hit['endDateHasMonth'],
-                    $hit['endDateHasDay']
-                ),
+                new EventDate($hit['startDateStr']),
+                $hit['endDateStr'] === null ? null : new EventDate($hit['endDateStr']),
                 $hit['startDateAttribute'],
                 $hit['endDateAttribute'],
-                !$highlight ? $hit['content'] : implode(' ... ',$highlight['content'])
+                !$highlight ? $hit['content'] : implode(' ... ', $highlight['content'])
             );
         }, $hits));
     }

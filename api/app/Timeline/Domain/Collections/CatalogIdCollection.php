@@ -13,7 +13,11 @@ use App\Timeline\Domain\ValueObjects\CatalogId;
 
 class CatalogIdCollection extends SingleValueModelCollection
 {
-    public static function fromValueArray(array $ids): self {
+    public static function fromValueArray(?array $ids): ?self {
+        if($ids === null) {
+            return null;
+        }
+
         return new static(array_map(function(int $id) {
             return new CatalogId($id);
         },$ids));

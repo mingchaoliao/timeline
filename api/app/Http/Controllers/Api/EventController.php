@@ -46,6 +46,20 @@ class EventController extends Controller
 
     public function search(Request $request)
     {
+        $request->validate([
+            'content' => 'nullable',
+            'startDate' => 'nullable|date',
+            'startDateFrom' => 'nullable|date_format:Y-m-d',
+            'startDateTo' => 'nullable|date_format:Y-m-d',
+            'endDate' => 'nullable|date',
+            'endDateFrom' => 'nullable|date_format:Y-m-d',
+            'endDateTo' => 'nullable|date_format:Y-m-d',
+            'period' => 'nullable|string',
+            'catalogs.*' => 'nullable|string',
+            'page' => 'nullable|integer|gt:0',
+            'pageSize' => 'nullable|integer|gt:0'
+        ]);
+
         $searchRequest = SearchEventRequest::createFromArray($request->all());
 
         $result = $this->eventService->search($searchRequest);
@@ -56,6 +70,17 @@ class EventController extends Controller
 
     public function create(Request $request)
     {
+        $request->validate([
+            'startDate' => 'date',
+            'startDateAttributeId' => 'nullable|integer|gr:0',
+            'endDate' => 'nullable|date',
+            'endDateAttributeId' => 'nullable|integer|gr:0',
+            'periodId' => 'nullable|integer|gr:0',
+            'catalogIds.*' => 'nullable|integer|gr:0',
+            'content' => 'string',
+            'imageIds.*' => 'nullable|integer|gr:0',
+        ]);
+
         $createEventRequest = CreateEventRequest::fromArray($request->all());
 
         $event = $this->eventService->create($createEventRequest);

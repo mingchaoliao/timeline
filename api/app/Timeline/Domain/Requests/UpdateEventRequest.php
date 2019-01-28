@@ -12,10 +12,9 @@ use App\Timeline\Domain\Collections\CatalogIdCollection;
 use App\Timeline\Domain\Collections\ImageIdCollection;
 use App\Timeline\Domain\Models\EventDate;
 use App\Timeline\Domain\ValueObjects\DateAttributeId;
-use App\Timeline\Domain\ValueObjects\DateFormatId;
 use App\Timeline\Domain\ValueObjects\PeriodId;
 use App\Timeline\Exceptions\TimelineException;
-use Carbon\Carbon;
+use App\Timeline\Utils\Common;
 
 class UpdateEventRequest
 {
@@ -53,7 +52,7 @@ class UpdateEventRequest
     private $imageIds;
 
     /**
-     * CreateEventRequest constructor.
+     * UpdateEventRequest constructor.
      * @param EventDate $startDate
      * @param DateAttributeId|null $startDateAttributeId
      * @param EventDate|null $endDate
@@ -80,45 +79,28 @@ class UpdateEventRequest
      * @return UpdateEventRequest
      * @throws TimelineException
      */
-    public static function fromArray(array $data): self {
-        $startDate = $data['startDate'] ?? null;
+    public static function fromArray(array $data): self
+    {
+        $startDate = EventDate::createFromString($data['startDate']);
         $startDateAttributeId = $data['startDateAttributeId'] ?? null;
-        $endDate = $data['endDate'] ?? null;
+        $endDate = EventDate::createFromString($data['endDate'] ?? null);
         $endDateAttributeId = $data['endDateAttributeId'] ?? null;
-        $periodId = $data['periodId'] ?? null;
-        $catalogs = $data['catalogs'] ?? null;
-        $content = $data['content'] ?? null;
-        $images = $data['images'] ?? null;
+        $periodId = PeriodId::createFromString($data['periodId'] ?? null);
+        $catalogIds = CatalogIdCollection::fromValueArray(
+            Common::splitByComma($data['catalogIds'] ?? null)
+        );
+        $content = $data['content'];
+        $imageIds = ImageIdCollection::fromValueArray(
+            Common::splitByComma($data['imageIds'] ?? null)
+        );
 
-        // start date must be provided
-        if ($startDate === null) {
-            throw TimelineException::ofStartDateIsRequired();
-        }
 
-        $startDate = EventDate::createFromArray($startDate);
-
-        if($startDate->hasMonth() && $startDateAttributeId !== null) {
+        if (!$startDate->isAttributeAllowed()) {
             throw TimelineException::ofStartDateAttributeShouldNotBeSet();
         }
 
-        if($endDate !== null) {
-            $endDate = EventDate::createFromArray($endDate);
-
-            if($endDate->hasMonth() && $endDateAttributeId !== null) {
-                throw TimelineException::ofEndDateAttributeShouldNotBeSet();
-            }
-        }
-
-        $catalogIds = new CatalogIdCollection();
-
-        if ($catalogs !== null) {
-            $catalogIds = CatalogIdCollection::fromValueArray(array_unique($catalogs));
-        }
-
-        $imageIds = new ImageIdCollection();
-
-        if ($images !== null) {
-            $imageIds = ImageIdCollection::fromValueArray(array_unique($images));
+        if ($endDate !== null && !$endDate->isAttributeAllowed()) {
+            throw TimelineException::ofEndDateAttributeShouldNotBeSet();
         }
 
         return new static(

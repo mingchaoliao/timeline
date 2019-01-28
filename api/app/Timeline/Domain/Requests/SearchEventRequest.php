@@ -9,23 +9,20 @@
 namespace App\Timeline\Domain\Requests;
 
 
-use App\Timeline\Domain\Collections\CatalogIdCollection;
-use App\Timeline\Domain\ValueObjects\PeriodId;
-use App\Timeline\Exceptions\TimelineException;
+use App\Timeline\Domain\Models\EventDate;
+use App\Timeline\Utils\Common;
 use Carbon\Carbon;
 
 class SearchEventRequest
 {
-    private const FORMAT = 'Y-m-d';
-
     /**
      * @var string|null
      */
     private $content;
     /**
-     * @var bool
+     * @var EventDate|null
      */
-    private $isFuzzy;
+    private $startDate;
     /**
      * @var Carbon|null
      */
@@ -34,6 +31,10 @@ class SearchEventRequest
      * @var Carbon|null
      */
     private $startDateTo;
+    /**
+     * @var EventDate|null
+     */
+    private $endDate;
     /**
      * @var Carbon|null
      */
@@ -62,22 +63,24 @@ class SearchEventRequest
     /**
      * SearchEventRequest constructor.
      * @param null|string $content
-     * @param bool $isFuzzy
+     * @param EventDate|null $startDate
      * @param Carbon|null $startDateFrom
      * @param Carbon|null $startDateTo
+     * @param EventDate|null $endDate
      * @param Carbon|null $endDateFrom
      * @param Carbon|null $endDateTo
-     * @param string|null $period
+     * @param null|string $period
      * @param array $catalogs
      * @param int $page
      * @param int $pageSize
      */
-    public function __construct(?string $content, bool $isFuzzy, ?Carbon $startDateFrom, ?Carbon $startDateTo, ?Carbon $endDateFrom, ?Carbon $endDateTo, ?string $period, array $catalogs, int $page, int $pageSize)
+    public function __construct(?string $content, ?EventDate $startDate, ?Carbon $startDateFrom, ?Carbon $startDateTo, ?EventDate $endDate, ?Carbon $endDateFrom, ?Carbon $endDateTo, ?string $period, array $catalogs, int $page, int $pageSize)
     {
         $this->content = $content;
-        $this->isFuzzy = $isFuzzy;
+        $this->startDate = $startDate;
         $this->startDateFrom = $startDateFrom;
         $this->startDateTo = $startDateTo;
+        $this->endDate = $endDate;
         $this->endDateFrom = $endDateFrom;
         $this->endDateTo = $endDateTo;
         $this->period = $period;
@@ -86,62 +89,31 @@ class SearchEventRequest
         $this->pageSize = $pageSize;
     }
 
+    /**
+     * @param array $data
+     * @return SearchEventRequest
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
     public static function createFromArray(array $data): self
     {
         $content = $data['content'] ?? null;
-        $isFuzzy = $data['isFuzzy'] ?? true;
-        $startDateFrom = $data['startDateFrom'] ?? null;
-        $startDateTo = $data['startDateTo'] ?? null;
-        $endDateFrom = $data['endDateFrom'] ?? null;
-        $endDateTo = $data['endDateTo'] ?? null;
+        $startDate = $data['startDate'] ?? null;
+        $startDateFrom = Common::createDateFromISOString($data['startDateFrom'] ?? null);
+        $startDateTo = Common::createDateFromISOString($data['$startDateTo'] ?? null);
+        $endDate = $data['endDate'] ?? null;
+        $endDateFrom = Common::createDateFromISOString($data['$endDateFrom'] ?? null);
+        $endDateTo = Common::createDateFromISOString($data['$endDateTo'] ?? null);
         $period = $data['period'] ?? null;
-        $catalogs = $data['catalogs'] ?? [];
+        $catalogs = Common::splitByComma($data['catalogs'] ?? null);
         $page = $data['page'] ?? 1;
         $pageSize = $data['pageSize'] ?? 10;
 
-        if ($isFuzzy === 'true') {
-            $isFuzzy = true;
-        } elseif ($isFuzzy === 'false') {
-            $isFuzzy = false;
-        }
-
-        try {
-            if ($startDateFrom !== null) {
-                $startDateFrom = Carbon::createFromFormat(static::FORMAT, $startDateFrom);
-            }
-        } catch (\InvalidArgumentException $e) {
-            throw TimelineException::ofInvalidStartDateFrom($e);
-        }
-
-        try {
-            if ($startDateTo !== null) {
-                $startDateTo = Carbon::createFromFormat(static::FORMAT, $startDateTo);
-            }
-        } catch (\InvalidArgumentException $e) {
-            throw TimelineException::ofInvalidStartDateTo($e);
-        }
-
-        try {
-            if ($endDateFrom !== null) {
-                $endDateFrom = Carbon::createFromFormat(static::FORMAT, $endDateFrom);
-            }
-        } catch (\InvalidArgumentException $e) {
-            throw TimelineException::ofInvalidEndDateFrom($e);
-        }
-
-        try {
-            if ($endDateTo !== null) {
-                $endDateTo = Carbon::createFromFormat(static::FORMAT, $endDateTo);
-            }
-        } catch (\InvalidArgumentException $e) {
-            throw TimelineException::ofInvalidEndDateTo($e);
-        }
-
         return new static(
             $content,
-            $isFuzzy,
+            EventDate::createFromString($startDate),
             $startDateFrom,
             $startDateTo,
+            EventDate::createFromString($endDate),
             $endDateFrom,
             $endDateTo,
             $period,
@@ -152,7 +124,7 @@ class SearchEventRequest
     }
 
     /**
-     * @return string|null
+     * @return null|string
      */
     public function getContent(): ?string
     {
@@ -160,11 +132,11 @@ class SearchEventRequest
     }
 
     /**
-     * @return bool
+     * @return EventDate|null
      */
-    public function isFuzzy(): bool
+    public function getStartDate(): ?EventDate
     {
-        return $this->isFuzzy;
+        return $this->startDate;
     }
 
     /**
@@ -184,6 +156,14 @@ class SearchEventRequest
     }
 
     /**
+     * @return EventDate|null
+     */
+    public function getEndDate(): ?EventDate
+    {
+        return $this->endDate;
+    }
+
+    /**
      * @return Carbon|null
      */
     public function getEndDateFrom(): ?Carbon
@@ -200,7 +180,7 @@ class SearchEventRequest
     }
 
     /**
-     * @return string|null
+     * @return null|string
      */
     public function getPeriod(): ?string
     {

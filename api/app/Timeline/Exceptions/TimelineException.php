@@ -76,7 +76,6 @@ class TimelineException extends \Exception implements HttpExceptionInterface
     public const UNABLE_TO_RETRIEVE_EVENT_BY_ID = 10055;
     public const UNABLE_TO_RETRIEVE_EVENTS = 10056;
     public const START_DATE_IS_REQUIRED = 10057;
-    public const INVALID_EVENT_DATE = 10058;
     public const MONTH_MUST_BE_SET_WHEN_DAY_IS_PRESENT = 10059;
     public const START_DATE_ATTRIBUTE_SHOULD_NOT_BE_SET = 10060;
     public const END_DATE_ATTRIBUTE_SHOULD_NOT_BE_SET = 10061;
@@ -94,6 +93,7 @@ class TimelineException extends \Exception implements HttpExceptionInterface
     public const INVALID_USER_ID = 10072;
     public const IMAGE_WITH_ID_DOES_NOT_EXIST = 10073;
     public const INVALID_IMAGE_ID = 10074;
+    public const INVALID_DATE_STRING = 10075;
 
     /**
      * @var int
@@ -512,26 +512,6 @@ class TimelineException extends \Exception implements HttpExceptionInterface
         return new static('unable to retrieve events', static::UNABLE_TO_RETRIEVE_EVENTS, 500, [], $previous);
     }
 
-    public static function ofStartDateIsRequired(\Throwable $previous = null): self
-    {
-        return new static('event start date must be provided', static::START_DATE_IS_REQUIRED, 400, [], $previous);
-    }
-
-    public static function ofInvalidEventDate(int $year, ?int $month, ?int $day, \Throwable $previous = null): self
-    {
-        return new static(sprintf(
-            'invalid date (year: "%s", month: "%s", day: "%s")',
-            strval($year),
-            $month === null ? '' : strval($month),
-            $day === null ? '' : strval($day)
-        ), static::INVALID_EVENT_DATE, 400, [], $previous);
-    }
-
-    public static function ofMonthMustBeSetWhenDayIsPresent(\Throwable $previous = null): self
-    {
-        return new static('month must be set when day is present', static::MONTH_MUST_BE_SET_WHEN_DAY_IS_PRESENT, 400, [], $previous);
-    }
-
     public static function ofStartDateAttributeShouldNotBeSet(\Throwable $previous = null): self
     {
         return new static('event start date attribute should not be set when month/day is present', static::START_DATE_ATTRIBUTE_SHOULD_NOT_BE_SET, 400, [], $previous);
@@ -667,5 +647,13 @@ class TimelineException extends \Exception implements HttpExceptionInterface
             'image with id "%s" does not exist',
             (string)$id
         ), static::IMAGE_WITH_ID_DOES_NOT_EXIST, 404, [], $previous);
+    }
+
+    public static function ofInvalidDateString(string $str, \Throwable $previous = null): self
+    {
+        return new static(sprintf(
+            'date string "%s" is invalid',
+            $str
+        ), static::INVALID_DATE_STRING, 400, [], $previous);
     }
 }

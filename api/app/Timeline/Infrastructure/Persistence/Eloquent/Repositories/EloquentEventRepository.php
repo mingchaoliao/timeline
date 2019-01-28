@@ -389,21 +389,11 @@ class EloquentEventRepository implements EventRepository
                 ->constructDateAttribute($endDateAttribute);
         }
 
-        $startDate = new EventDate(
-            $eloquentEvent->getStartDate(),
-            $eloquentEvent->hasStartDateMonth(),
-            $eloquentEvent->hasStartDateDay(),
-            true
-        );
+        $startDate = new EventDate($eloquentEvent->getStartDateStr());
 
         $endDate = null;
-        if ($eloquentEvent->getEndDate()) {
-            $endDate = new EventDate(
-                $eloquentEvent->getEndDate(),
-                $eloquentEvent->hasEndDateMonth(),
-                $eloquentEvent->hasEndDateDay(),
-                false
-            );
+        if ($eloquentEvent->getEndDateStr()) {
+            $endDate = new EventDate($eloquentEvent->getEndDateStr());
         }
 
         $period = $eloquentEvent->getPeriod();

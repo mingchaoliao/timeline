@@ -126,27 +126,18 @@ class AddForeignKeyConstraints extends Migration
                                 'type' => 'date',
                                 'format' => 'yyyy-MM-dd'
                             ],
-                            'startDateHasMonth' => [
-                                'type' => 'boolean',
-                            ],
-                            'startDateHasDay' => [
-                                'type' => 'boolean',
+                            'startDateStr' => [
+                                'type' => 'keyword',
                             ],
                             'startDateAttribute' => [
                                 'type' => 'keyword',
-                            ],
-                            'hasEndDate' => [
-                                'type' => 'boolean',
                             ],
                             'endDate' => [
                                 'type' => 'date',
                                 'format' => 'yyyy-MM-dd'
                             ],
-                            'endDateHasMonth' => [
-                                'type' => 'boolean',
-                            ],
-                            'endDateHasDay' => [
-                                'type' => 'boolean',
+                            'endDateStr' => [
+                                'type' => 'keyword',
                             ],
                             'endDateAttribute' => [
                                 'type' => 'keyword',
