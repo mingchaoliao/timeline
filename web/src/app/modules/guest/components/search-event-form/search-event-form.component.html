@@ -84,7 +84,7 @@
                 <label for="period" i18n="period">Period</label>
                 <ng-select [items]="periodOptions"
                            bindLabel="value"
-                           bindValue="id"
+                           bindValue="value"
                            formControlName="period"
                            notFoundText="No items found."
                            i18n-notFoundText
@@ -99,7 +99,7 @@
                 <label for="catalogs" i18n="catalog">Catalogs</label>
                 <ng-select [items]="catalogOptions"
                            bindLabel="value"
-                           bindValue="id"
+                           bindValue="value"
                            [multiple]="true"
                            formControlName="catalogs"
                            notFoundText="No items found."

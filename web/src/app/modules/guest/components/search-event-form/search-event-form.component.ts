@@ -7,10 +7,6 @@ import {PeriodService} from '../../../core/shared/services/period.service';
 import {CatalogService} from '../../../core/shared/services/catalog.service';
 import {Notification} from '../../../core/shared/models/notification';
 import {NotificationEmitter} from '../../../core/shared/events/notificationEmitter';
-import {NgbDateStruct} from '@ng-bootstrap/ng-bootstrap';
-import {NgOption} from '@ng-select/ng-select';
-import {Typeahead} from '../../../core/shared/models/typeahead';
-import {EventDate} from '../../../core/shared/models/event';
 
 export function dateValidator(): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {
@@ -73,11 +69,11 @@ export class SearchEventFormComponent implements OnInit {
         const query = this.route.snapshot.queryParams;
 
         if (this.periodOptions && this.periodOptions.length) {
-          this.setPeriodById(query['period']);
+          this.setPeriodByLabel(query['period']);
         }
 
         if (this.catalogOptions && this.catalogOptions.length) {
-          this.setCatalogByIds(query['catalogs']);
+          this.setCatalogByLabels(query['catalogs']);
         }
       }
     });
@@ -90,7 +86,7 @@ export class SearchEventFormComponent implements OnInit {
         NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve periods'));
       },
       () => {
-        this.setPeriodById(this.route.snapshot.queryParams['period']);
+        this.setPeriodByLabel(this.route.snapshot.queryParams['period']);
       }
     );
 
@@ -102,15 +98,15 @@ export class SearchEventFormComponent implements OnInit {
         NotificationEmitter.emit(Notification.error(e.error.message, 'Unable to retrieve catalogs'));
       },
       () => {
-        this.setCatalogByIds(this.route.snapshot.queryParams['catalogs']);
+        this.setCatalogByLabels(this.route.snapshot.queryParams['catalogs']);
       }
     );
   }
 
-  setPeriodById(id: string) {
-    if (id) {
+  setPeriodByLabel(label: string) {
+    if (label) {
       setTimeout(() => {
-        const option = this.findNgOptionById(this.periodNgSelect.itemsList.items, parseInt(id));
+        const option = this.periodNgSelect.itemsList.findByLabel(label);
         if (option) {
           this.periodNgSelect.select(option);
         }
@@ -118,27 +114,18 @@ export class SearchEventFormComponent implements OnInit {
     }
   }
 
-  setCatalogByIds(catalogStr: string) {
+  setCatalogByLabels(labelStr: string) {
     setTimeout(() => {
-      if (catalogStr) {
-        const ids = catalogStr.split(',').map((catalog) => catalog.trim());
-        for (const id of ids) {
-          const option = this.findNgOptionById(this.catalogNgSelect.itemsList.items, parseInt(id));
+      if (labelStr) {
+        const labels = labelStr.split(',');
+        for (const label of labels) {
+          const option = this.catalogNgSelect.itemsList.findByLabel(label);
           if (option) {
             this.catalogNgSelect.select(option);
           }
         }
       }
     }, 10);
-  }
-
-  findNgOptionById(options: Array<NgOption>, id: number): NgOption {
-    for (const option of options) {
-      if ((<Typeahead>option.value).id === id) {
-        return option;
-      }
-    }
-    return null;
   }
 
   ngOnInit() {

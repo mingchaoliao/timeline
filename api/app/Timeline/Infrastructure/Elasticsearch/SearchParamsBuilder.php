@@ -29,8 +29,10 @@ class SearchParamsBuilder
 
     public static function createFromRequest(SearchEventRequest $request): self
     {
+        $startDate = $request->getStartDate();
         $startDateFrom = $request->getStartDateFrom();
         $startDateTo = $request->getStartDateTo();
+        $endDate = $request->getEndDate();
         $endDateFrom = $request->getEndDateFrom();
         $endDateTo = $request->getEndDateTo();
         $period = $request->getPeriod();
@@ -42,7 +44,19 @@ class SearchParamsBuilder
 
         $query = [];
 
-        if ($startDateFrom !== null || $startDateTo !== null) {
+        if($startDate !== null) {
+            $config = [
+                'range' => [
+                    'startDate' => [
+                        'format' => 'yyyy-MM-dd'
+                    ]
+                ]
+            ];
+            $config['range']['startDate']['gte'] = $startDate->toStartDate()->format('Y-m-d');
+            $config['range']['startDate']['lte'] = $startDate->toEndDate()->format('Y-m-d');
+
+            $query['bool']['must'][] = $config;
+        } elseif ($startDateFrom !== null || $startDateTo !== null) {
             $config = [
                 'range' => [
                     'startDate' => [
@@ -59,7 +73,19 @@ class SearchParamsBuilder
             $query['bool']['must'][] = $config;
         }
 
-        if ($endDateFrom !== null || $endDateTo !== null) {
+        if($endDate !== null) {
+            $config = [
+                'range' => [
+                    'endDate' => [
+                        'format' => 'yyyy-MM-dd'
+                    ]
+                ]
+            ];
+            $config['range']['endDate']['gte'] = $endDate->toStartDate()->format('Y-m-d');
+            $config['range']['endDate']['lte'] = $endDate->toEndDate()->format('Y-m-d');
+
+            $query['bool']['must'][] = $config;
+        } elseif ($endDateFrom !== null || $endDateTo !== null) {
             $config = [
                 'range' => [
                     'endDate' => [
@@ -145,7 +171,7 @@ class SearchParamsBuilder
 
         if ($content === null) {
             $params['body']['sort'] = [
-                'startDate' => 'asc'
+                'startDate' => 'desc'
             ];
         }
 
