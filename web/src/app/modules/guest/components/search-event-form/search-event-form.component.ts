@@ -1,6 +1,6 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import * as moment from 'moment';
-import {AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators} from '@angular/forms';
+import {AbstractControl, FormBuilder, FormGroup, ValidatorFn} from '@angular/forms';
 import {CommonService} from '../../../core/shared/services/common.service';
 import {ActivatedRoute, NavigationEnd, NavigationExtras, Router} from '@angular/router';
 import {PeriodService} from '../../../core/shared/services/period.service';
@@ -52,12 +52,8 @@ export class SearchEventFormComponent implements OnInit {
       }
 
       this.searchEventForm = this.formBuilder.group({
-        'startDate': [null, [
-          dateValidator()
-        ]],
-        'endDate': [null, [
-          dateValidator()
-        ]],
+        'startDate': [query['startDate'], []],
+        'endDate': [query['endDate'], []],
         'content': [query['content'], []],
         'period': [null, []],
         'catalogs': [null, []],
@@ -143,19 +139,11 @@ export class SearchEventFormComponent implements OnInit {
       const content = this.searchEventForm.value.content;
 
       if (startDate) {
-        queryParams['startDate'] = moment({
-          year: startDate['year'],
-          month: startDate['month'] - 1,
-          day: startDate['day']
-        }).format('YYYY-MM-DD');
+        queryParams['startDate'] = startDate;
       }
 
       if (endDate) {
-        queryParams['endDateFrom'] = moment({
-          year: endDate['year'],
-          month: endDate['month'] - 1,
-          day: endDate['day']
-        }).format('YYYY-MM-DD');
+        queryParams['endDate'] = endDate;
       }
 
       if (period) {

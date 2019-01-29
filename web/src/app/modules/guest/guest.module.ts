@@ -8,9 +8,9 @@ import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import {CoreModule} from '../core/core.module';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgSelectModule} from '@ng-select/ng-select';
-import { FacetedSearchBarComponent } from './components/faceted-search-bar/faceted-search-bar.component';
-import { EventsComponent } from './pages/events/events.component';
-import { EventHitCardComponent } from './components/event-hit-card/event-hit-card.component';
+import {FacetedSearchBarComponent} from './components/faceted-search-bar/faceted-search-bar.component';
+import {EventsComponent} from './pages/events/events.component';
+import { EventDatepickerComponent } from './components/event-datepicker/event-datepicker.component';
 
 @NgModule({
   imports: [
@@ -28,7 +28,7 @@ import { EventHitCardComponent } from './components/event-hit-card/event-hit-car
     SearchEventComponent,
     FacetedSearchBarComponent,
     EventsComponent,
-    EventHitCardComponent
+    EventDatepickerComponent
   ]
 })
 export class GuestModule {

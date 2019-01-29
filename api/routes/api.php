@@ -30,7 +30,7 @@ Route::group(['middleware' => ['auth:api']], function () {
     Route::put('/user/{id}', 'UserController@update');
 });
 
-Route::group(['middleware' => ['auth:api', 'editor', 'admin']], function () {
+Route::group(['middleware' => ['auth:api', 'editor']], function () {
     Route::post('/timeline', 'TimelineController@create');
 
     Route::post('/event', 'EventController@create');

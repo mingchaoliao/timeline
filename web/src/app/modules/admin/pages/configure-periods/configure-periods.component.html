@@ -15,7 +15,7 @@
                      class="form-control" id="value_{{ period.id }}" [value]="period.value">
             </div>
             <div class="col-12"># of associated events: <a routerLink="/app/event/search"
-                                                           [queryParams]="{period: period.id}">{{
+                                                           [queryParams]="{period: period.value}">{{
               period.numberOfEvents }}</a></div>
             <div class="col-12">
               Created At: {{ period.createdAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }} by {{ period.createUserName }}

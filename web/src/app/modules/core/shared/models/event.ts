@@ -15,6 +15,7 @@ export class EventDate {
 
   private readonly _date: string;
   private readonly _format: string;
+  private readonly _moment;
 
   public static validate(str: string): boolean {
     return this.getFormat(str) !== null;
@@ -38,6 +39,7 @@ export class EventDate {
       throw new Error(`Invalid event date ${date}`);
     }
     this._format = format;
+    this._moment = moment(date, format);
   }
 
   get date(): string {
@@ -56,13 +58,22 @@ export class EventDate {
     return this._format === EventDate.FORMAT_YEAR;
   }
 
-  public toNgbDate(): NgbDateStruct {
-    const date = moment(this._date, this._format);
-    return {
-      year: date.year(),
-      month: date.month() + 1,
-      day: date.date()
-    };
+  public getYear(): number {
+    return this._moment.year();
+  }
+
+  public getMonth(): number {
+    if (this._format === EventDate.FORMAT_YEAR) {
+      return null;
+    }
+    return this._moment.month() + 1;
+  }
+
+  public getDay(): number {
+    if (this._format !== EventDate.FORMAT_YEAR_MONTH_DAY) {
+      return null;
+    }
+    return this._moment.day();
   }
 }
 

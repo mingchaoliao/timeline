@@ -13,12 +13,11 @@ import {FacetLink} from '../../components/faceted-search-bar/faceted-search-bar.
   templateUrl: './search-event.component.html',
   styleUrls: ['./search-event.component.css']
 })
-export class SearchEventComponent implements OnInit, AfterViewInit, OnDestroy {
+export class SearchEventComponent implements OnInit, AfterViewInit {
   public result: EventSearchResult;
   public pageSize = 10;
   public total = 10;
   public page = 1;
-  public routerSubscriber = null;
 
   constructor(
     private common: CommonService,
@@ -26,19 +25,21 @@ export class SearchEventComponent implements OnInit, AfterViewInit, OnDestroy {
     private router: Router,
     private eventService: EventService
   ) {
-    this.routerSubscriber = this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd && event.url.startsWith('/app/event/search')) {
-        const params = this.route.snapshot.queryParams;
-        this.page = params['page'] ? parseInt(params['page'], 10) : 1;
+    this.route.queryParams.subscribe(
+      params => {
         this.search(params);
       }
-    });
+    );
   }
 
-  ngOnDestroy() {
-    if (this.routerSubscriber) {
-      this.routerSubscriber.unsubscribe();
+  getFromRoute(key: string): Array<string> {
+    const value: string = this.route.snapshot.queryParams[key];
+
+    if (value) {
+      return value.split(',');
     }
+
+    return [];
   }
 
   public onPageChange(page) {
@@ -68,17 +69,17 @@ export class SearchEventComponent implements OnInit, AfterViewInit, OnDestroy {
     const value = facetLink.value;
     if (facetLink.facetIndex === 0) { // Year
       this.router.navigate([], {
-        queryParams: {startDate: value},
+        queryParams: {startDate: value, page: 1},
         queryParamsHandling: 'merge'
       });
     } else if (facetLink.facetIndex === 1) { // Period
       this.router.navigate([], {
-        queryParams: {period: value},
+        queryParams: {period: value, page: 1},
         queryParamsHandling: 'merge'
       });
     } else if (facetLink.facetIndex === 2) { // Catalog
       this.router.navigate([], {
-        queryParams: {catalogs: this.mergeCatalogs(this.route.snapshot.queryParams['catalogs'], value)},
+        queryParams: {catalogs: this.mergeCatalogs(this.route.snapshot.queryParams['catalogs'], value), page: 1},
         queryParamsHandling: 'merge'
       });
     }
@@ -114,6 +115,11 @@ export class SearchEventComponent implements OnInit, AfterViewInit, OnDestroy {
         page
       ).subscribe(
         result => {
+          this.pageSize = 10;
+          this.page = this.route.snapshot.queryParams['page'];
+          if (!this.page) {
+            this.page = 1;
+          }
           this.result = result;
           this.total = result.total;
         },

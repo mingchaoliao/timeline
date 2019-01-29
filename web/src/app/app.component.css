@@ -11,3 +11,15 @@ header {
   line-height: 1rem;
   padding: 1rem;
 }
+
+.nav-item {
+  opacity: 0.5;
+}
+
+.nav-item-active, .nav-item:hover, .show > .nav-item {
+  opacity: 1;
+}
+
+.nav-item.btn-link {
+  text-decoration: none;
+}

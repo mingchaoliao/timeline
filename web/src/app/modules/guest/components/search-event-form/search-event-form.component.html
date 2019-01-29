@@ -17,64 +17,14 @@
           <div class="row">
             <div class="col-6">
               <div class="form-group">
-                <label i18n="start date">Start Date</label>
-                <div class="input-group">
-                  <input
-                    class="form-control"
-                    type="text"
-                    ngbDatepicker
-                    i18n-placeholder
-                    [autoClose]="true"
-                    placeholder="YYYY or YYYY-MM or YYYY-MM-DD, e.g. 1915 or 1920-10 or 1935-03-14"
-                    #startDate="ngbDatepicker"
-                    [startDate]="{year: 1900, month: 1, day: 1}"
-                    [minDate]="{year: 1800, month: 1, day: 1}"
-                    [maxDate]="{year: 2030, month: 1, day: 1}"
-                    formControlName="startDate"
-                    id="startDate"
-                  />
-                  <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" (click)="startDate.toggle()" type="button"
-                            style="border-color: #ced4da">
-                      <i class="far fa-calendar-alt"></i>
-                    </button>
-                  </div>
-                </div>
-                <div class="error-container"
-                     *ngIf="searchEventForm.controls['startDate'].dirty && !searchEventForm.controls['startDate'].valid">
-                  <div>Date is invalid</div>
-                </div>
+                <label i18n="start date" for="startDate">Start Date</label>
+                <app-event-datepicker id="startDate" formControlName="startDate"></app-event-datepicker>
               </div>
             </div>
             <div class="col-6">
               <div class="form-group">
-                <label i18n="end date">End Date</label>
-                <div class="input-group">
-                  <input
-                    class="form-control"
-                    type="text"
-                    ngbDatepicker
-                    i18n-placeholder
-                    [autoClose]="true"
-                    placeholder="YYYY or YYYY-MM or YYYY-MM-DD, e.g. 1915 or 1920-10 or 1935-03-14"
-                    #endDate="ngbDatepicker"
-                    [startDate]="{year: 1900, month: 1, day: 1}"
-                    [minDate]="{year: 1800, month: 1, day: 1}"
-                    [maxDate]="{year: 2030, month: 1, day: 1}"
-                    formControlName="endDate"
-                    id="endDate"
-                  />
-                  <div class="input-group-append">
-                    <button class="btn btn-outline-secondary" (click)="endDate.toggle()" type="button"
-                            style="border-color: #ced4da">
-                      <i class="far fa-calendar-alt"></i>
-                    </button>
-                  </div>
-                </div>
-                <div class="error-container"
-                     *ngIf="searchEventForm.controls['endDate'].dirty && !searchEventForm.controls['endDate'].valid">
-                  <div>Date is invalid</div>
-                </div>
+                <label i18n="end date" for="endDate">End Date</label>
+                <app-event-datepicker id="endDate" formControlName="endDate"></app-event-datepicker>
               </div>
             </div>
           </div>

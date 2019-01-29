@@ -113,20 +113,22 @@ class SearchParamsBuilder
         if (count($catalogs) !== 0) {
             foreach ($catalogs as $catalog) {
                 $query['bool']['must'][] = [
-                    [
-                        'term' => [
-                            'catalogs' => $catalog
-                        ]
+                    'term' => [
+                        'catalogs' => $catalog
                     ]
                 ];
             }
         }
 
         if ($content !== null) {
-            $query['bool']['must']['match']['content'] = [
-                'query' => $content,
-                'fuzziness' => 'AUTO',
-                'prefix_length' => 2
+            $query['bool']['must'][] = [
+                'match' => [
+                    'content' => [
+                        'query' => $content,
+                        'fuzziness' => 'AUTO',
+                        'prefix_length' => 2
+                    ]
+                ]
             ];
         }
 

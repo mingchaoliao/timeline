@@ -1,0 +1,45 @@
+<div class="row">
+  <div class="col-12">
+    <form [formGroup]="form">
+      <div class="row">
+        <div class="col pr-1">
+          <label class="sr-only" for="year">Year</label>
+          <select id="year"
+                  class="form-control form-control-sm"
+                  (change)="onYearChange($event)"
+                  formControlName="year">
+            <option value=""></option>
+            <option [value]="option.value"
+                    *ngFor="let option of yearOptions">{{ option.displayedValue }}
+            </option>
+          </select>
+        </div>
+        <div class="col pl-1 pr-1">
+          <label class="sr-only" for="month">Month</label>
+          <select id="month"
+                  class="form-control form-control-sm"
+                  (change)="onMonthChange($event)"
+                  formControlName="month">
+            <option value=""></option>
+            <option [value]="option.value"
+                    *ngFor="let option of monthOptions">{{ option.displayedValue }}
+            </option>
+          </select>
+        </div>
+        <div class="col pl-1">
+          <label class="sr-only" for="day">Day</label>
+          <select id="day"
+                  class="form-control form-control-sm"
+                  (change)="onValueChange()"
+                  formControlName="day">
+            <option value=""></option>
+            <option [value]="option.value"
+                    *ngFor="let option of dayOptions">{{ option.displayedValue }}
+            </option>
+          </select>
+        </div>
+      </div>
+    </form>
+
+  </div>
+</div>

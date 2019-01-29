@@ -2,26 +2,29 @@
   <app-search-event-form></app-search-event-form>
   <ng-container *ngIf="result">
     <div class="row">
-      <div class="col-4" style="border-right: 1px solid #DDDDDD;">
+      <div class="col-3" style="border-right: 1px solid #DDDDDD;">
         <app-faceted-search-bar
           [facets]="[
             {
               buckets: result.dates.reverse(),
               name: 'Year',
               numDisplayed: 5,
-              increment: 5
+              increment: 5,
+              disable: getFromRoute('startDate')
             },
             {
               buckets: result.periods,
               name: 'Period',
               numDisplayed: 5,
-              increment: 5
+              increment: 5,
+              disable: getFromRoute('period')
             },
             {
               buckets: result.catalogs,
               name: 'Catalog',
               numDisplayed: 5,
-              increment: 5
+              increment: 5,
+              disable: getFromRoute('catalogs')
             }
           ]"
           (onFacetChange)="onFacetChange($event)"
@@ -35,7 +38,9 @@
         </div>
         <div class="row">
           <div class="col-12" style="margin-top: 15px" *ngFor="let hit of result.hits">
-            <app-event-hit-card [hit]="hit"></app-event-hit-card>
+            <app-event-card
+              [hit]="hit"
+              [isDetailView]="false"></app-event-card>
           </div>
         </div>
         <div class="row" style="margin-top: 15px;" *ngIf="result.hits.length">

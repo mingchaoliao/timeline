@@ -2,7 +2,6 @@ import {Component, forwardRef, OnInit} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {CommonService} from '../../../core/shared/services/common.service';
 import {Url} from '../../../core/shared/classes/url';
-import {UserService} from '../../../core/shared/services/user.service';
 import {ImageService} from '../../../core/shared/services/image.service';
 import {Notification} from '../../../core/shared/models/notification';
 import {NotificationEmitter} from '../../../core/shared/events/notificationEmitter';

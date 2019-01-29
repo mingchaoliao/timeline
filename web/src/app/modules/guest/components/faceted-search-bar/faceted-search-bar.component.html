@@ -1,27 +1,28 @@
 <div class="row">
   <div class="col-12" *ngFor="let facet of facets; index as facetIndex;">
-    <div class="row mb-2" *ngIf="facet.buckets.length > 1">
+    <div class="row mb-2" *ngIf="facet.buckets.length">
       <div class="col-12">
         {{ facet.name }}:
       </div>
-      <div class="col-12" *ngFor="let bucket of facet.buckets | slice:0:facet.numDisplayed">
+      <div class="col-12" *ngFor="let bucket of facet.buckets | slice:0:status[facetIndex]">
         <button class="btn btn-link text-left p-0 pl-2"
                 (click)="onChange.emit({facetIndex: facetIndex, value: bucket.value})"
+                [disabled]="facet.disable.indexOf(bucket.value) >= 0 || facet.buckets.length === 1"
                 style="white-space: normal; font-size: 0.85rem;">
           {{ bucket.value }} ({{ bucket.count }})
         </button>
       </div>
       <div class="col-12">
-        <button *ngIf="facet.numDisplayed < facet.buckets.length"
+        <button *ngIf="status[facetIndex] < facet.buckets.length"
                 class="btn btn-link text-left p-0 pl-2"
                 style="white-space: normal; font-size: 0.85rem;"
-                (click)="facet.numDisplayed=facet.numDisplayed+facet.increment">
+                (click)="more(facetIndex, facet)">
           More
         </button>
-        <button *ngIf="facet.numDisplayed >= facet.buckets.length && facet.numDisplayed-facet.increment>0"
+        <button *ngIf="status[facetIndex] >= facet.buckets.length && status[facetIndex]-facet.increment>0"
                 class="btn btn-link text-left p-0 pl-2"
                 style="white-space: normal; font-size: 0.85rem;"
-                (click)="facet.numDisplayed=facet.numDisplayed-facet.increment">
+                (click)="less(facetIndex, facet)">
           Less
         </button>
       </div>

@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { EventHitCardComponent } from './event-hit-card.component';
+import { EventDatepickerComponent } from './event-datepicker.component';
 
-describe('EventHitCardComponent', () => {
-  let component: EventHitCardComponent;
-  let fixture: ComponentFixture<EventHitCardComponent>;
+describe('EventDatepickerComponent', () => {
+  let component: EventDatepickerComponent;
+  let fixture: ComponentFixture<EventDatepickerComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ EventHitCardComponent ]
+      declarations: [ EventDatepickerComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(EventHitCardComponent);
+    fixture = TestBed.createComponent(EventDatepickerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

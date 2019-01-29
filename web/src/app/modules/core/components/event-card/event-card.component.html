@@ -1,53 +1,69 @@
-<div class="card my-2" *ngIf="!isDeleted">
-  <div class="card-header">
-    <div class="row">
-      <div class="col text-left">
-        <span>
-          {{data.startDate.date}}{{data.startDateAttribute?' ' + data.startDateAttribute.value:''}} ~ {{data.endDate?data.endDate.date:''}}{{data.endDateAttribute?' ' + data.endDateAttribute.value:''}}
-        </span>
-      </div>
-      <div class="col text-right" *ngIf="!isPreview && getUser() && getUser().isAdmin">
-        <a [routerLink]="['', 'admin', 'event', data.id, 'update']" class="btn btn-sm btn-outline-primary">
-          <i class="fas fa-pencil-alt"></i>
-        </a>
-        <button class="btn btn-sm btn-outline-danger ml-2" (click)="onDelete(data.id)">
-          <i class="far fa-trash-alt"></i>
-        </button>
-      </div>
-    </div>
+<div class="row" *ngIf="!isDeleted">
+  <div class="col-12" *ngIf="hit && !isDetailView">
+    {{ hit.startDate.date }}
+    <div [innerHTML]="sanitizer.bypassSecurityTrustHtml(hit.content)"></div>
+    <button class="btn btn-link" (click)="loadDetailView(hit.id)">[see more]</button>
   </div>
-  <div class="card-body">
-    <div class="row">
-      <div class="col-12" *ngIf="!data.content" i18n="empty event content@@emptyEventContent">
-        There is no content for this event.
-      </div>
-      <div class="col-12" [innerHtml]="sanitizer.bypassSecurityTrustHtml(data.content)" *ngIf="data.content">
-        loading ...
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-lg-6 col-xs-12 text-center" *ngFor="let image of data.images">
+
+  <div class="col-12" *ngIf="event && isDetailView">
+    <div class="card my-2">
+      <div class="card-header">
         <div class="row">
-          <div class="col-12 event-image-container">
-            <img class="event-image"
-                 src="{{getImageUrl(image)}}"
-                 alt="Image {{ image.id }}">
+          <div class="col text-left">
+        <span>
+          {{event.startDate.date}}{{event.startDateAttribute?' ' + event.startDateAttribute.value:''}} ~ {{event.endDate?event.endDate.date:''}}{{event.endDateAttribute?' ' + event.endDateAttribute.value:''}}
+        </span>
           </div>
-          <div class="col-12 event-image-container">
-            {{ image.description }}
+          <div class="col text-right" *ngIf="!isPreview && getUser() && getUser().isAdmin">
+            <a [routerLink]="['', 'admin', 'event', event.id, 'update']" class="btn btn-sm btn-outline-primary">
+              <i class="fas fa-pencil-alt"></i>
+            </a>
+            <button class="btn btn-sm btn-outline-danger ml-2" (click)="onDelete(event.id)">
+              <i class="far fa-trash-alt"></i>
+            </button>
           </div>
         </div>
       </div>
-    </div>
-    <hr>
-    <div class="row">
-      <div class="col-12">
-        <span><ng-container i18n="period">Period</ng-container>: {{data.period ? data.period.value : 'N/A'}}</span>
-      </div>
-      <div class="col-12">
-        <span><ng-container i18n="catalog">Catalogs</ng-container>: {{!data.catalogs || !data.catalogs.length ? 'N/A' : ''}}</span>
-        <span style="margin-right: 5px;" class="badge badge-secondary"
-              *ngFor="let i of data.catalogs">{{i.value}}</span>
+      <div class="card-body">
+        <div class="row">
+          <div class="col-12" *ngIf="!event.content" i18n="empty event content@@emptyEventContent">
+            There is no content for this event.
+          </div>
+          <div class="col-12" [innerHtml]="sanitizer.bypassSecurityTrustHtml(event.content)" *ngIf="event.content">
+            loading ...
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-lg-6 col-xs-12 text-center" *ngFor="let image of event.images">
+            <div class="row">
+              <div class="col-12 event-image-container">
+                <img class="event-image"
+                     src="{{getImageUrl(image)}}"
+                     alt="Image {{ image.id }}">
+              </div>
+              <div class="col-12 event-image-container">
+                {{ image.description }}
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12">
+            <button class="btn btn-link" (click)="isDetailView = false" *ngIf="hit">[see less]</button>
+          </div>
+        </div>
+        <hr>
+        <div class="row">
+          <div class="col-12">
+            <span><ng-container
+              i18n="period">Period</ng-container>: {{event.period ? event.period.value : 'N/A'}}</span>
+          </div>
+          <div class="col-12">
+            <span><ng-container i18n="catalog">Catalogs</ng-container>: {{!event.catalogs || !event.catalogs.length ? 'N/A' : ''}}</span>
+            <span style="margin-right: 5px;" class="badge badge-secondary"
+                  *ngFor="let i of event.catalogs">{{i.value}}</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
