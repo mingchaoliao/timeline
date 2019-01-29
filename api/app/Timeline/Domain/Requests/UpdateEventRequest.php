@@ -82,24 +82,24 @@ class UpdateEventRequest
     public static function fromArray(array $data): self
     {
         $startDate = EventDate::createFromString($data['startDate']);
-        $startDateAttributeId = $data['startDateAttributeId'] ?? null;
+        $startDateAttributeId = DateAttributeId::createFromString($data['startDateAttributeId'] ?? null);
         $endDate = EventDate::createFromString($data['endDate'] ?? null);
-        $endDateAttributeId = $data['endDateAttributeId'] ?? null;
+        $endDateAttributeId = DateAttributeId::createFromString($data['endDateAttributeId'] ?? null);
         $periodId = PeriodId::createFromString($data['periodId'] ?? null);
         $catalogIds = CatalogIdCollection::fromValueArray(
-            Common::splitByComma($data['catalogIds'] ?? null)
+            $data['catalogIds'] ?? []
         );
         $content = $data['content'];
         $imageIds = ImageIdCollection::fromValueArray(
-            Common::splitByComma($data['imageIds'] ?? null)
+            $data['imageIds'] ?? []
         );
 
-
-        if (!$startDate->isAttributeAllowed()) {
+        if ($startDateAttributeId !== null && !$startDate->isAttributeAllowed()) {
             throw TimelineException::ofStartDateAttributeShouldNotBeSet();
         }
 
-        if ($endDate !== null && !$endDate->isAttributeAllowed()) {
+        if ($endDate === null && $endDateAttributeId !== null
+            || $endDate !== null && $endDateAttributeId !== null && !$endDate->isAttributeAllowed()) {
             throw TimelineException::ofEndDateAttributeShouldNotBeSet();
         }
 

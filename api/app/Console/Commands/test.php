@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Timeline\Domain\Services\EventService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Validator;
 
 class test extends Command
 {
@@ -38,8 +39,14 @@ class test extends Command
      */
     public function handle()
     {
-        /** @var EventService $service */
-        $service = resolve(EventService::class);
-        $service->indexAll();
+        $data = [
+            'attr1' => '2015'
+        ];
+
+        dd(
+            Validator::make($data, [
+                'attr1' => 'required|date'
+            ])->errors()
+        );
     }
 }

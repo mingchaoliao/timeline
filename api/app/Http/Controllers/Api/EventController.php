@@ -48,14 +48,14 @@ class EventController extends Controller
     {
         $request->validate([
             'content' => 'nullable',
-            'startDate' => 'nullable|date',
+            'startDate' => 'nullable|event_date',
             'startDateFrom' => 'nullable|date_format:Y-m-d',
             'startDateTo' => 'nullable|date_format:Y-m-d',
-            'endDate' => 'nullable|date',
+            'endDate' => 'nullable|event_date',
             'endDateFrom' => 'nullable|date_format:Y-m-d',
             'endDateTo' => 'nullable|date_format:Y-m-d',
             'period' => 'nullable|string',
-            'catalogs.*' => 'nullable|string',
+            'catalogs' => 'nullable|string',
             'page' => 'nullable|integer|gt:0',
             'pageSize' => 'nullable|integer|gt:0'
         ]);
@@ -71,14 +71,14 @@ class EventController extends Controller
     public function create(Request $request)
     {
         $request->validate([
-            'startDate' => 'date',
-            'startDateAttributeId' => 'nullable|integer|gr:0',
-            'endDate' => 'nullable|date',
-            'endDateAttributeId' => 'nullable|integer|gr:0',
-            'periodId' => 'nullable|integer|gr:0',
-            'catalogIds.*' => 'nullable|integer|gr:0',
-            'content' => 'string',
-            'imageIds.*' => 'nullable|integer|gr:0',
+            'startDate' => 'required|event_date',
+            'startDateAttributeId' => 'nullable|integer|gt:0',
+            'endDate' => 'nullable|event_date',
+            'endDateAttributeId' => 'nullable|integer|gt:0',
+            'periodId' => 'nullable|integer|gt:0',
+            'catalogIds.*' => 'integer',
+            'content' => 'required|string',
+            'imageIds.*' => 'integer',
         ]);
 
         $createEventRequest = CreateEventRequest::fromArray($request->all());
@@ -90,6 +90,17 @@ class EventController extends Controller
 
     public function bulkCreate(Request $request)
     {
+        $request->validate([
+            '*.startDate' => 'required|event_date',
+            '*.startDateAttributeId' => 'nullable|integer',
+            '*.endDate' => 'nullable|event_date',
+            '*.endDateAttributeId' => 'nullable|integer',
+            '*.periodId' => 'nullable|integer',
+            '*.catalogIds.*' => 'integer',
+            '*.content' => 'required|string',
+            '*.imageIds.*' => 'integer',
+        ]);
+
         $createEventRequestCollection = CreateEventRequestCollection::fromArray($request->all());
 
         $event = $this->eventService->bulkCreate($createEventRequestCollection);
@@ -99,6 +110,17 @@ class EventController extends Controller
 
     public function update(string $id, Request $request)
     {
+        $request->validate([
+            'startDate' => 'required|event_date',
+            'startDateAttributeId' => 'nullable|integer|gt:0',
+            'endDate' => 'nullable|event_date',
+            'endDateAttributeId' => 'nullable|integer|gt:0',
+            'periodId' => 'nullable|integer|gt:0',
+            'catalogIds.*' => 'integer',
+            'content' => 'required|string',
+            'imageIds.*' => 'integer',
+        ]);
+
         $updateRequest = UpdateEventRequest::fromArray($request->all());
 
         $event = $this->eventService->update(EventId::createFromString($id), $updateRequest);

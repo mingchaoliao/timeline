@@ -17,6 +17,7 @@ use App\Timeline\Domain\Services\ImageService;
 use App\Timeline\Domain\Services\PeriodService;
 use App\Timeline\Domain\Services\TimelineService;
 use App\Timeline\Domain\Services\UserService;
+use App\Timeline\Infrastructure\Elasticsearch\SearchEventRepository;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentCatalog;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentDateAttribute;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentEvent;
@@ -30,11 +31,11 @@ use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentImageR
 use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentPeriodRepository;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentUserRepository;
 use App\Timeline\Infrastructure\Persistence\Filesystem\FSImageFileRepository;
-use App\Timeline\Infrastructure\Elasticsearch\SearchEventRepository;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\ServiceProvider;
 
 class TimelineServiceProvider extends ServiceProvider
@@ -46,7 +47,25 @@ class TimelineServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        Validator::extend(
+            'comma_separated_ids',
+            'App\Timeline\App\Validators\CommaSeparatedIdsValidator@validate'
+        );
+
+        Validator::replacer(
+            'comma_separated_ids',
+            'App\Timeline\App\Validators\CommaSeparatedIdsValidator@message'
+        );
+
+        Validator::extend(
+            'event_date',
+            'App\Timeline\App\Validators\EventDateValidator@validate'
+        );
+
+        Validator::replacer(
+            'event_date',
+            'App\Timeline\App\Validators\EventDateValidator@message'
+        );
     }
 
     /**

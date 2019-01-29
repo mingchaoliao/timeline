@@ -212,7 +212,6 @@ export class ImportEventComponent implements OnInit {
       if (startDateStr === null) {
         this.makeError('A', i + 2, 'startDate is required');
       }
-      const startDate = this.constructEventDate(startDateStr);
       if (!this.common.isDateValid(startDateStr)) {
         this.makeError('A', i + 2, 'invalid startDate');
       }
@@ -220,13 +219,11 @@ export class ImportEventComponent implements OnInit {
 
       const endDateStr: string = this.trim(sheet[i][2]);
       let endDateAttribute: string = null;
-      let endDate = null;
       if (endDateStr !== null) {
         if (!this.common.isDateValid(endDateStr)) {
           this.makeError('C', i + 2, 'invalid endDate');
         }
         endDateAttribute = this.trim(sheet[i][3]);
-        endDate = this.constructEventDate(endDateStr);
       }
 
       const content: string = this.trim(sheet[i][4]);
@@ -290,9 +287,9 @@ export class ImportEventComponent implements OnInit {
       }
 
       data.push({
-        startDate: startDate,
+        startDate: startDateStr,
         startDateAttribute: startDateAttribute,
-        endDate: endDate,
+        endDate: endDateStr,
         endDateAttribute: endDateAttribute,
         content: content,
         period: period,
@@ -301,24 +298,6 @@ export class ImportEventComponent implements OnInit {
       });
     }
     return data;
-  }
-
-  private constructEventDate(str: string) {
-    const parts = str.split('-');
-
-    const date = {
-      year: Number(parts[0])
-    };
-
-    if (parts[1]) {
-      date['month'] = Number(parts[1]);
-    }
-
-    if (parts[2]) {
-      date['day'] = Number(parts[2]);
-    }
-
-    return date;
   }
 
   private trim(str: string): string {

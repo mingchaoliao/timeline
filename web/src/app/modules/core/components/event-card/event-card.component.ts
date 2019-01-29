@@ -44,19 +44,6 @@ export class EventCardComponent implements OnInit {
   ngOnInit() {
   }
 
-  getReadableDate(eventDate: EventDate): string {
-    if (!eventDate) {
-      return '';
-    }
-    const date = moment(eventDate.date);
-    if (eventDate.hasDay) {
-      return date.format('YYYY-MM-DD');
-    } else if (eventDate.hasMonth) {
-      return date.format('YYYY-MM');
-    }
-    return date.format('YYYY');
-  }
-
   public onDelete(id: number) {
     this.eventService.deleteById(id).subscribe(
       success => {

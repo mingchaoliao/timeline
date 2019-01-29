@@ -1,11 +1,30 @@
 <div class="row">
-  <div class="col">
-
-  </div>
-  <div class="col">
-
-  </div>
-  <div class="col">
-
+  <div class="col-12" *ngFor="let facet of facets; index as facetIndex;">
+    <div class="row mb-2" *ngIf="facet.buckets.length > 1">
+      <div class="col-12">
+        {{ facet.name }}:
+      </div>
+      <div class="col-12" *ngFor="let bucket of facet.buckets | slice:0:facet.numDisplayed">
+        <button class="btn btn-link text-left p-0 pl-2"
+                (click)="onChange.emit({facetIndex: facetIndex, value: bucket.value})"
+                style="white-space: normal; font-size: 0.85rem;">
+          {{ bucket.value }} ({{ bucket.count }})
+        </button>
+      </div>
+      <div class="col-12">
+        <button *ngIf="facet.numDisplayed < facet.buckets.length"
+                class="btn btn-link text-left p-0 pl-2"
+                style="white-space: normal; font-size: 0.85rem;"
+                (click)="facet.numDisplayed=facet.numDisplayed+facet.increment">
+          More
+        </button>
+        <button *ngIf="facet.numDisplayed >= facet.buckets.length && facet.numDisplayed-facet.increment>0"
+                class="btn btn-link text-left p-0 pl-2"
+                style="white-space: normal; font-size: 0.85rem;"
+                (click)="facet.numDisplayed=facet.numDisplayed-facet.increment">
+          Less
+        </button>
+      </div>
+    </div>
   </div>
 </div>

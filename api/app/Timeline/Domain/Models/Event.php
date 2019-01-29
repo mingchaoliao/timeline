@@ -249,7 +249,8 @@ class Event extends BaseModel
             'startDateAttribute' => $this->getStartDateAttribute() === null ? null : $this->getStartDateAttribute()->getValue(),
             'endDateStr' => $this->getEndDate() === null ? null : $this->getEndDate()->getDate(),
             'endDate' => $this->getEndDate() === null ? null : $this->getEndDate()->toEndDate()->format('Y-m-d'),
-            'period' => $this->getPeriod() === null ? null : (string)$this->getPeriod(),
+            'endDateAttribute' => $this->getEndDateAttribute() === null ? null : $this->getEndDateAttribute()->getValue(),
+            'period' => $this->getPeriod() === null ? null : $this->getPeriod()->getValue(),
             'catalogs' => $this->getCatalogCollection()
                 ->map(function (Catalog $catalog) {
                     return $catalog->getValue();

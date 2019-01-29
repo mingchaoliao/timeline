@@ -2,39 +2,67 @@ import {DateAttribute} from './dateAttribute';
 import {Period} from './period';
 import {Catalog} from './catalog';
 import {Image} from './image';
+import {NgbDateStruct} from '@ng-bootstrap/ng-bootstrap';
+import * as moment from 'moment';
 
 export class EventDate {
-  private readonly _date: Date;
-  private readonly _hasMonth: boolean;
-  private readonly _hasDay: boolean;
+  public static readonly FORMAT_YEAR = 'YYYY';
+  public static readonly FORMAT_YEAR_MONTH = 'YYYY-MM';
+  public static readonly FORMAT_YEAR_MONTH_DAY = 'YYYY-MM-DD';
+  public static readonly REGEXR_YEAR = /^[0-9]{4}$/;
+  public static readonly REGEXR_YEAR_MONTH = /^([0-9]{4})-(0[1-9]|1[0-2])$/;
+  public static readonly REGEXR_YEAR_MONTH_DAY = /^([0-9]{4})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
 
-  constructor(date: Date, hasMonth: boolean, hasDay: boolean) {
-    this._date = date;
-    this._hasMonth = hasMonth;
-    this._hasDay = hasDay;
+  private readonly _date: string;
+  private readonly _format: string;
+
+  public static validate(str: string): boolean {
+    return this.getFormat(str) !== null;
   }
 
-  get date(): Date {
+  public static getFormat(str: string): string {
+    if (str.match(this.REGEXR_YEAR)) {
+      return this.FORMAT_YEAR;
+    } else if (str.match(this.REGEXR_YEAR_MONTH)) {
+      return this.FORMAT_YEAR_MONTH;
+    } else if (str.match(this.REGEXR_YEAR_MONTH_DAY)) {
+      return this.FORMAT_YEAR_MONTH_DAY;
+    }
+    return null;
+  }
+
+  constructor(date: string) {
+    this._date = date;
+    const format = EventDate.getFormat(date);
+    if (!format) {
+      throw new Error(`Invalid event date ${date}`);
+    }
+    this._format = format;
+  }
+
+  get date(): string {
     return this._date;
   }
 
-  get hasMonth(): boolean {
-    return this._hasMonth;
-  }
-
-  get hasDay(): boolean {
-    return this._hasDay;
-  }
-
-  static fromJson(json: any): EventDate {
-    if (json === null) {
+  static createFromString(str: string) {
+    if (!str) {
       return null;
     }
-    return new EventDate(
-      json['date'],
-      json['hasMonth'],
-      json['hasDay']
-    );
+
+    return new EventDate(str);
+  }
+
+  public isAttributeAllowed(): boolean {
+    return this._format === EventDate.FORMAT_YEAR;
+  }
+
+  public toNgbDate(): NgbDateStruct {
+    const date = moment(this._date, this._format);
+    return {
+      year: date.year(),
+      month: date.month() + 1,
+      day: date.date()
+    };
   }
 }
 
@@ -127,8 +155,8 @@ export class Event {
     }
     return new Event(
       json['id'],
-      EventDate.fromJson(json['startDate']),
-      EventDate.fromJson(json['endDate']),
+      EventDate.createFromString(json['startDate']),
+      EventDate.createFromString(json['endDate']),
       DateAttribute.fromJson(json['startDateAttribute']),
       DateAttribute.fromJson(json['endDateAttribute']),
       Period.fromJson(json['period']),

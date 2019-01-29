@@ -20,7 +20,6 @@ use App\Timeline\Domain\Models\EventSearchResult;
 use App\Timeline\Domain\Repositories\SearchEventRepository as SearchEventRepositoryInterface;
 use App\Timeline\Domain\Requests\SearchEventRequest;
 use App\Timeline\Domain\ValueObjects\EventId;
-use Carbon\Carbon;
 
 class SearchEventRepository implements SearchEventRepositoryInterface
 {
@@ -83,8 +82,7 @@ class SearchEventRepository implements SearchEventRepositoryInterface
     {
         return new BucketCollection(array_map(function (array $bucket) {
             return new Bucket(
-                Carbon::createFromFormat('Y-m-d', $bucket['key_as_string'])
-                    ->format('Y'),
+                $bucket['key_as_string'],
                 $bucket['doc_count']
             );
         }, $buckets));
@@ -101,9 +99,15 @@ class SearchEventRepository implements SearchEventRepositoryInterface
                 $hit['endDateStr'] === null ? null : new EventDate($hit['endDateStr']),
                 $hit['startDateAttribute'],
                 $hit['endDateAttribute'],
-                !$highlight ? $hit['content'] : implode(' ... ', $highlight['content'])
+                !$highlight ? $this->truncateContent($hit['content'], 0.5) : implode(' ... ', $highlight['content']) . ' ...'
             );
         }, $hits));
+    }
+
+    private function truncateContent(string $content, float $ratio): string
+    {
+        $len = mb_strlen($content, 'UTF-8');
+        return mb_substr($content, 0, floor($len * $ratio), 'UTF-8') . ' ... ';
     }
 
     public function index(Event $event): void
@@ -147,9 +151,5 @@ class SearchEventRepository implements SearchEventRepositoryInterface
             'type' => 'event',
             'id' => $id->getValue()
         ]);
-    }
-
-    private function constructSearchResult(array $result): EventSearchResult
-    {
     }
 }

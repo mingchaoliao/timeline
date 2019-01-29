@@ -15,12 +15,16 @@ use App\Timeline\Utils\Common;
 final class DateAttributeId extends SingleInteger
 {
     /**
-     * @param string $value
-     * @return DateAttributeId
+     * @param string|null $value
+     * @return DateAttributeId|null
      * @throws TimelineException
      */
-    public static function createFromString(string $value): self
+    public static function createFromString(?string $value): ?self
     {
+        if($value === null) {
+            return null;
+        }
+
         if (!Common::isPosInt($value)) {
             throw TimelineException::ofInvalidDateAttributeId($value);
         }

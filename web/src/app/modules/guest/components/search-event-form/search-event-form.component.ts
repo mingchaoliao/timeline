@@ -10,6 +10,7 @@ import {NotificationEmitter} from '../../../core/shared/events/notificationEmitt
 import {NgbDateStruct} from '@ng-bootstrap/ng-bootstrap';
 import {NgOption} from '@ng-select/ng-select';
 import {Typeahead} from '../../../core/shared/models/typeahead';
+import {EventDate} from '../../../core/shared/models/event';
 
 export function dateValidator(): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {
@@ -39,6 +40,7 @@ export class SearchEventFormComponent implements OnInit {
   public searchEventForm: FormGroup;
   public periodOptions: any = [];
   public catalogOptions: any = [];
+  public isAdvancedSearchCollapsed = true;
 
   constructor(
     private formBuilder: FormBuilder,
@@ -49,17 +51,15 @@ export class SearchEventFormComponent implements OnInit {
     private route: ActivatedRoute
   ) {
     this.route.queryParams.subscribe(query => {
+      if (query['startDate'] || query['endDate'] || query['period'] || query['catalogs']) {
+        this.isAdvancedSearchCollapsed = false;
+      }
+
       this.searchEventForm = this.formBuilder.group({
-        'startDateFrom': [this.dateStringToNgbDate(query['startDateFrom']), [
+        'startDate': [null, [
           dateValidator()
         ]],
-        'startDateTo': [this.dateStringToNgbDate(query['startDateTo']), [
-          dateValidator()
-        ]],
-        'endDateFrom': [this.dateStringToNgbDate(query['endDateFrom']), [
-          dateValidator()
-        ]],
-        'endDateTo': [this.dateStringToNgbDate(query['endDateTo']), [
+        'endDate': [null, [
           dateValidator()
         ]],
         'content': [query['content'], []],
@@ -141,18 +141,6 @@ export class SearchEventFormComponent implements OnInit {
     return null;
   }
 
-  dateStringToNgbDate(str: string): NgbDateStruct {
-    if (str === '' || str === undefined || str === null) {
-      return null;
-    }
-    const date = moment(str);
-    return {
-      year: date.year(),
-      month: date.month() + 1,
-      day: date.date()
-    };
-  }
-
   ngOnInit() {
   }
 
@@ -161,43 +149,25 @@ export class SearchEventFormComponent implements OnInit {
       const queryParams = {
         page: 1
       };
-      const startDateFrom = this.searchEventForm.value.startDateFrom;
-      const startDateTo = this.searchEventForm.value.startDateTo;
-      const endDateFrom = this.searchEventForm.value.endDateFrom;
-      const endDateTo = this.searchEventForm.value.endDateTo;
+      const startDate = this.searchEventForm.value.startDate;
+      const endDate = this.searchEventForm.value.endDate;
       const period = this.searchEventForm.value.period;
       const catalogs = this.searchEventForm.value.catalogs;
       const content = this.searchEventForm.value.content;
 
-      if (startDateFrom) {
-        queryParams['startDateFrom'] = moment({
-          year: startDateFrom['year'],
-          month: startDateFrom['month'] - 1,
-          day: startDateFrom['day']
+      if (startDate) {
+        queryParams['startDate'] = moment({
+          year: startDate['year'],
+          month: startDate['month'] - 1,
+          day: startDate['day']
         }).format('YYYY-MM-DD');
       }
 
-      if (startDateTo) {
-        queryParams['startDateTo'] = moment({
-          year: startDateTo['year'],
-          month: startDateTo['month'] - 1,
-          day: startDateTo['day']
-        }).format('YYYY-MM-DD');
-      }
-
-      if (endDateFrom) {
+      if (endDate) {
         queryParams['endDateFrom'] = moment({
-          year: endDateFrom['year'],
-          month: endDateFrom['month'] - 1,
-          day: endDateFrom['day']
-        }).format('YYYY-MM-DD');
-      }
-
-      if (endDateTo) {
-        queryParams['endDateTo'] = moment({
-          year: endDateTo['year'],
-          month: endDateTo['month'] - 1,
-          day: endDateTo['day']
+          year: endDate['year'],
+          month: endDate['month'] - 1,
+          day: endDate['day']
         }).format('YYYY-MM-DD');
       }
 

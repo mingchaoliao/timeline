@@ -1,31 +1,60 @@
 <div class="container">
   <app-search-event-form></app-search-event-form>
-  <div class="row" *ngIf="!events || !events.length">
-    <div class="col-12 mt-3">
-      No event found.
+  <ng-container *ngIf="result">
+    <div class="row">
+      <div class="col-4" style="border-right: 1px solid #DDDDDD;">
+        <app-faceted-search-bar
+          [facets]="[
+            {
+              buckets: result.dates.reverse(),
+              name: 'Year',
+              numDisplayed: 5,
+              increment: 5
+            },
+            {
+              buckets: result.periods,
+              name: 'Period',
+              numDisplayed: 5,
+              increment: 5
+            },
+            {
+              buckets: result.catalogs,
+              name: 'Catalog',
+              numDisplayed: 5,
+              increment: 5
+            }
+          ]"
+          (onFacetChange)="onFacetChange($event)"
+        ></app-faceted-search-bar>
+      </div>
+      <div class="col">
+        <div class="row" *ngIf="!result.hits.length">
+          <div class="col-12 mt-3">
+            No event found.
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-12" style="margin-top: 15px" *ngFor="let hit of result.hits">
+            <app-event-hit-card [hit]="hit"></app-event-hit-card>
+          </div>
+        </div>
+        <div class="row" style="margin-top: 15px;" *ngIf="result.hits.length">
+          <div class="col-12">
+            <ngb-pagination
+              class="d-flex justify-content-center"
+              [collectionSize]="total"
+              [(page)]="page"
+              [maxSize]="5"
+              [boundaryLinks]="true"
+              [rotate]="true"
+              (pageChange)="onPageChange($event)"
+              [pageSize]="pageSize"
+              aria-label="Default pagination"
+            ></ngb-pagination>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="col-12" style="margin-top: 15px" *ngFor="let event of events">
-      <app-event-card
-        [data]="event"
-      ></app-event-card>
-    </div>
-  </div>
-  <div class="row" style="margin-top: 15px;" *ngIf="events && events.length">
-    <div class="col-12">
-      <ngb-pagination
-        class="d-flex justify-content-center"
-        [collectionSize]="total"
-        [(page)]="page"
-        [maxSize]="5"
-        [boundaryLinks]="true"
-        [rotate]="true"
-        (pageChange)="onPageChange($event)"
-        [pageSize]="pageSize"
-        aria-label="Default pagination"
-      ></ngb-pagination>
-    </div>
-  </div>
+  </ng-container>
 
 </div>

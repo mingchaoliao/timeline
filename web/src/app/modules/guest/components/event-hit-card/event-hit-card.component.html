@@ -1,0 +1,7 @@
+<div class="row">
+  <div class="col">
+    {{ hit.startDate.date }}
+    <div [innerHTML]="sanitizer.bypassSecurityTrustHtml(hit.content)"></div>
+    <a routerLink="/">[see more]</a>
+  </div>
+</div>

@@ -10,6 +10,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgSelectModule} from '@ng-select/ng-select';
 import { FacetedSearchBarComponent } from './components/faceted-search-bar/faceted-search-bar.component';
 import { EventsComponent } from './pages/events/events.component';
+import { EventHitCardComponent } from './components/event-hit-card/event-hit-card.component';
 
 @NgModule({
   imports: [
@@ -26,7 +27,8 @@ import { EventsComponent } from './pages/events/events.component';
     AboutComponent,
     SearchEventComponent,
     FacetedSearchBarComponent,
-    EventsComponent
+    EventsComponent,
+    EventHitCardComponent
   ]
 })
 export class GuestModule {

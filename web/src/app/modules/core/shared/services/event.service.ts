@@ -4,6 +4,7 @@ import {Observable} from 'rxjs';
 import {Event} from '../models/event';
 import {Url} from '../classes/url';
 import {environment} from '../../../../../environments/environment';
+import {EventSearchResult} from '../models/eventSearchResult';
 
 @Injectable()
 export class EventService {
@@ -55,31 +56,23 @@ export class EventService {
   }
 
   search(
-    startDateFrom: string,
-    startDateTo: string,
-    endDateFrom: string,
-    endDateTo: string,
+    startDate: string,
+    endDate: string,
     period: string,
     catalogs: string,
     content: string,
     page: number = 1,
     pageSize: number = 10
-  ): Observable<Array<Event>> {
+  ): Observable<EventSearchResult> {
     const query = {
       page: page,
       pageSize: pageSize
     };
-    if (startDateFrom) {
-      query['startDateFrom'] = startDateFrom;
+    if (startDate) {
+      query['startDate'] = startDate;
     }
-    if (startDateTo) {
-      query['startDateTo'] = startDateTo;
-    }
-    if (endDateFrom) {
-      query['endDateFrom'] = endDateFrom;
-    }
-    if (endDateTo) {
-      query['endDateTo'] = endDateTo;
+    if (endDate) {
+      query['endDate'] = endDate;
     }
     if (period) {
       query['period'] = period;
@@ -91,13 +84,14 @@ export class EventService {
       query['content'] = content;
     }
 
-    return new Observable<Array<Event>>(
+    return new Observable<EventSearchResult>(
       observer => {
         this.httpService.get(Url.searchEvent(), query, {}, true).subscribe(
           response => {
-            let arr: Array<Event> = Event.fromArray(response['body']);
-            arr['total'] = response['headers'].get('X-Total-Count');
-            observer.next(arr);
+            observer.next(EventSearchResult.fromJson(
+              response['body'],
+              response['headers'].get('X-Total-Count')
+            ));
           },
           error => {
             observer.error(error);

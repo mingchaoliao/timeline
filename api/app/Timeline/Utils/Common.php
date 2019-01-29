@@ -31,10 +31,10 @@ class Common
         return self::isInt($var) && intval($var) > 0;
     }
 
-    public static function splitByComma(?string $str): ?array
+    public static function splitByComma(?string $str, ?array $default = null): ?array
     {
         if ($str === null) {
-            return null;
+            return $default;
         }
 
         return explode(',', $str);

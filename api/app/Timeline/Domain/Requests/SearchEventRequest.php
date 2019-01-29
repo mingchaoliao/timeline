@@ -104,7 +104,7 @@ class SearchEventRequest
         $endDateFrom = Common::createDateFromISOString($data['$endDateFrom'] ?? null);
         $endDateTo = Common::createDateFromISOString($data['$endDateTo'] ?? null);
         $period = $data['period'] ?? null;
-        $catalogs = Common::splitByComma($data['catalogs'] ?? null);
+        $catalogs = Common::splitByComma($data['catalogs'] ?? null, []);
         $page = $data['page'] ?? 1;
         $pageSize = $data['pageSize'] ?? 10;
 

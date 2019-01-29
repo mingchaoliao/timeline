@@ -37,7 +37,7 @@ class EventDate
      */
     public function __construct(string $date)
     {
-        $this->validate($date);
+        $this->format = self::validate($date);
         $this->date = $date;
     }
 
@@ -91,19 +91,28 @@ class EventDate
 
     /**
      * @param string $date
+     * @return string
      * @throws TimelineException
      */
-    private function validate(string $date): void
+    public static function validate(string $date): string
     {
         if (preg_match(self::REGEX_YEAR, $date)) {
-            $this->format = self::FORMAT_YEAR;
+            $format = self::FORMAT_YEAR;
         } elseif (preg_match(self::REGEX_YEAR_MONTH, $date)) {
-            $this->format = self::FORMAT_YEAR_MONTH;
+            $format = self::FORMAT_YEAR_MONTH;
         } elseif (preg_match(self::REGEX_YEAR_MONTH_DAY, $date)) {
-            $this->format = self::FORMAT_YEAR_MONTH_DAY;
+            $format = self::FORMAT_YEAR_MONTH_DAY;
+        } else {
+            throw TimelineException::ofInvalidDateString($date);
         }
 
-        throw TimelineException::ofInvalidDateString($date);
+        try {
+            Carbon::createFromFormat($format, $date);
+        } catch (\InvalidArgumentException $e) {
+            throw TimelineException::ofInvalidDateString($date);
+        }
+
+        return $format;
     }
 
     /**
@@ -139,14 +148,6 @@ class EventDate
 
     public function isAttributeAllowed(): bool
     {
-        switch ($this->format) {
-            case self::FORMAT_YEAR:
-                return true;
-            case self::FORMAT_YEAR_MONTH:
-                return false;
-            case self::FORMAT_YEAR_MONTH_DAY:
-                return false;
-        }
-        return false;
+        return $this->format === self::FORMAT_YEAR;
     }
 }

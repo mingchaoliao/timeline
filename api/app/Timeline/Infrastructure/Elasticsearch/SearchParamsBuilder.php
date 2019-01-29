@@ -85,12 +85,15 @@ class SearchParamsBuilder
         }
 
         if (count($catalogs) !== 0) {
-            $catalogIdStr = implode(',', $catalogs);
-            $query['bool']['must'][] = [
-                'term' => [
-                    'catalogs' => $catalogIdStr
-                ]
-            ];
+            foreach ($catalogs as $catalog) {
+                $query['bool']['must'][] = [
+                    [
+                        'term' => [
+                            'catalogs' => $catalog
+                        ]
+                    ]
+                ];
+            }
         }
 
         if ($content !== null) {
@@ -108,7 +111,7 @@ class SearchParamsBuilder
             'size' => $pageSize,
             'body' => [
                 'highlight' => [
-                    'pre_tags' => '<em class="hl" style="color: red;">',
+                    'pre_tags' => '<em class="hl">',
                     'post_tags' => '</em>',
                     'fields' => [
                         'content' => new \stdClass
@@ -128,7 +131,8 @@ class SearchParamsBuilder
                     'startDate' => [
                         'date_histogram' => [
                             'field' => 'startDate',
-                            'interval' => '1y'
+                            'interval' => '1y',
+                            'format' => 'yyyy'
                         ]
                     ]
                 ]

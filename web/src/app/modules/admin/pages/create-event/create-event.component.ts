@@ -15,7 +15,7 @@ import {Image} from '../../../core/shared/models/image';
 
 export function dateValidator(): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {
-    return control.value == null || moment(control.value).isValid() ? null : {'invalidDate': {value: control.value}};
+    return control.value == null || EventDate.validate(control.value) ? null : {'invalidDate': {value: control.value}};
   };
 }
 
@@ -159,7 +159,7 @@ export class CreateEventComponent
 
   ngOnInit() {
     this.createEventForm = this.formBuilder.group({
-      'startDate': [this.eventData && this.eventData.startDate ? this.toInputDate(this.eventData.startDate) : null, [
+      'startDate': [this.eventData && this.eventData.startDate ? this.eventData.startDate.date : null, [
         Validators.required,
         Validators.pattern('(^[0-9]{4}$)|(^[0-9]{4}-[0-9]{2}$)|(^[0-9]{4}-[0-9]{2}-[0-9]{2}$)'),
         dateValidator()
@@ -167,7 +167,7 @@ export class CreateEventComponent
       'startDateAttributeId': [
         this.eventData ? (this.eventData.startDateAttribute ? this.eventData.startDateAttribute.id : null) : null, []
       ],
-      'endDate': [this.eventData && this.eventData.endDate ? this.toInputDate(this.eventData.endDate) : null, [
+      'endDate': [this.eventData && this.eventData.endDate ? this.eventData.endDate.date : null, [
         Validators.pattern('(^[0-9]{4}$)|(^[0-9]{4}-[0-9]{2}$)|(^[0-9]{4}-[0-9]{2}-[0-9]{2}$)'),
         dateValidator()
       ]],
@@ -181,16 +181,6 @@ export class CreateEventComponent
         return Image.fromJson(image);
       }) : null, [imageValidator()]]
     });
-  }
-
-  private toInputDate(eventDate: EventDate): string {
-    const date = moment(eventDate.date);
-    if (eventDate.hasDay) {
-      return date.format('YYYY-MM-DD');
-    } else if (eventDate.hasMonth) {
-      return date.format('YYYY-MM');
-    }
-    return date.format('YYYY');
   }
 
   onStartDateChange() {
@@ -211,35 +201,12 @@ export class CreateEventComponent
     }
   }
 
-  constructEventDate(dateStr: string): any {
-    const parts = dateStr.split('-');
-
-    const date = {
-      year: Number(parts[0])
-    };
-
-    if (parts[1]) {
-      date['month'] = Number(parts[1]);
-    }
-
-    if (parts[2]) {
-      date['day'] = Number(parts[2]);
-    }
-
-    return date;
-  }
-
   onSubmit(loading: EventEmitter<boolean>) {
     this.isSubmitted = true;
     if (!this.createEventForm.valid) {
       return;
     }
     const requestBody = this.createEventForm.value;
-
-    requestBody['startDate'] = this.constructEventDate(requestBody['startDate']);
-    if (requestBody['endDate']) {
-      requestBody['endDate'] = this.constructEventDate(requestBody['endDate']);
-    }
 
     if (requestBody.images === null) {
       requestBody.images = [];

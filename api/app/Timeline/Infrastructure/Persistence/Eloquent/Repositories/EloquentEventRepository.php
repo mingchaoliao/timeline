@@ -295,12 +295,10 @@ class EloquentEventRepository implements EventRepository
         try {
             $this->dbh->transaction(function () use ($eloquentEvent, $request, $id, $updateUserId) {
                 $eloquentEvent->update([
-                    'start_date' => $request->getStartDate()->getDate(),
-                    'end_date' => $request->getEndDate() === null ? null : $request->getEndDate()->getDate(),
-                    'start_date_has_month' => $request->getStartDate()->hasMonth() ? 1 : 0,
-                    'start_date_has_day' => $request->getStartDate()->hasDay() ? 1 : 0,
-                    'end_date_has_month' => $request->getEndDate() === null ? 0 : ($request->getEndDate()->hasMonth() ? 1 : 0),
-                    'end_date_has_day' => $request->getEndDate() === null ? 0 : ($request->getEndDate()->hasMonth() ? 1 : 0),
+                    'start_date' => $request->getStartDate()->toStartDate(),
+                    'start_date_str' => $request->getStartDate()->getDate(),
+                    'end_date' => $request->getEndDate() === null ? null : $request->getEndDate()->toEndDate(),
+                    'end_date_str' => $request->getEndDate() === null ? null : $request->getEndDate()->getDate(),
                     'start_date_attribute_id' => $request->getStartDateAttributeId(),
                     'end_date_attribute_id' => $request->getEndDateAttributeId(),
                     'content' => $request->getContent(),
@@ -312,7 +310,11 @@ class EloquentEventRepository implements EventRepository
                     ->whereNotIn('id', $request->getImageIds()->toValueArray())
                     ->get();
 
-                $unneededImages->delete();
+                if(count($unneededImages) !== 0) {
+                    $eloquentEvent->images()
+                        ->whereNotIn('id', $request->getImageIds()->toValueArray())
+                        ->delete();
+                }
 
                 $existingImages = $eloquentEvent->images()->get();
                 $existingImageIds = $existingImages->map(function (EloquentImage $eloquentImage) {
@@ -321,11 +323,11 @@ class EloquentEventRepository implements EventRepository
 
                 $linkImageIds = array_diff($request->getImageIds()->toValueArray(), $existingImageIds);
                 $linkImages = $this->imageRepository->getRawByIds(new ImageIdCollection($linkImageIds));
-                $eloquentEvent->saveMany($linkImages);
+                $eloquentEvent->images()->saveMany($linkImages);
                 $eloquentEvent->catalogs()->sync($request->getCatalogIds()->toValueArray());
 
-                CleanUnlinkedImages::dispatch($unneededImages);
-                LinkImages::dispatch($linkImages);
+                CleanUnlinkedImages::dispatch($this->imageRepository->constructImageCollection($unneededImages));
+                LinkImages::dispatch($this->imageRepository->constructImageCollection($linkImages));
             });
         } catch (QueryException $e) {
             /** @var \PDOException $pdoException */
@@ -440,12 +442,10 @@ class EloquentEventRepository implements EventRepository
          * @var EloquentEvent $eloquentEvent
          * */
         $eloquentEvent = $this->eventModel->create([
-            'start_date' => $request->getStartDate()->getDate(),
-            'end_date' => $request->getEndDate() === null ? null : $request->getEndDate()->getDate(),
-            'start_date_has_month' => $request->getStartDate()->hasMonth() ? 1 : 0,
-            'start_date_has_day' => $request->getStartDate()->hasDay() ? 1 : 0,
-            'end_date_has_month' => $request->getEndDate() === null ? 0 : ($request->getEndDate()->hasMonth() ? 1 : 0),
-            'end_date_has_day' => $request->getEndDate() === null ? 0 : ($request->getEndDate()->hasMonth() ? 1 : 0),
+            'start_date' => $request->getStartDate()->toStartDate(),
+            'start_date_str' => $request->getStartDate()->getDate(),
+            'end_date' => $request->getEndDate() === null ? null : $request->getEndDate()->toEndDate(),
+            'end_date_str' => $request->getEndDate() === null ? null : $request->getEndDate()->getDate(),
             'start_date_attribute_id' => $request->getStartDateAttributeId() === null ? null : $request->getStartDateAttributeId()->getValue(),
             'end_date_attribute_id' => $request->getEndDateAttributeId() === null ? null : $request->getEndDateAttributeId()->getValue(),
             'content' => $request->getContent(),
