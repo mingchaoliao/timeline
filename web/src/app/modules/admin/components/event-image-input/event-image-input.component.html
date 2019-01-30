@@ -4,11 +4,15 @@
          *ngFor="let image of images; let index = index;">
       <div class="row">
         <div class="col">
-          <div class="form-group">
+          <div class="form-group mb-1">
             <label for="image{{index}}">
               <ng-container i18n="image">Image</ng-container>
               {{index+1}}</label>
-            <input class="form-control" type="file" id="image{{index}}" (change)="changeFile($event, index)">
+            <input class="form-control p-0"
+                   type="file"
+                   id="image{{index}}"
+                   style="border: none;"
+                   (change)="changeFile($event, index)">
           </div>
           <div class="form-group">
             <label for="imageDescription{{index}}">
