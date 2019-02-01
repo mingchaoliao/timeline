@@ -14,11 +14,17 @@ RUN apk update && apk add build-base \
   bash \
   autoconf
 
+# create new user with same UID and primary GID as the user in the host machine,
+# in order to making sure host user can modify files created in the container
+# without any permission issue
 ARG HOST_USER
 ARG HOST_UID
 ARG HOST_GID
-RUN adduser -h "/home/${HOST_USER}" -u "${HOST_UID}" -g "${HOST_GID}" -s /bin/bash -D "${HOST_USER}" "${HOST_USER}"
-RUN echo "${HOST_USER} ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/no_password_sudoer_${HOST_USER}"
+RUN echo "${HOST_USER}:x:${HOST_UID}:${HOST_GID}::/home/${HOST_USER}:" >> /etc/passwd \
+    && echo "${HOST_USER}:!:$(($(date +%s) / 60 / 60 / 24)):0:99999:7:::" >> /etc/shadow \
+    && echo "${HOST_USER}:x:${HOST_GID}:" >> /etc/group \
+    && mkdir "/home/${HOST_USER}" && chown "${HOST_USER}:${HOST_USER}" "/home/${HOST_USER}" \
+    && echo "${HOST_USER} ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/no_password_sudoer_${HOST_USER}"
 
 RUN docker-php-ext-install mysqli mbstring pdo pdo_mysql tokenizer pcntl
 RUN docker-php-ext-configure gd --with-gd --with-jpeg-dir=/usr/include/ --with-png-dir=/usr/include/
@@ -28,6 +34,7 @@ RUN curl -sS https://getcomposer.org/installer | php \
         && mv composer.phar /usr/local/bin/ \
         && ln -s /usr/local/bin/composer.phar /usr/local/bin/composer
 
+# install xdebug for generating PHPUnit code coverage
 RUN pecl install xdebug \
     && echo -e "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)\n\
 xdebug.remote_enable=1\n\
@@ -37,6 +44,7 @@ xdebug.profiler_enable_trigger=1\n\
 xdebug.profiler_output_dir=/tmp/xdebug_profiles" > /usr/local/etc/php/xdebug.ini \
     && ln -sf /usr/local/etc/php/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
 
+# a script to turn on/off xdebug
 RUN echo -e '#!/bin/bash\n\
 \n\
 case $1 in\n\
@@ -53,6 +61,8 @@ esac\n\
 ' > /usr/local/bin/xdebug \
     && chmod 755 /usr/local/bin/xdebug
 
+# allow to execute composer installed executable package without specifying
+# absolute/relative path
 ENV PATH="/apidist/vendor/bin:${PATH}"
 
 WORKDIR /apidist
