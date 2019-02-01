@@ -1,7 +1,11 @@
 import {Injectable} from '@angular/core';
-import {HttpClient, HttpHeaders} from '@angular/common/http';
+import {HttpClient, HttpErrorResponse, HttpHeaders} from '@angular/common/http';
 import {Common} from '../utils/common.class';
 import {JwtHelperService} from '@auth0/angular-jwt';
+import {catchError} from 'rxjs/operators';
+import {Observable, ObservableInput, throwError} from 'rxjs';
+import {UserService} from './user.service';
+import {AuthEmitter} from '../events/authEmitter';
 
 @Injectable()
 export class HttpService {
@@ -21,7 +25,7 @@ export class HttpService {
     return this.http.get(
       url + Common.buildQueryParameters(queryParameters),
       options
-    );
+    ).pipe(catchError(this.handleError));
   }
 
   post(
@@ -86,5 +90,12 @@ export class HttpService {
 
   private createHeaders(headers: any = {}): HttpHeaders {
     return new HttpHeaders(headers);
+  }
+
+  private handleError(error, a): ObservableInput<HttpErrorResponse> {
+    if (error['status'] && error['status'] === 401) {
+      AuthEmitter.emit(false);
+    }
+    return throwError(error);
   }
 }

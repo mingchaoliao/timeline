@@ -31,7 +31,8 @@ export function tokenGetter() {
         headerName: 'Authorization',
         tokenGetter: tokenGetter,
         whitelistedDomains: environment.whitelistedDomains,
-        authScheme: 'Bearer '
+        authScheme: 'Bearer ',
+        skipWhenExpired: true
       }
     }),
     CoreModule

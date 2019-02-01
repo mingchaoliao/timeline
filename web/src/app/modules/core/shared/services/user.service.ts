@@ -4,19 +4,25 @@ import {HttpService} from './http.service';
 import {User} from '../models/user';
 import {Observable} from 'rxjs';
 import {Token, TokenType} from '../models/token';
+import {Router} from '@angular/router';
 
 @Injectable()
 export class UserService {
   private static currentUser: User = null;
 
   constructor(
-    private httpService: HttpService
+    private httpService: HttpService,
+    private router: Router
   ) {
 
   }
 
   public static getCurrentUser(): User {
     return UserService.currentUser;
+  }
+
+  static clearCurrentUser() {
+    UserService.currentUser = null;
   }
 
   public getAll(): Observable<Array<User>> {

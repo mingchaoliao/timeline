@@ -3,6 +3,7 @@ import {UserService} from './modules/core/shared/services/user.service';
 import * as moment from 'moment';
 import {environment} from '../environments/environment';
 import {ActivatedRoute, Router} from '@angular/router';
+import {AuthEmitter} from './modules/core/shared/events/authEmitter';
 
 @Component({
   selector: 'app-root',
@@ -20,6 +21,15 @@ export class AppComponent {
       user => {
       },
       error => {
+      }
+    );
+
+    AuthEmitter.emitter.subscribe(
+      authenticated => {
+        if (!authenticated) {
+          UserService.logout();
+          this.router.navigate(['/', 'account', 'login']);
+        }
       }
     );
 

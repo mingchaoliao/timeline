@@ -1,7 +1,5 @@
 FROM php:7.2.13-fpm-alpine3.8
 
-# Configure PHP
-
 RUN apk update && apk add build-base \
   wget \
   curl \
@@ -11,7 +9,16 @@ RUN apk update && apk add build-base \
   zip \
   freetype-dev \
   libjpeg-turbo-dev \
-  libpng-dev
+  libpng-dev \
+  sudo \
+  bash \
+  autoconf
+
+ARG HOST_USER
+ARG HOST_UID
+ARG HOST_GID
+RUN adduser -h "/home/${HOST_USER}" -u "${HOST_UID}" -g "${HOST_GID}" -s /bin/bash -D "${HOST_USER}" "${HOST_USER}"
+RUN echo "${HOST_USER} ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/no_password_sudoer_${HOST_USER}"
 
 RUN docker-php-ext-install mysqli mbstring pdo pdo_mysql tokenizer pcntl
 RUN docker-php-ext-configure gd --with-gd --with-jpeg-dir=/usr/include/ --with-png-dir=/usr/include/
@@ -20,6 +27,33 @@ RUN docker-php-ext-install gd
 RUN curl -sS https://getcomposer.org/installer | php \
         && mv composer.phar /usr/local/bin/ \
         && ln -s /usr/local/bin/composer.phar /usr/local/bin/composer
+
+RUN pecl install xdebug \
+    && echo -e "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)\n\
+xdebug.remote_enable=1\n\
+xdebug.idekey=phpstorm-xdebug\n\
+xdebug.profiler_enable=0\n\
+xdebug.profiler_enable_trigger=1\n\
+xdebug.profiler_output_dir=/tmp/xdebug_profiles" > /usr/local/etc/php/xdebug.ini \
+    && ln -sf /usr/local/etc/php/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini
+
+RUN echo -e '#!/bin/bash\n\
+\n\
+case $1 in\n\
+    enable|on)\n\
+        sudo ln -sf /usr/local/etc/php/xdebug.ini /usr/local/etc/php/conf.d/xdebug.ini\n\
+        ;;\n\
+    disable|off)\n\
+        sudo rm -rf /usr/local/etc/php/conf.d/xdebug.ini\n\
+        ;;\n\
+    *)\n\
+        echo -e "Usage: \n 1. xdebug enable\n 2. xdebug disable"\n\
+        ;;\n\
+esac\n\
+' > /usr/local/bin/xdebug \
+    && chmod 755 /usr/local/bin/xdebug
+
+ENV PATH="/apidist/vendor/bin:${PATH}"
 
 WORKDIR /apidist
 COPY . /apidist

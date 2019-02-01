@@ -1,4 +1,4 @@
-version: '2'
+version: '3.7'
 services:
   nginx:
     image: nginx:1.15.1-alpine
@@ -18,7 +18,11 @@ services:
     build:
       context: api
       dockerfile: Dockerfile.dev
-    user: "1000:1000"
+      args:
+        HOST_USER: "${USER}"
+        HOST_UID: "${HOST_UID}"
+        HOST_GID: "${HOST_GID}"
+    user: "${HOST_UID}:${HOST_GID}"
     volumes:
       - ./api:/apidist
     depends_on:
