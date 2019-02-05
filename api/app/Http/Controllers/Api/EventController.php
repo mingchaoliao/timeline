@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Timeline\App\Validators\ValidatorFactory;
 use App\Timeline\Domain\Collections\CreateEventRequestCollection;
 use App\Timeline\Domain\Requests\CreateEventRequest;
 use App\Timeline\Domain\Requests\PageableRequest;
@@ -39,27 +40,17 @@ class EventController extends Controller
         return response()->json($events)->header('X-Total-Count', $count);
     }
 
-    public function getById(string $id)
+    public function getById(string $id, ValidatorFactory $validatorFactory)
     {
+        $validatorFactory->validate(['id' => $id], [
+            'id' => 'required|id'
+        ]);
+
         return response()->json($this->eventService->getById(EventId::createFromString($id)));
     }
 
     public function search(Request $request)
     {
-        $request->validate([
-            'content' => 'nullable',
-            'startDate' => 'nullable|event_date',
-            'startDateFrom' => 'nullable|date_format:Y-m-d',
-            'startDateTo' => 'nullable|date_format:Y-m-d',
-            'endDate' => 'nullable|event_date',
-            'endDateFrom' => 'nullable|date_format:Y-m-d',
-            'endDateTo' => 'nullable|date_format:Y-m-d',
-            'period' => 'nullable|string',
-            'catalogs' => 'nullable|string',
-            'page' => 'nullable|integer|gt:0',
-            'pageSize' => 'nullable|integer|gt:0'
-        ]);
-
         $searchRequest = SearchEventRequest::createFromArray($request->all());
 
         $result = $this->eventService->search($searchRequest);
@@ -70,17 +61,6 @@ class EventController extends Controller
 
     public function create(Request $request)
     {
-        $request->validate([
-            'startDate' => 'required|event_date',
-            'startDateAttributeId' => 'nullable|integer|gt:0',
-            'endDate' => 'nullable|event_date',
-            'endDateAttributeId' => 'nullable|integer|gt:0',
-            'periodId' => 'nullable|integer|gt:0',
-            'catalogIds.*' => 'integer',
-            'content' => 'required|string',
-            'imageIds.*' => 'integer',
-        ]);
-
         $createEventRequest = CreateEventRequest::fromArray($request->all());
 
         $event = $this->eventService->create($createEventRequest);
@@ -88,17 +68,10 @@ class EventController extends Controller
         return response()->json($event);
     }
 
-    public function bulkCreate(Request $request)
+    public function bulkCreate(Request $request, ValidatorFactory $validatorFactory)
     {
-        $request->validate([
-            '*.startDate' => 'required|event_date',
-            '*.startDateAttributeId' => 'nullable|integer',
-            '*.endDate' => 'nullable|event_date',
-            '*.endDateAttributeId' => 'nullable|integer',
-            '*.periodId' => 'nullable|integer',
-            '*.catalogIds.*' => 'integer',
-            '*.content' => 'required|string',
-            '*.imageIds.*' => 'integer',
+        $validatorFactory->validate($request->all(), [
+            'events' => 'required|array|filled'
         ]);
 
         $createEventRequestCollection = CreateEventRequestCollection::fromArray($request->all());
@@ -110,26 +83,22 @@ class EventController extends Controller
 
     public function update(string $id, Request $request)
     {
-        $request->validate([
-            'startDate' => 'required|event_date',
-            'startDateAttributeId' => 'nullable|integer|gt:0',
-            'endDate' => 'nullable|event_date',
-            'endDateAttributeId' => 'nullable|integer|gt:0',
-            'periodId' => 'nullable|integer|gt:0',
-            'catalogIds.*' => 'integer',
-            'content' => 'required|string',
-            'imageIds.*' => 'integer',
-        ]);
+        $params = $request->all();
+        $params['id'] = $id;
 
-        $updateRequest = UpdateEventRequest::fromArray($request->all());
+        $updateRequest = UpdateEventRequest::fromArray($params);
 
         $event = $this->eventService->update(EventId::createFromString($id), $updateRequest);
 
         return response()->json($event);
     }
 
-    public function delete(string $id)
+    public function delete(string $id, ValidatorFactory $validatorFactory)
     {
+        $validatorFactory->validate(['id' => $id], [
+            'id' => 'required|id'
+        ]);
+
         return response()->json($this->eventService->delete(EventId::createFromString($id)));
     }
 }

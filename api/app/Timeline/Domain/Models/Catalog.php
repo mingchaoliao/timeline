@@ -10,7 +10,7 @@ namespace App\Timeline\Domain\Models;
 
 use App\Timeline\Domain\ValueObjects\CatalogId;
 use App\Timeline\Domain\ValueObjects\UserId;
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 
 class Catalog extends BaseModel
 {

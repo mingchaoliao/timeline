@@ -9,8 +9,7 @@
 namespace App\Timeline\Domain\Requests;
 
 
-use App\Timeline\Exceptions\TimelineException;
-use App\Timeline\Utils\Common;
+use App\Timeline\App\Validators\ValidatorFactory;
 
 class PageableRequest
 {
@@ -22,73 +21,29 @@ class PageableRequest
      * @var int
      */
     private $pageSize;
-    /**
-     * @var int
-     */
-    private $maxPageSize;
 
     /**
      * PageableRequest constructor.
      * @param int $page
      * @param int $pageSize
-     * @param int $maxPageSize
-     * @throws TimelineException
      */
-    public function __construct(int $page = 1, int $pageSize = 10, int $maxPageSize = 100)
+    public function __construct(int $page = 1, int $pageSize = 10)
     {
-        $this->validatePage($page);
-        $this->validatePageSize($pageSize, $maxPageSize);
         $this->page = $page;
         $this->pageSize = $pageSize;
-        $this->maxPageSize = $maxPageSize;
     }
 
-    /**
-     * @param array $data
-     * @param int $maxPageSize
-     * @return PageableRequest
-     * @throws TimelineException
-     */
-    public static function createFromArray(array $data, int $maxPageSize = 100): self {
-        if(isset($data['page']) && !Common::isPosInt($data['page'])) {
-            throw TimelineException::ofInvalidPageNumber($data['page']);
-        }
-
-        if(isset($data['pageSize']) && !Common::isPosInt($data['pageSize'])) {
-            throw TimelineException::ofInvalidPageSize($data['pageSize']);
-        }
+    public static function createFromArray(array $data): self
+    {
+        resolve(ValidatorFactory::class)->validate($data, [
+            'page' => 'nullable|integer|gt:0',
+            'pageSize' => 'nullable|integer|gt:0'
+        ]);
 
         $page = $data['page'] ?? 1;
         $pageSize = $data['pageSize'] ?? 10;
 
-        return new static($page, $pageSize, $maxPageSize);
-    }
-
-    /**
-     * @param int $page
-     * @throws TimelineException
-     */
-    private function validatePage(int $page): void
-    {
-        if ($page < 1) {
-            throw TimelineException::ofInvalidPageNumber($page);
-        }
-    }
-
-    /**
-     * @param int $pageSize
-     * @param int $maxPageSize
-     * @throws TimelineException
-     */
-    private function validatePageSize(int $pageSize, int $maxPageSize): void
-    {
-        if ($pageSize < 1) {
-            throw TimelineException::ofInvalidPageSize($pageSize);
-        }
-
-        if ($pageSize > $maxPageSize) {
-            throw TimelineException::ofPageSizeTooLarge($pageSize);
-        }
+        return new static($page, $pageSize);
     }
 
     /**
@@ -105,14 +60,6 @@ class PageableRequest
     public function getPageSize(): int
     {
         return $this->pageSize;
-    }
-
-    /**
-     * @return int
-     */
-    public function getMaxPageSize(): int
-    {
-        return $this->maxPageSize;
     }
 
     /**

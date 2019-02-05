@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Timeline\App\Validators\ValidatorFactory;
 use App\Timeline\Domain\Services\PeriodService;
 use App\Timeline\Domain\ValueObjects\PeriodId;
 use Illuminate\Http\Request;
@@ -43,21 +44,15 @@ class PeriodController extends Controller
 
     /**
      * @param Request $request
+     * @param ValidatorFactory $validatorFactory
      * @return \Illuminate\Http\JsonResponse
      * @throws \App\Timeline\Exceptions\TimelineException
-     * @throws \Illuminate\Validation\ValidationException
      */
-    public function createPeriod(Request $request)
+    public function create(Request $request, ValidatorFactory $validatorFactory)
     {
-        $this->validate(
-            $request,
-            [
-                'value' => 'required'
-            ],
-            [
-                'required' => 'Missing value'
-            ]
-        );
+        $validatorFactory->validate($request->all(), [
+            'value' => 'required|string'
+        ]);
 
         $period = $this->periodService->create($request->get('value'));
 
@@ -67,14 +62,18 @@ class PeriodController extends Controller
     /**
      * @param string $id
      * @param Request $request
+     * @param ValidatorFactory $validatorFactory
      * @return \Illuminate\Http\JsonResponse
      * @throws \App\Timeline\Exceptions\TimelineException
-     * @throws \Illuminate\Validation\ValidationException
      */
-    public function update(string $id, Request $request)
+    public function update(string $id, Request $request, ValidatorFactory $validatorFactory)
     {
-        $this->validate($request, [
-            'value' => 'required'
+        $params = $request->all();
+        $params['id'] = $id;
+
+        $validatorFactory->validate($params, [
+            'id' => 'required|id',
+            'value' => 'required|string'
         ]);
 
         $period = $this->periodService->update(
@@ -87,11 +86,16 @@ class PeriodController extends Controller
 
     /**
      * @param string $id
+     * @param ValidatorFactory $validatorFactory
      * @return \Illuminate\Http\JsonResponse
      * @throws \App\Timeline\Exceptions\TimelineException
      */
-    public function delete(string $id)
+    public function delete(string $id, ValidatorFactory $validatorFactory)
     {
+        $validatorFactory->validate(['id' => $id], [
+            'id' => 'required|id'
+        ]);
+
         $isSuccess = $this->periodService->delete(PeriodId::createFromString($id));
 
         return response()->json($isSuccess);
@@ -99,12 +103,18 @@ class PeriodController extends Controller
 
     /**
      * @param Request $request
+     * @param ValidatorFactory $validatorFactory
      * @return \Illuminate\Http\JsonResponse
      * @throws \App\Timeline\Exceptions\TimelineException
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function bulkCreate(Request $request)
+    public function bulkCreate(Request $request, ValidatorFactory $validatorFactory)
     {
+        $validatorFactory->validate($request->all(), [
+            'values' => 'required|array|filled',
+            'values.*' => 'string',
+        ]);
+
         $this->validate($request, [
             'values' => 'array'
         ]);

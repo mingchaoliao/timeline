@@ -11,7 +11,7 @@ namespace App\Timeline\Domain\Models;
 use App\Timeline\Domain\ValueObjects\EventId;
 use App\Timeline\Domain\ValueObjects\ImageId;
 use App\Timeline\Domain\ValueObjects\UserId;
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 
 class Image extends BaseModel
 {
@@ -162,8 +162,8 @@ class Image extends BaseModel
             'eventId' => $this->getEventId() === null ? null : $this->getEventId()->getValue(),
             'createUserId' => $this->getCreateUserId()->getValue(),
             'updateUserId' => $this->getUpdateUserId()->getValue(),
-            'createdAt' => $this->getCreatedAt()->format(DATE_ISO8601),
-            'updatedAt' => $this->getUpdatedAt()->format(DATE_ISO8601)
+            'createdAt' => $this->getCreatedAt()->toIso8601String(),
+            'updatedAt' => $this->getUpdatedAt()->toIso8601String()
         ];
     }
 }

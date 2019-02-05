@@ -8,13 +8,13 @@
 
 namespace App\Timeline\Domain\Requests;
 
+use App\Timeline\App\Validators\ValidatorFactory;
 use App\Timeline\Domain\Collections\CatalogIdCollection;
 use App\Timeline\Domain\Collections\ImageIdCollection;
 use App\Timeline\Domain\Models\EventDate;
 use App\Timeline\Domain\ValueObjects\DateAttributeId;
 use App\Timeline\Domain\ValueObjects\PeriodId;
 use App\Timeline\Exceptions\TimelineException;
-use App\Timeline\Utils\Common;
 
 class CreateEventRequest
 {
@@ -81,6 +81,19 @@ class CreateEventRequest
      */
     public static function fromArray(array $data): self
     {
+        resolve(ValidatorFactory::class)->validate($data, [
+            'startDate' => 'required|event_date',
+            'startDateAttributeId' => 'nullable|date_attribute:startDate|iso_date',
+            'endDate' => 'nullable|event_date',
+            'endDateAttributeId' => 'nullable|date_attribute:endDate|iso_date',
+            'content' => 'required|string',
+            'periodId' => 'nullable|id',
+            'catalogIds' => 'nullable|array',
+            'catalogIds.*' => 'id',
+            'imageIds' => 'nullable|array',
+            'imageIds.*' => 'id',
+        ]);
+
         $startDate = EventDate::createFromString($data['startDate']);
         $startDateAttributeId = DateAttributeId::createFromString($data['startDateAttributeId'] ?? null);
         $endDate = EventDate::createFromString($data['endDate'] ?? null);
@@ -93,15 +106,6 @@ class CreateEventRequest
         $imageIds = ImageIdCollection::fromValueArray(
             $data['imageIds'] ?? []
         );
-
-        if ($startDateAttributeId !== null && !$startDate->isAttributeAllowed()) {
-            throw TimelineException::ofStartDateAttributeShouldNotBeSet();
-        }
-
-        if ($endDate === null && $endDateAttributeId !== null
-            || $endDate !== null && $endDateAttributeId !== null && !$endDate->isAttributeAllowed()) {
-            throw TimelineException::ofEndDateAttributeShouldNotBeSet();
-        }
 
         return new static(
             $startDate,

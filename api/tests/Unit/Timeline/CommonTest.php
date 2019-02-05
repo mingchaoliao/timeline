@@ -56,4 +56,9 @@ class CommonTest extends TestCase
         $this->assertSame(['1', ' 2', '3'], Common::splitByComma('1, 2,3'));
         $this->assertSame(['', '2', ''], Common::splitByComma(',2,'));
     }
+
+    public function testConvertISODateStrToDate() {
+        $this->assertSame(null, Common::createDateFromISOString(null));
+        $this->assertSame('2000-01-12', Common::createDateFromISOString('2000-01-12')->format('Y-m-d'));
+    }
 }

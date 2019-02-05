@@ -9,6 +9,7 @@
 namespace App\Timeline\Domain\Requests;
 
 
+use App\Timeline\App\Validators\ValidatorFactory;
 use App\Timeline\Domain\Models\EventDate;
 use App\Timeline\Utils\Common;
 use Carbon\Carbon;
@@ -96,6 +97,22 @@ class SearchEventRequest
      */
     public static function createFromArray(array $data): self
     {
+        resolve(ValidatorFactory::class)->validate($data, [
+            'content' => 'nullable|string',
+            'startDate' => 'nullable|event_date',
+            'startDateFrom' => 'nullable|iso_date',
+            'startDateTo' => 'nullable|iso_date',
+            'endDate' => 'nullable|event_date',
+            'endDateFrom' => 'nullable|iso_date',
+            'endDateTo' => 'nullable|iso_date',
+            'period' => 'nullable|string',
+            'catalogs' => 'nullable|array',
+            'catalogs.*' => 'string',
+            'page' => 'nullable|integer|gt:0',
+            'pageSize' => 'nullable|integer|gt:0',
+
+        ]);
+
         $content = $data['content'] ?? null;
         $startDate = $data['startDate'] ?? null;
         $startDateFrom = Common::createDateFromISOString($data['startDateFrom'] ?? null);

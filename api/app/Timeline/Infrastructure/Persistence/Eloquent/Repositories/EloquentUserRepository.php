@@ -198,7 +198,6 @@ class EloquentUserRepository implements UserRepository
             new UserId($eloquentUser->getId()),
             $eloquentUser->getName(),
             new Email($eloquentUser->getEmail()),
-            $eloquentUser->getPasswordHash(),
             $eloquentUser->isAdmin(),
             $eloquentUser->isEditor(),
             $eloquentUser->getCreatedAt(),

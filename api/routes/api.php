@@ -45,13 +45,13 @@ Route::group(['middleware' => ['auth:api', 'editor']], function () {
     Route::delete('/period/{id}', 'PeriodController@delete');
 
     Route::get('/catalog', 'CatalogController@getAll');
-    Route::post('/catalog', 'CatalogController@createCatalog');
+    Route::post('/catalog', 'CatalogController@create');
     Route::post('/catalog/bulk', 'CatalogController@bulkCreate');
     Route::put('/catalog/{id}', 'CatalogController@update');
     Route::delete('/catalog/{id}', 'CatalogController@delete');
 
     Route::get('/dateAttribute', 'DateAttributeController@getAll');
-    Route::post('/dateAttribute', 'DateAttributeController@createDateAttribute');
+    Route::post('/dateAttribute', 'DateAttributeController@create');
     Route::post('/dateAttribute/bulk', 'DateAttributeController@bulkCreate');
     Route::put('/dateAttribute/{id}', 'DateAttributeController@update');
     Route::delete('/dateAttribute/{id}', 'DateAttributeController@delete');

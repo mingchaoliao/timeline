@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Timeline\App\Validators\ValidatorFactory;
 use App\Timeline\Domain\Services\UserService;
 use App\Timeline\Domain\ValueObjects\Email;
 use App\Timeline\Domain\ValueObjects\UserId;
@@ -24,12 +25,12 @@ class UserController extends Controller
         $this->userService = $userService;
     }
 
-    public function register(Request $request)
+    public function register(Request $request, ValidatorFactory $validatorFactory)
     {
-        $this->validate($request, [
-            'name' => 'string',
-            'email' => 'email',
-            'password' => 'string'
+        $validatorFactory->validate($request->all(), [
+            'name' => 'required|string',
+            'email' => 'required|email',
+            'password' => 'required|string'
         ]);
 
         $token = $this->userService->register(
@@ -52,9 +53,9 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    public function login(Request $request)
+    public function login(Request $request, ValidatorFactory $validatorFactory)
     {
-        $this->validate($request, [
+        $validatorFactory->validate($request->all(), [
             'email' => 'required|email',
             'password' => 'required|string'
         ]);
@@ -74,9 +75,12 @@ class UserController extends Controller
         return response()->json($users);
     }
 
-    public function update(string $id, Request $request)
+    public function update(string $id, Request $request, ValidatorFactory $validatorFactory)
     {
-        $this->validate($request, [
+        $params = $request->all();
+        $params['id'] = $id;
+
+        $validatorFactory->validate($params, [
             'name' => 'nullable|string',
             'password' => 'nullable|string',
             'isAdmin' => 'nullable|boolean',

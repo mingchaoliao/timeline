@@ -58,8 +58,8 @@ class TimelineException extends \Exception implements HttpExceptionInterface
     public const UNAUTHORIZED_TO_UPDATE_PERIOD = 10037;
     public const UNABLE_TO_CREATE_PERIOD = 10038;
     public const UNABLE_TO_UPDATE_PERIOD = 10039;
-    public const INVALID_PAGE_NUMBER = 10040;
-    public const INVALID_PAGE_SIZE = 10041;
+    public const PAGE_NUMBER_TOO_SMALL = 10040;
+    public const PAGE_SIZE_TOO_SMALL = 10041;
     public const PAGE_SIZE_TOO_LARGE = 10042;
     public const UNAUTHORIZED_TO_DELETE_PERIOD = 10043;
     public const UNAUTHORIZED_TO_DELETE_CATALOG = 10044;
@@ -385,20 +385,20 @@ class TimelineException extends \Exception implements HttpExceptionInterface
         ), static::UNABLE_TO_UPDATE_PERIOD, 500, [], $previous);
     }
 
-    public static function ofInvalidPageNumber(string $page, \Throwable $previous = null): self
+    public static function ofPageNumberTooSmall(int $page, \Throwable $previous = null): self
     {
         return new static(sprintf(
-            'page number "%s" is invalid',
+            'page number "%d" is too small',
             $page
-        ), static::INVALID_PAGE_NUMBER, 400, [], $previous);
+        ), static::PAGE_NUMBER_TOO_SMALL, 400, [], $previous);
     }
 
-    public static function ofInvalidPageSize(string $pageSize, \Throwable $previous = null): self
+    public static function ofPageSizeTooSmall(int $pageSize, \Throwable $previous = null): self
     {
         return new static(sprintf(
-            'page size "%s" is invalid',
+            'page size "%d" is too small',
             $pageSize
-        ), static::INVALID_PAGE_SIZE, 400, [], $previous);
+        ), static::PAGE_SIZE_TOO_SMALL, 400, [], $previous);
     }
 
     public static function ofPageSizeTooLarge(int $pageSize, \Throwable $previous = null): self

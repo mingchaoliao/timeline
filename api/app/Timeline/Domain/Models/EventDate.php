@@ -83,7 +83,7 @@ class EventDate
                 $date->endOfMonth();
                 break;
             case self::FORMAT_YEAR_MONTH_DAY:
-                $date->endOfMonth();
+                $date->endOfDay();
                 break;
         }
         return $date;
@@ -103,12 +103,6 @@ class EventDate
         } elseif (preg_match(self::REGEX_YEAR_MONTH_DAY, $date)) {
             $format = self::FORMAT_YEAR_MONTH_DAY;
         } else {
-            throw TimelineException::ofInvalidDateString($date);
-        }
-
-        try {
-            Carbon::createFromFormat($format, $date);
-        } catch (\InvalidArgumentException $e) {
             throw TimelineException::ofInvalidDateString($date);
         }
 

@@ -27,10 +27,6 @@ class User extends BaseModel
      */
     private $email;
     /**
-     * @var string
-     */
-    private $passwordHash;
-    /**
      * @var bool
      */
     private $isAdmin;
@@ -52,18 +48,16 @@ class User extends BaseModel
      * @param UserId $id
      * @param string $name
      * @param Email $email
-     * @param string $passwordHash
      * @param bool $isAdmin
      * @param bool $isEditor
      * @param Carbon $createdAt
      * @param Carbon|null $updatedAt
      */
-    public function __construct(UserId $id, string $name, Email $email, string $passwordHash, bool $isAdmin, bool $isEditor, Carbon $createdAt, ?Carbon $updatedAt)
+    public function __construct(UserId $id, string $name, Email $email, bool $isAdmin, bool $isEditor, Carbon $createdAt, ?Carbon $updatedAt)
     {
         $this->id = $id;
         $this->name = $name;
         $this->email = $email;
-        $this->passwordHash = $passwordHash;
         $this->isAdmin = $isAdmin;
         $this->isEditor = $isEditor;
         $this->createdAt = $createdAt;
@@ -92,14 +86,6 @@ class User extends BaseModel
     public function getEmail(): Email
     {
         return $this->email;
-    }
-
-    /**
-     * @return string
-     */
-    public function getPasswordHash(): string
-    {
-        return $this->passwordHash;
     }
 
     /**
@@ -145,8 +131,8 @@ class User extends BaseModel
             'email' => $this->getEmail()->getValue(),
             'isAdmin' => $this->isAdmin(),
             'isEditor' => $this->isEditor(),
-            'createdAt' => $this->getCreatedAt()->format(DATE_ISO8601),
-            'updatedAt' => $this->getUpdatedAt()->format(DATE_ISO8601)
+            'createdAt' => $this->getCreatedAt()->toIso8601String(),
+            'updatedAt' => $this->getUpdatedAt()->toIso8601String()
         ];
     }
 }

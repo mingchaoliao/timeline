@@ -2,11 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Timeline\Domain\Models\Image;
 use App\Http\Controllers\Controller;
+use App\Timeline\App\Validators\ValidatorFactory;
 use App\Timeline\Domain\Services\ImageService;
 use App\Timeline\Domain\ValueObjects\ImageId;
-use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentImageRepository;
 use Illuminate\Http\Request;
 
 class ImageController extends Controller
@@ -25,35 +24,32 @@ class ImageController extends Controller
         $this->imageService = $imageService;
     }
 
-    public function upload(Request $request)
+    public function upload(Request $request, ValidatorFactory $validatorFactory)
     {
-        $this->validate(
-            $request,
-            [
-                'image' => 'required|image'
-            ],
-            [
-                'required' => 'Missing image file',
-                'image' => 'Invalid image file'
-            ]
+        $validatorFactory->validate($request->all(), [
+            'image' => 'required|image',
+            'description' => 'nullable|string'
+        ]);
+
+        $image = $this->imageService->upload(
+            $request->file('image'),
+            $request->get('description') ?? null
         );
 
-       $image = $this->imageService->upload(
-           $request->file('image'),
-           $request->get('description') ?? null
-       );
-
-       return response()->json($image);
+        return response()->json($image);
     }
 
-    public function update(string $id, Request $request) {
-        $this->validate(
-            $request,
-            [
-                'description' => 'required'
-            ]
-        );
-        $image = $this->imageService->update(ImageId::createFromString($id),$request->get('description'));
+    public function update(string $id, Request $request, ValidatorFactory $validatorFactory)
+    {
+        $params = $request->all();
+        $params['id'] = $id;
+
+        $validatorFactory->validate($request->all(), [
+            'id' => 'required|id',
+            'description' => 'required|string'
+        ]);
+
+        $image = $this->imageService->update(ImageId::createFromString($id), $request->get('description'));
         return response()->json($image);
     }
 }

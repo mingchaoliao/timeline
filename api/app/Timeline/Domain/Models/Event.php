@@ -235,8 +235,8 @@ class Event extends BaseModel
             'imageCollection' => $this->getImageCollection()->toValueArray(),
             'createUserId' => $this->getCreateUserId()->getValue(),
             'updateUserId' => $this->getUpdateUserId()->getValue(),
-            'createdAt' => $this->getCreatedAt()->format(DATE_ISO8601),
-            'updatedAt' => $this->getUpdatedAt()->format(DATE_ISO8601),
+            'createdAt' => $this->getCreatedAt()->toIso8601String(),
+            'updatedAt' => $this->getUpdatedAt()->toIso8601String(),
         ];
     }
 
@@ -245,10 +245,12 @@ class Event extends BaseModel
         $body = [
             'id' => $this->getId()->getValue(),
             'startDateStr' => $this->getStartDate()->getDate(),
-            'startDate' => $this->getStartDate()->toStartDate()->format('Y-m-d'),
+            'startDateFrom' => $this->getStartDate()->toStartDate()->format('Y-m-d'),
+            'startDateTo' => $this->getStartDate()->toEndDate()->format('Y-m-d'),
             'startDateAttribute' => $this->getStartDateAttribute() === null ? null : $this->getStartDateAttribute()->getValue(),
             'endDateStr' => $this->getEndDate() === null ? null : $this->getEndDate()->getDate(),
-            'endDate' => $this->getEndDate() === null ? null : $this->getEndDate()->toEndDate()->format('Y-m-d'),
+            'endDateFrom' => $this->getEndDate() === null ? null : $this->getEndDate()->toStartDate()->format('Y-m-d'),
+            'endDateTo' => $this->getEndDate() === null ? null : $this->getEndDate()->toEndDate()->format('Y-m-d'),
             'endDateAttribute' => $this->getEndDateAttribute() === null ? null : $this->getEndDateAttribute()->getValue(),
             'period' => $this->getPeriod() === null ? null : $this->getPeriod()->getValue(),
             'catalogs' => $this->getCatalogCollection()
@@ -265,7 +267,7 @@ class Event extends BaseModel
     {
         $eventsConfig = [
             'start_date' => $this->getStartDate()->toDateArray(),
-            'unique_id' => $this->getId()
+            'unique_id' => $this->getId()->getValue()
         ];
 
         if ($this->getEndDate() !== null) {

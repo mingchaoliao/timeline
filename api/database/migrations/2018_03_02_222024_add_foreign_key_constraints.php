@@ -122,7 +122,11 @@ class AddForeignKeyConstraints extends Migration
                             'id' => [
                                 'type' => 'long',
                             ],
-                            'startDate' => [
+                            'startDateFrom' => [
+                                'type' => 'date',
+                                'format' => 'yyyy-MM-dd'
+                            ],
+                            'startDateTo' => [
                                 'type' => 'date',
                                 'format' => 'yyyy-MM-dd'
                             ],
@@ -132,7 +136,11 @@ class AddForeignKeyConstraints extends Migration
                             'startDateAttribute' => [
                                 'type' => 'keyword',
                             ],
-                            'endDate' => [
+                            'endDateFrom' => [
+                                'type' => 'date',
+                                'format' => 'yyyy-MM-dd'
+                            ],
+                            'endDateTo' => [
                                 'type' => 'date',
                                 'format' => 'yyyy-MM-dd'
                             ],

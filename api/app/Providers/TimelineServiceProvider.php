@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Timeline\App\Validators\ValidatorFactory;
 use App\Timeline\Domain\Repositories\CatalogRepository;
 use App\Timeline\Domain\Repositories\DateAttributeRepository;
 use App\Timeline\Domain\Repositories\EventRepository;
@@ -33,6 +34,7 @@ use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentUserRe
 use App\Timeline\Infrastructure\Persistence\Filesystem\FSImageFileRepository;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\Hashing\Hasher;
+use Illuminate\Contracts\Validation\Factory;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -65,6 +67,36 @@ class TimelineServiceProvider extends ServiceProvider
         Validator::replacer(
             'event_date',
             'App\Timeline\App\Validators\EventDateValidator@message'
+        );
+
+        Validator::extend(
+            'iso_date',
+            'App\Timeline\App\Validators\ISODateValidator@validate'
+        );
+
+        Validator::replacer(
+            'iso_date',
+            'App\Timeline\App\Validators\ISODateValidator@message'
+        );
+
+        Validator::extend(
+            'date_attribute',
+            'App\Timeline\App\Validators\DateAttributeValidator@validate'
+        );
+
+        Validator::replacer(
+            'date_attribute',
+            'App\Timeline\App\Validators\DateAttributeValidator@message'
+        );
+
+        Validator::extend(
+            'id',
+            'App\Timeline\App\Validators\IDValidator@validate'
+        );
+
+        Validator::replacer(
+            'id',
+            'App\Timeline\App\Validators\IDValidator@message'
         );
     }
 
@@ -187,6 +219,10 @@ class TimelineServiceProvider extends ServiceProvider
                 resolve(SearchEventRepositoryInterface::class),
                 resolve(UserService::class)
             );
+        });
+
+        $this->app->singleton(ValidatorFactory::class, function () {
+            return new ValidatorFactory(resolve(Factory::class));
         });
     }
 }
