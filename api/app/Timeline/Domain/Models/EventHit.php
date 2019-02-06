@@ -105,7 +105,7 @@ class EventHit extends BaseModel
         return $this->content;
     }
 
-    public function toArray(): array
+    public function toValueArray(): array
     {
         return [
             'id' => $this->getId()->getValue(),

@@ -41,6 +41,6 @@ class UserTest extends TestCase
             'isEditor' => false,
             'createdAt' => $date->toIso8601String(),
             'updatedAt' => $date->toIso8601String()
-        ], $model->toArray());
+        ], $model->toValueArray());
     }
 }

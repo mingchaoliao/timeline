@@ -31,7 +31,7 @@ class EventController extends Controller
 
     public function get(Request $request)
     {
-        $pagableRequest = PageableRequest::createFromArray($request->all());
+        $pagableRequest = PageableRequest::createFromValueArray($request->all());
 
         $events = $this->eventService->get($pagableRequest);
 
@@ -46,12 +46,12 @@ class EventController extends Controller
             'id' => 'required|id'
         ]);
 
-        return response()->json($this->eventService->getById(EventId::createFromString($id)));
+        return response()->json($this->eventService->getById(new EventId(intval($id))));
     }
 
     public function search(Request $request)
     {
-        $searchRequest = SearchEventRequest::createFromArray($request->all());
+        $searchRequest = SearchEventRequest::createFromValueArray($request->all());
 
         $result = $this->eventService->search($searchRequest);
 
@@ -61,7 +61,7 @@ class EventController extends Controller
 
     public function create(Request $request)
     {
-        $createEventRequest = CreateEventRequest::fromArray($request->all());
+        $createEventRequest = CreateEventRequest::createFromValueArray($request->all());
 
         $event = $this->eventService->create($createEventRequest);
 
@@ -74,7 +74,7 @@ class EventController extends Controller
             'events' => 'required|array|filled'
         ]);
 
-        $createEventRequestCollection = CreateEventRequestCollection::fromArray($request->all());
+        $createEventRequestCollection = CreateEventRequestCollection::createFromValueArray($request->all());
 
         $event = $this->eventService->bulkCreate($createEventRequestCollection);
 
@@ -86,9 +86,9 @@ class EventController extends Controller
         $params = $request->all();
         $params['id'] = $id;
 
-        $updateRequest = UpdateEventRequest::fromArray($params);
+        $updateRequest = UpdateEventRequest::createFromValueArray($params);
 
-        $event = $this->eventService->update(EventId::createFromString($id), $updateRequest);
+        $event = $this->eventService->update(new EventId(intval($id)), $updateRequest);
 
         return response()->json($event);
     }
@@ -99,6 +99,6 @@ class EventController extends Controller
             'id' => 'required|id'
         ]);
 
-        return response()->json($this->eventService->delete(EventId::createFromString($id)));
+        return response()->json($this->eventService->delete(new EventId(intval($id))));
     }
 }

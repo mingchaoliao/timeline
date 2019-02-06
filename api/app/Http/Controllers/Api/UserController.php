@@ -88,7 +88,7 @@ class UserController extends Controller
         ]);
 
         $user = $this->userService->update(
-            UserId::createFromString($id),
+            new UserId(intval($id)),
             $request->get('name'),
             $request->get('password'),
             $request->get('isAdmin'),

@@ -148,7 +148,7 @@ class Catalog extends BaseModel
         return $this->updatedAt;
     }
 
-    public function toArray(): array
+    public function toValueArray(): array
     {
         return [
             'id' => $this->getId()->getValue(),

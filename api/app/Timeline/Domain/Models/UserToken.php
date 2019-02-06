@@ -47,7 +47,7 @@ class UserToken extends BaseModel
         return $this->token;
     }
 
-    public function toArray(): array
+    public function toValueArray(): array
     {
         return [
             'type' => $this->getType(),

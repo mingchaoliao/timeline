@@ -16,7 +16,13 @@ class DateAttributeValidator
     public function validate($attribute, $value, $parameters, $validator)
     {
         try {
-            $date = EventDate::createFromString($validator->getData()[$parameters[0] ?? null] ?? null);
+            $dateStr = $validator->getData()[$parameters[0] ?? null] ?? null;
+
+            if($dateStr === null) {
+                return false;
+            }
+
+            $date = EventDate::createFromString($dateStr);
 
             return $date->isAttributeAllowed();
         } catch (\Exception $e) {

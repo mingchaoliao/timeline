@@ -77,7 +77,7 @@ class CatalogController extends Controller
         ]);
 
         $catalog = $this->catalogService->update(
-            CatalogId::createFromString($id),
+            new CatalogId(intval($id)),
             $request->get('value')
         );
 
@@ -96,7 +96,7 @@ class CatalogController extends Controller
             'id' => 'required|id'
         ]);
 
-        $isSuccess = $this->catalogService->delete(CatalogId::createFromString($id));
+        $isSuccess = $this->catalogService->delete(new CatalogId(intval($id)));
 
         return response()->json($isSuccess);
     }

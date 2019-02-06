@@ -26,6 +26,6 @@ class UserTokenTest extends TestCase
         $this->assertSame([
             'type' => 'bearer',
             'token' => 'abcd'
-        ], $model->toArray());
+        ], $model->toValueArray());
     }
 }

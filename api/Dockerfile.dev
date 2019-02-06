@@ -14,18 +14,6 @@ RUN apk update && apk add build-base \
   bash \
   autoconf
 
-# create new user with same UID and primary GID as the user in the host machine,
-# in order to making sure host user can modify files created in the container
-# without any permission issue
-ARG HOST_USER
-ARG HOST_UID
-ARG HOST_GID
-RUN echo "${HOST_USER}:x:${HOST_UID}:${HOST_GID}::/home/${HOST_USER}:" >> /etc/passwd \
-    && echo "${HOST_USER}:!:$(($(date +%s) / 60 / 60 / 24)):0:99999:7:::" >> /etc/shadow \
-    && echo "${HOST_USER}:x:${HOST_GID}:" >> /etc/group \
-    && mkdir "/home/${HOST_USER}" && chown "${HOST_USER}:${HOST_USER}" "/home/${HOST_USER}" \
-    && echo "${HOST_USER} ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/no_password_sudoer_${HOST_USER}"
-
 RUN docker-php-ext-install mysqli mbstring pdo pdo_mysql tokenizer pcntl
 RUN docker-php-ext-configure gd --with-gd --with-jpeg-dir=/usr/include/ --with-png-dir=/usr/include/
 RUN docker-php-ext-install gd

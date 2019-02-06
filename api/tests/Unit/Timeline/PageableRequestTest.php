@@ -10,7 +10,8 @@ namespace Tests\Unit\Timeline;
 
 
 use App\Timeline\Domain\Requests\PageableRequest;
-use PHPUnit\Framework\TestCase;
+use Tests\TestCase;
+
 /**
  * @covers \App\Timeline\Domain\Requests\PageableRequest
  */
@@ -18,7 +19,7 @@ class PageableRequestTest extends TestCase
 {
     public function testCreatePageableRequestFromArray()
     {
-        $request = PageableRequest::createFromArray([
+        $request = PageableRequest::createFromValueArray([
             'page' => '3',
             'pageSize' => '10'
         ]);

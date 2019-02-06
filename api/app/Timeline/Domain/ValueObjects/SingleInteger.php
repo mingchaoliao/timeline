@@ -9,10 +9,7 @@
 namespace App\Timeline\Domain\ValueObjects;
 
 
-use App\Timeline\Exceptions\TimelineException;
-use App\Timeline\Utils\Common;
-
-abstract class SingleInteger
+abstract class SingleInteger extends SingleValue
 {
     /**
      * @var int
@@ -37,7 +34,8 @@ abstract class SingleInteger
         return $this->value;
     }
 
-    public function validation(int $value): void {
+    public function validation(int $value): void
+    {
         // validate value
     }
 
@@ -46,7 +44,8 @@ abstract class SingleInteger
         return (string)$this->value;
     }
 
-    public function equalsWith(self $obj): bool {
+    public function equalsWith(self $obj): bool
+    {
         return $this->value === $obj->getValue();
     }
 }

@@ -36,6 +36,6 @@ class EventHitTest extends TestCase
             'startDateAttribute' => 'attr1',
             'endDateAttribute' => null,
             'content' => 'content'
-        ], $hit->toArray());
+        ], $hit->toValueArray());
     }
 }

@@ -14,7 +14,7 @@ use PHPUnit\Framework\TestCase;
 
 final class TestModel1 extends BaseModel {
 
-    public function toArray(): array
+    public function toValueArray(): array
     {
         return [
             'attr1' => 1,

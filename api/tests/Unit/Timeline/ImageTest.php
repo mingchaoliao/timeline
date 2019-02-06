@@ -47,7 +47,7 @@ class ImageTest extends TestCase
             'updateUserId' => 1,
             'createdAt' => $date->toIso8601String(),
             'updatedAt' => $date->toIso8601String()
-        ], $model->toArray());
+        ], $model->toValueArray());
     }
 
     public function testConvertModelWithEventIdToArray()
@@ -76,6 +76,6 @@ class ImageTest extends TestCase
             'updateUserId' => 1,
             'createdAt' => $date->toIso8601String(),
             'updatedAt' => $date->toIso8601String()
-        ], $model->toArray());
+        ], $model->toValueArray());
     }
 }

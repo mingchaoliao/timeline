@@ -14,13 +14,13 @@ use App\Timeline\Utils\Common;
 
 final class UserId extends SingleInteger
 {
-    /**
-     * @param string $value
-     * @return UserId
-     * @throws TimelineException
-     */
-    public static function createFromString(string $value): self {
-        if(!Common::isPosInt($value)) {
+    public static function createFromString(?string $value): ?self
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if (!Common::isPosInt($value)) {
             throw TimelineException::ofInvalidUserId($value);
         }
 

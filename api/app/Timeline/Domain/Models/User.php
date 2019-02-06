@@ -123,7 +123,7 @@ class User extends BaseModel
     /**
      * @return array
      */
-    public function toArray(): array
+    public function toValueArray(): array
     {
         return [
             'id' => $this->getId()->getValue(),

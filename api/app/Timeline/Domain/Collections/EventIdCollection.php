@@ -9,7 +9,7 @@
 namespace App\Timeline\Domain\Collections;
 
 
-class EventIdCollection extends SingleValueModelCollection
+class EventIdCollection extends BaseSingleValueCollection
 {
 
 }

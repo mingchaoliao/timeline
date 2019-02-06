@@ -94,6 +94,7 @@ class TimelineException extends \Exception implements HttpExceptionInterface
     public const IMAGE_WITH_ID_DOES_NOT_EXIST = 10073;
     public const INVALID_IMAGE_ID = 10074;
     public const INVALID_DATE_STRING = 10075;
+    public const INVALID_INTEGER = 10076;
 
     /**
      * @var int
@@ -655,5 +656,10 @@ class TimelineException extends \Exception implements HttpExceptionInterface
             'date string "%s" is invalid',
             $str
         ), static::INVALID_DATE_STRING, 400, [], $previous);
+    }
+
+    public static function ofInvalidInteger(\Throwable $previous = null): self
+    {
+        return new static('value must be an integer', static::INVALID_INTEGER, 400, [], $previous);
     }
 }

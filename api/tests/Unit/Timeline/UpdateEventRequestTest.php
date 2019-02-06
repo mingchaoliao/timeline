@@ -8,19 +8,19 @@
 
 namespace Tests\Unit\Timeline;
 
-use App\Timeline\Domain\Requests\CreateEventRequest;
+use App\Timeline\Domain\Requests\UpdateEventRequest;
 use App\Timeline\Exceptions\InvalidArgumentException;
 use Tests\TestCase;
 
 /**
- * @covers \App\Timeline\Domain\Requests\CreateEventRequest
+ * @covers \App\Timeline\Domain\Requests\UpdateEventRequest
  */
-class CreateEventRequestTest extends TestCase
+class UpdateEventRequestTest extends TestCase
 {
     public function testStartDateAttributeShouldNotBeSetIfStartDateHasMonth()
     {
         $this->expectException(InvalidArgumentException::class);
-        CreateEventRequest::createFromValueArray([
+        UpdateEventRequest::createFromValueArray([
             'startDate' => '2018-03',
             'startDateAttributeId' => 1,
             'endDate' => '2019',
@@ -35,7 +35,7 @@ class CreateEventRequestTest extends TestCase
     public function testEndDateAttributeShouldNotBeSetIfEndDateHasMonth()
     {
         $this->expectException(InvalidArgumentException::class);
-        CreateEventRequest::createFromValueArray([
+        UpdateEventRequest::createFromValueArray([
             'startDate' => '2018',
             'startDateAttributeId' => 1,
             'endDate' => '2019-03',
@@ -50,7 +50,7 @@ class CreateEventRequestTest extends TestCase
     public function testStartDateIsRequired()
     {
         $this->expectException(InvalidArgumentException::class);
-        CreateEventRequest::createFromValueArray([
+        UpdateEventRequest::createFromValueArray([
             'startDateAttributeId' => 1,
             'endDate' => '2019-03',
             'endDateAttributeId' => 1,
@@ -64,7 +64,7 @@ class CreateEventRequestTest extends TestCase
     public function testStartDateMustBeEventDateFormat()
     {
         $this->expectException(InvalidArgumentException::class);
-        CreateEventRequest::createFromValueArray([
+        UpdateEventRequest::createFromValueArray([
             'startDate' => '2018/03/23',
             'startDateAttributeId' => 1,
             'endDate' => '2019-03',
@@ -79,7 +79,7 @@ class CreateEventRequestTest extends TestCase
     public function testStartDateAttributeIdMustBeValidId()
     {
         try {
-            CreateEventRequest::createFromValueArray([
+            UpdateEventRequest::createFromValueArray([
                 'startDate' => '2018',
                 'startDateAttributeId' => 's',
                 'endDate' => '2019',
@@ -94,7 +94,7 @@ class CreateEventRequestTest extends TestCase
         }
 
         try {
-            CreateEventRequest::createFromValueArray([
+            UpdateEventRequest::createFromValueArray([
                 'startDate' => '2018',
                 'startDateAttributeId' => -3,
                 'endDate' => '2019',
@@ -109,7 +109,7 @@ class CreateEventRequestTest extends TestCase
         }
 
         try {
-            CreateEventRequest::createFromValueArray([
+            UpdateEventRequest::createFromValueArray([
                 'startDate' => '2018',
                 'startDateAttributeId' => 0,
                 'endDate' => '2019',
@@ -129,7 +129,7 @@ class CreateEventRequestTest extends TestCase
     public function testEndDateMustBeEventDateFormat()
     {
         $this->expectException(InvalidArgumentException::class);
-        CreateEventRequest::createFromValueArray([
+        UpdateEventRequest::createFromValueArray([
             'startDate' => '2018',
             'startDateAttributeId' => 1,
             'endDate' => '2019/03',
@@ -144,7 +144,7 @@ class CreateEventRequestTest extends TestCase
     public function testEndDateAttributeIdMustBeValidId()
     {
         try {
-            CreateEventRequest::createFromValueArray([
+            UpdateEventRequest::createFromValueArray([
                 'startDate' => '2018',
                 'startDateAttributeId' => 1,
                 'endDate' => '2019',
@@ -159,7 +159,7 @@ class CreateEventRequestTest extends TestCase
         }
 
         try {
-            CreateEventRequest::createFromValueArray([
+            UpdateEventRequest::createFromValueArray([
                 'startDate' => '2018',
                 'startDateAttributeId' => 1,
                 'endDate' => '2019',
@@ -174,7 +174,7 @@ class CreateEventRequestTest extends TestCase
         }
 
         try {
-            CreateEventRequest::createFromValueArray([
+            UpdateEventRequest::createFromValueArray([
                 'startDate' => '2018',
                 'startDateAttributeId' => 1,
                 'endDate' => '2019',
@@ -193,7 +193,7 @@ class CreateEventRequestTest extends TestCase
 
     public function testContentMustBeProvided() {
         $this->expectException(InvalidArgumentException::class);
-        CreateEventRequest::createFromValueArray([
+        UpdateEventRequest::createFromValueArray([
             'startDate' => '2018',
             'startDateAttributeId' => 1,
             'endDate' => '2019',
@@ -206,7 +206,7 @@ class CreateEventRequestTest extends TestCase
 
     public function testPeriodIdMustBeAValidIdWhenProvided() {
         $this->expectException(InvalidArgumentException::class);
-        CreateEventRequest::createFromValueArray([
+        UpdateEventRequest::createFromValueArray([
             'startDate' => '2018',
             'startDateAttributeId' => 1,
             'endDate' => '2019',
@@ -220,7 +220,7 @@ class CreateEventRequestTest extends TestCase
 
     public function testCatalogIdsMustBeAnArrayWhenProvided() {
         $this->expectException(InvalidArgumentException::class);
-        CreateEventRequest::createFromValueArray([
+        UpdateEventRequest::createFromValueArray([
             'startDate' => '2018',
             'startDateAttributeId' => 1,
             'endDate' => '2019',
@@ -234,7 +234,7 @@ class CreateEventRequestTest extends TestCase
 
     public function testEachIdInTheCatalogIdsMustBeAValidId() {
         $this->expectException(InvalidArgumentException::class);
-        CreateEventRequest::createFromValueArray([
+        UpdateEventRequest::createFromValueArray([
             'startDate' => '2018',
             'startDateAttributeId' => 1,
             'endDate' => '2019',
@@ -248,7 +248,7 @@ class CreateEventRequestTest extends TestCase
 
     public function testImageIdsMustBeAnArrayWhenProvided() {
         $this->expectException(InvalidArgumentException::class);
-        CreateEventRequest::createFromValueArray([
+        UpdateEventRequest::createFromValueArray([
             'startDate' => '2018',
             'startDateAttributeId' => 1,
             'endDate' => '2019',
@@ -262,7 +262,7 @@ class CreateEventRequestTest extends TestCase
 
     public function testEachIdInTheImageIdsMustBeAValidId() {
         $this->expectException(InvalidArgumentException::class);
-        CreateEventRequest::createFromValueArray([
+        UpdateEventRequest::createFromValueArray([
             'startDate' => '2018',
             'startDateAttributeId' => 1,
             'endDate' => '2019',
@@ -275,7 +275,7 @@ class CreateEventRequestTest extends TestCase
     }
 
     public function testCreateRequestFromRequestBody() {
-        $request = CreateEventRequest::createFromValueArray([
+        $request = UpdateEventRequest::createFromValueArray([
             'startDate' => '2018-01',
             'startDateAttributeId' => null,
             'endDate' => '2019',

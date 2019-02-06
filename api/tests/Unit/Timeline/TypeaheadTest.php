@@ -23,6 +23,6 @@ class TypeaheadTest extends TestCase
         $this->assertSame([
             'id' => 1,
             'value' => 'a'
-        ], $model->toArray());
+        ], $model->toValueArray());
     }
 }

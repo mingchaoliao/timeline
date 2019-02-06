@@ -46,6 +46,6 @@ class PeriodTest extends TestCase
             'updateUserName' => 'user1',
             'createdAt' => $date->toIso8601String(),
             'updatedAt' => $date->toIso8601String()
-        ], $model->toArray());
+        ], $model->toValueArray());
     }
 }

@@ -206,21 +206,21 @@ class Event extends BaseModel
         return $this->updatedAt;
     }
 
-    public function toArray(): array
+    public function toValueArray(): array
     {
         $startDateAttribute = $this->getStartDateAttribute();
         if ($startDateAttribute !== null) {
-            $startDateAttribute = $startDateAttribute->toArray();
+            $startDateAttribute = $startDateAttribute->toValueArray();
         }
 
         $endDateAttribute = $this->getEndDateAttribute();
         if ($endDateAttribute !== null) {
-            $endDateAttribute = $endDateAttribute->toArray();
+            $endDateAttribute = $endDateAttribute->toValueArray();
         }
 
         $period = $this->getPeriod();
         if ($period !== null) {
-            $period = $period->toArray();
+            $period = $period->toValueArray();
         }
 
         return [

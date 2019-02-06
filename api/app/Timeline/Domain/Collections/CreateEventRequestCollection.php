@@ -7,16 +7,18 @@
 
 namespace App\Timeline\Domain\Collections;
 
-
 use App\Timeline\Domain\Requests\CreateEventRequest;
 
 class CreateEventRequestCollection extends BaseCollection
 {
-
-    public static function fromArray(array $data): self
+    public static function createFromValueArray(?array $data): ?self
     {
-        return new static(array_map(function(array $singleData) {
-            return CreateEventRequest::fromArray($singleData);
+        if ($data === null) {
+            return null;
+        }
+
+        return new static(array_map(function (array $arr) {
+            CreateEventRequest::createFromValueArray($arr);
         }, $data));
     }
 }

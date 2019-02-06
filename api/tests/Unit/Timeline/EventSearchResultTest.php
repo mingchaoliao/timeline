@@ -31,14 +31,14 @@ class EventSearchResultTest extends TestCase
         $dateBucket1 = $this->createMock(Bucket::class);
         $dateBucket2 = $this->createMock(Bucket::class);
 
-        $hit1->method('toArray')->willReturn([1]);
-        $hit2->method('toArray')->willReturn([2]);
-        $periodBucket1->method('toArray')->willReturn([3]);
-        $periodBucket2->method('toArray')->willReturn([4]);
-        $catalogBucket1->method('toArray')->willReturn([5]);
-        $catalogBucket2->method('toArray')->willReturn([6]);
-        $dateBucket1->method('toArray')->willReturn([7]);
-        $dateBucket2->method('toArray')->willReturn([8]);
+        $hit1->method('toValueArray')->willReturn([1]);
+        $hit2->method('toValueArray')->willReturn([2]);
+        $periodBucket1->method('toValueArray')->willReturn([3]);
+        $periodBucket2->method('toValueArray')->willReturn([4]);
+        $catalogBucket1->method('toValueArray')->willReturn([5]);
+        $catalogBucket2->method('toValueArray')->willReturn([6]);
+        $dateBucket1->method('toValueArray')->willReturn([7]);
+        $dateBucket2->method('toValueArray')->willReturn([8]);
 
         $result = new EventSearchResult(
             new EventHitCollection([$hit1, $hit2]),
@@ -64,6 +64,6 @@ class EventSearchResultTest extends TestCase
                 [7],
                 [8]
             ],
-        ], $result->toArray());
+        ], $result->toValueArray());
     }
 }

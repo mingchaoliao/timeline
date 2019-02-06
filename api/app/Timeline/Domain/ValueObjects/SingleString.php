@@ -9,7 +9,7 @@
 namespace App\Timeline\Domain\ValueObjects;
 
 
-abstract class SingleString
+abstract class SingleString extends SingleValue
 {
     /**
      * @var string
@@ -26,6 +26,15 @@ abstract class SingleString
         $this->value = $value;
     }
 
+    public static function createFromString(?string $value): ?self
+    {
+        if($value === null) {
+            return null;
+        }
+
+        return new static($value);
+    }
+
     /**
      * @return string
      */
@@ -34,9 +43,7 @@ abstract class SingleString
         return $this->value;
     }
 
-    public function validation(string $value): void {
-        // validate value
-    }
+    public abstract function validation(string $value): void;
 
     public function __toString()
     {

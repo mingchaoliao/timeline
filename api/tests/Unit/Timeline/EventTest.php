@@ -203,7 +203,7 @@ class EventTest extends TestCase
             'updateUserId' => 1,
             'createdAt' => $this->date->toIso8601String(),
             'updatedAt' => $this->date->toIso8601String(),
-        ], $this->event1->toArray());
+        ], $this->event1->toValueArray());
     }
 
     public function testGetDataForIndex()
@@ -211,10 +211,12 @@ class EventTest extends TestCase
         $this->assertSame([
             'id' => 1,
             'startDateStr' => '2018',
-            'startDate' => '2018-01-01',
+            'startDateFrom' => '2018-01-01',
+            'startDateTo' => '2018-12-31',
             'startDateAttribute' => 'attr1',
             'endDateStr' => '2018-03',
-            'endDate' => '2018-03-31',
+            'endDateFrom' => '2018-03-01',
+            'endDateTo' => '2018-03-31',
             'endDateAttribute' => 'attr2',
             'period' => 'period1',
             'catalogs' => [

@@ -14,10 +14,16 @@ use App\Timeline\Utils\Common;
 
 final class EventId extends SingleInteger
 {
-    public static function createFromString(string $value): self {
-        if(!Common::isPosInt($value)) {
+    public static function createFromString(?string $value): ?self
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if (!Common::isPosInt($value)) {
             throw TimelineException::ofInvalidEventId($value);
         }
+
         return new static(intval($value));
     }
 }

@@ -23,6 +23,6 @@ class BucketTest extends TestCase
         $this->assertSame([
             'value' => 'a',
             'count' => 3
-        ], $model->toArray());
+        ], $model->toValueArray());
     }
 }

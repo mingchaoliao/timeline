@@ -79,7 +79,7 @@ class EventSearchResult extends BaseModel
     }
 
 
-    public function toArray(): array
+    public function toValueArray(): array
     {
         return [
             'hits' => $this->getHits()->toValueArray(),

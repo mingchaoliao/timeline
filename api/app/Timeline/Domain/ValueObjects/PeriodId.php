@@ -14,18 +14,14 @@ use App\Timeline\Utils\Common;
 
 final class PeriodId extends SingleInteger
 {
-    /**
-     * @param string|null $value
-     * @return PeriodId|null
-     * @throws TimelineException
-     */
-    public static function createFromString(?string $value): ?self {
-        if($value === null) {
+    public static function createFromString(?string $value): ?self
+    {
+        if ($value === null) {
             return null;
         }
 
-        if(!Common::isPosInt($value)) {
-            throw TimelineException::ofInvalidPeriodId($value);
+        if (!Common::isPosInt($value)) {
+            throw TimelineException::ofInvalidImageId($value);
         }
 
         return new static(intval($value));

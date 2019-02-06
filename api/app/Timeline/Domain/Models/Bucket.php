@@ -47,8 +47,7 @@ class Bucket extends BaseModel
         return $this->count;
     }
 
-
-    public function toArray(): array
+    public function toValueArray(): array
     {
         return [
             'value' => $this->getValue(),

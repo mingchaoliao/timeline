@@ -9,7 +9,9 @@
 namespace App\Timeline\Domain\Models;
 
 
-class Typeahead
+use App\Timeline\Utils\JsonSerializable;
+
+class Typeahead extends BaseModel
 {
     /**
      * @var int
@@ -47,7 +49,7 @@ class Typeahead
         return $this->value;
     }
 
-    public function toArray(): array
+    public function toValueArray(): array
     {
         return [
             'id' => $this->getId(),

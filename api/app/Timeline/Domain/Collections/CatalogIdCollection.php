@@ -11,15 +11,16 @@ namespace App\Timeline\Domain\Collections;
 
 use App\Timeline\Domain\ValueObjects\CatalogId;
 
-class CatalogIdCollection extends SingleValueModelCollection
+class CatalogIdCollection extends BaseSingleValueCollection
 {
-    public static function fromValueArray(?array $ids): ?self {
-        if($ids === null) {
+    public static function createFromValueArray(?array $ids): ?self
+    {
+        if ($ids === null) {
             return null;
         }
 
-        return new static(array_map(function(int $id) {
-            return new CatalogId($id);
-        },$ids));
+        return new static(array_map(function (string $id) {
+            return CatalogId::createFromString($id);
+        }, $ids));
     }
 }

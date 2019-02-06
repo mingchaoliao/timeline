@@ -8,9 +8,10 @@
 namespace App\Timeline\Domain\Collections;
 
 
+use App\Timeline\Utils\JsonSerializable;
 use Illuminate\Support\Collection;
 
-class BaseCollection extends Collection
+abstract class BaseCollection extends Collection implements JsonSerializable
 {
     /**
      * @var int
@@ -38,15 +39,10 @@ class BaseCollection extends Collection
         return json_encode($this->toValueArray(), $options);
     }
 
-    public function toValueArray(): array {
-        try {
-            $arr = [];
-            foreach ($this->items as $item) {
-                $arr[] = $item->toArray();
-            }
-            return $arr;
-        } catch (\Exception $e) {
-            return [];
-        }
+    public function toValueArray(): array
+    {
+        return $this->map(function (JsonSerializable $obj) {
+            return $obj->toValueArray();
+        })->toArray();
     }
 }

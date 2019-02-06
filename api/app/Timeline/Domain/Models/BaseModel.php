@@ -8,14 +8,13 @@
 namespace App\Timeline\Domain\Models;
 
 
+use App\Timeline\Utils\JsonSerializable;
 use Illuminate\Contracts\Support\Jsonable;
 
-abstract class BaseModel implements Jsonable
+abstract class BaseModel implements JsonSerializable, Jsonable
 {
-    abstract public function toArray(): array;
-
     public function toJson($options = 0)
     {
-        return json_encode($this->toArray(),$options);
+        return json_encode($this->toValueArray(), $options);
     }
 }

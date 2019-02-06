@@ -12,9 +12,10 @@ namespace App\Timeline\Domain\Requests;
 use App\Timeline\App\Validators\ValidatorFactory;
 use App\Timeline\Domain\Models\EventDate;
 use App\Timeline\Utils\Common;
+use App\Timeline\Utils\JsonSerializable;
 use Carbon\Carbon;
 
-class SearchEventRequest
+class SearchEventRequest implements JsonSerializable
 {
     /**
      * @var string|null
@@ -95,8 +96,12 @@ class SearchEventRequest
      * @return SearchEventRequest
      * @throws \App\Timeline\Exceptions\TimelineException
      */
-    public static function createFromArray(array $data): self
+    public static function createFromValueArray(?array $data): ?self
     {
+        if($data === null) {
+            return null;
+        }
+
         resolve(ValidatorFactory::class)->validate($data, [
             'content' => 'nullable|string',
             'startDate' => 'nullable|event_date',
@@ -106,8 +111,7 @@ class SearchEventRequest
             'endDateFrom' => 'nullable|iso_date',
             'endDateTo' => 'nullable|iso_date',
             'period' => 'nullable|string',
-            'catalogs' => 'nullable|array',
-            'catalogs.*' => 'string',
+            'catalogs' => 'nullable|string',
             'page' => 'nullable|integer|gt:0',
             'pageSize' => 'nullable|integer|gt:0',
 
@@ -116,10 +120,10 @@ class SearchEventRequest
         $content = $data['content'] ?? null;
         $startDate = $data['startDate'] ?? null;
         $startDateFrom = Common::createDateFromISOString($data['startDateFrom'] ?? null);
-        $startDateTo = Common::createDateFromISOString($data['$startDateTo'] ?? null);
+        $startDateTo = Common::createDateFromISOString($data['startDateTo'] ?? null);
         $endDate = $data['endDate'] ?? null;
-        $endDateFrom = Common::createDateFromISOString($data['$endDateFrom'] ?? null);
-        $endDateTo = Common::createDateFromISOString($data['$endDateTo'] ?? null);
+        $endDateFrom = Common::createDateFromISOString($data['endDateFrom'] ?? null);
+        $endDateTo = Common::createDateFromISOString($data['endDateTo'] ?? null);
         $period = $data['period'] ?? null;
         $catalogs = Common::splitByComma($data['catalogs'] ?? null, []);
         $page = $data['page'] ?? 1;
@@ -226,5 +230,22 @@ class SearchEventRequest
     public function getPageSize(): int
     {
         return $this->pageSize;
+    }
+
+    public function toValueArray(): array
+    {
+        return [
+            'content' => $this->getContent(),
+            'startDate' => $this->getStartDate() === null ? null : $this->getStartDate()->getDate(),
+            'startDateFrom' => $this->getStartDateFrom() === null ? null : $this->getStartDateFrom()->format('Y-m-d'),
+            'startDateTo' => $this->getStartDateTo() === null ? null : $this->getStartDateTo()->format('Y-m-d'),
+            'endDate' => $this->getEndDate() === null ? null : $this->getEndDate()->getDate(),
+            'endDateFrom' => $this->getEndDateFrom() === null ? null : $this->getEndDateFrom()->format('Y-m-d'),
+            'endDateTo' => $this->getEndDateTo() === null ? null : $this->getEndDateTo()->format('Y-m-d'),
+            'period' => $this->getPeriod(),
+            'catalogs' => $this->getCatalogs(),
+            'page' => $this->getPage(),
+            'pageSize' => $this->getPageSize(),
+        ];
     }
 }

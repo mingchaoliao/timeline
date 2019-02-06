@@ -18,11 +18,6 @@ services:
     build:
       context: api
       dockerfile: Dockerfile.dev
-      args:
-        HOST_USER: "${USER}"
-        HOST_UID: "${HOST_UID}"
-        HOST_GID: "${HOST_GID}"
-    user: "${HOST_UID}:${HOST_GID}"
     volumes:
       - ./api:/apidist
     depends_on:
@@ -31,6 +26,13 @@ services:
       - queue
     networks:
       - internal
+  api_test:
+    build:
+      context: api
+      dockerfile: Dockerfile.dev
+    command: php -v
+    volumes:
+      - ./api:/apidist
   queue:
     image: redis:5.0.3-alpine
     volumes:
@@ -41,7 +43,6 @@ services:
     build:
       context: api
       dockerfile: horizon/Dockerfile.dev
-    user: "1000:1000"
     volumes:
       - ./api:/apidist
     depends_on:
@@ -90,7 +91,6 @@ services:
     build:
       context: web
       dockerfile: Dockerfile.dev
-    user: "1000:1000"
     ports:
       - 4200:4200
     volumes:

@@ -15,8 +15,9 @@ use App\Timeline\Domain\Models\EventDate;
 use App\Timeline\Domain\ValueObjects\DateAttributeId;
 use App\Timeline\Domain\ValueObjects\PeriodId;
 use App\Timeline\Exceptions\TimelineException;
+use App\Timeline\Utils\JsonSerializable;
 
-class CreateEventRequest
+class CreateEventRequest implements JsonSerializable
 {
     /**
      * @var EventDate
@@ -79,13 +80,17 @@ class CreateEventRequest
      * @return CreateEventRequest
      * @throws TimelineException
      */
-    public static function fromArray(array $data): self
+    public static function createFromValueArray(?array $data): ?self
     {
+        if($data === null) {
+            return null;
+        }
+
         resolve(ValidatorFactory::class)->validate($data, [
             'startDate' => 'required|event_date',
-            'startDateAttributeId' => 'nullable|date_attribute:startDate|iso_date',
+            'startDateAttributeId' => 'nullable|date_attribute:startDate|id',
             'endDate' => 'nullable|event_date',
-            'endDateAttributeId' => 'nullable|date_attribute:endDate|iso_date',
+            'endDateAttributeId' => 'nullable|date_attribute:endDate|id',
             'content' => 'required|string',
             'periodId' => 'nullable|id',
             'catalogIds' => 'nullable|array',
@@ -99,11 +104,11 @@ class CreateEventRequest
         $endDate = EventDate::createFromString($data['endDate'] ?? null);
         $endDateAttributeId = DateAttributeId::createFromString($data['endDateAttributeId'] ?? null);
         $periodId = PeriodId::createFromString($data['periodId'] ?? null);
-        $catalogIds = CatalogIdCollection::fromValueArray(
+        $catalogIds = CatalogIdCollection::createFromValueArray(
             $data['catalogIds'] ?? []
         );
         $content = $data['content'];
-        $imageIds = ImageIdCollection::fromValueArray(
+        $imageIds = ImageIdCollection::createFromArray(
             $data['imageIds'] ?? []
         );
 
@@ -181,5 +186,19 @@ class CreateEventRequest
     public function getImageIds(): ImageIdCollection
     {
         return $this->imageIds;
+    }
+
+    public function toValueArray(): array
+    {
+        return [
+            'startDate' => $this->getStartDate()->getDate(),
+            'startDateAttributeId' => $this->getStartDateAttributeId() === null ? null : $this->getStartDateAttributeId()->getValue(),
+            'endDate' => $this->getEndDate() === null ? null : $this->getEndDate()->getDate(),
+            'endDateAttributeId' => $this->getEndDateAttributeId() === null ? null : $this->getEndDateAttributeId()->getValue(),
+            'content' => $this->getContent(),
+            'periodId' => $this->getPeriodId() === null ? null : $this->getPeriodId()->getValue(),
+            'catalogIds' => $this->getCatalogIds()->toValueArray(),
+            'imageIds' => $this->getImageIds()->toValueArray(),
+        ];
     }
 }

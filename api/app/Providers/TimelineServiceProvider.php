@@ -50,16 +50,6 @@ class TimelineServiceProvider extends ServiceProvider
     public function boot()
     {
         Validator::extend(
-            'comma_separated_ids',
-            'App\Timeline\App\Validators\CommaSeparatedIdsValidator@validate'
-        );
-
-        Validator::replacer(
-            'comma_separated_ids',
-            'App\Timeline\App\Validators\CommaSeparatedIdsValidator@message'
-        );
-
-        Validator::extend(
             'event_date',
             'App\Timeline\App\Validators\EventDateValidator@validate'
         );

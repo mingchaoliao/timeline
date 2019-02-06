@@ -2,17 +2,20 @@
 /**
  * Created by PhpStorm.
  * User: liaom
- * Date: 1/16/19
- * Time: 11:06 PM
+ * Date: 2/6/19
+ * Time: 4:04 PM
  */
 
 namespace App\Timeline\Domain\Collections;
 
-class SingleValueModelCollection extends BaseCollection
+
+use App\Timeline\Domain\ValueObjects\SingleValue;
+
+abstract class BaseSingleValueCollection extends BaseCollection
 {
     public function toValueArray(): array
     {
-        return $this->map(function($obj) {
+        return $this->map(function (SingleValue $obj) {
             return $obj->getValue();
         })->toArray();
     }

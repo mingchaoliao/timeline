@@ -14,14 +14,9 @@ use App\Timeline\Utils\Common;
 
 final class DateAttributeId extends SingleInteger
 {
-    /**
-     * @param string|null $value
-     * @return DateAttributeId|null
-     * @throws TimelineException
-     */
     public static function createFromString(?string $value): ?self
     {
-        if($value === null) {
+        if ($value === null) {
             return null;
         }
 

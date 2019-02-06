@@ -49,7 +49,7 @@ class ImageController extends Controller
             'description' => 'required|string'
         ]);
 
-        $image = $this->imageService->update(ImageId::createFromString($id), $request->get('description'));
+        $image = $this->imageService->update(new ImageId(intval($id)), $request->get('description'));
         return response()->json($image);
     }
 }

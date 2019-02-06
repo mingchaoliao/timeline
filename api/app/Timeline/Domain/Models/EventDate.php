@@ -11,7 +11,7 @@ namespace App\Timeline\Domain\Models;
 use App\Timeline\Exceptions\TimelineException;
 use Carbon\Carbon;
 
-class EventDate
+class EventDate extends BaseModel
 {
     private const FORMAT_YEAR = 'Y';
     private const FORMAT_YEAR_MONTH = 'Y-m';
@@ -143,5 +143,12 @@ class EventDate
     public function isAttributeAllowed(): bool
     {
         return $this->format === self::FORMAT_YEAR;
+    }
+
+    public function toValueArray(): array
+    {
+        return [
+            'date' => $this->getDate()
+        ];
     }
 }
