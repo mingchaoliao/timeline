@@ -15,6 +15,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \App\Timeline\Domain\Collections\ImageIdCollection
+ * @covers \App\Timeline\Domain\Collections\BaseSingleValueCollection
+ * @covers \App\Timeline\Domain\Collections\BaseCollection
  */
 class ImageIdCollectionTest extends TestCase
 {

@@ -9,29 +9,34 @@ namespace App\Timeline\Domain\Collections;
 
 
 use App\Timeline\Utils\JsonSerializable;
+use App\Timeline\Utils\Pageable;
 use Illuminate\Support\Collection;
 
-abstract class BaseCollection extends Collection implements JsonSerializable
+abstract class BaseCollection extends Collection implements JsonSerializable, Pageable
 {
     /**
-     * @var int
+     * @var int|null
      */
-    protected $count = 0;
+    protected $totalCount = null;
 
     /**
      * @return int
      */
-    public function getCount(): int
+    public function getTotalCount(): int
     {
-        return $this->count;
+        if($this->totalCount === null) {
+            return $this->count();
+        }
+
+        return $this->totalCount;
     }
 
     /**
-     * @param int $count
+     * @param int $totalCount
      */
-    public function setCount(int $count): void
+    public function setTotalCount(int $totalCount): void
     {
-        $this->count = $count;
+        $this->totalCount = $totalCount;
     }
 
     public function toJson($options = 0)

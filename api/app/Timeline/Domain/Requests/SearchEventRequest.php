@@ -76,7 +76,7 @@ class SearchEventRequest implements JsonSerializable
      * @param int $page
      * @param int $pageSize
      */
-    public function __construct(?string $content, ?EventDate $startDate, ?Carbon $startDateFrom, ?Carbon $startDateTo, ?EventDate $endDate, ?Carbon $endDateFrom, ?Carbon $endDateTo, ?string $period, array $catalogs, int $page, int $pageSize)
+    public function __construct(?string $content, ?EventDate $startDate, ?Carbon $startDateFrom, ?Carbon $startDateTo, ?EventDate $endDate, ?Carbon $endDateFrom, ?Carbon $endDateTo, ?string $period, array $catalogs, int $page = 1, int $pageSize = 10)
     {
         $this->content = $content;
         $this->startDate = $startDate;
@@ -98,7 +98,7 @@ class SearchEventRequest implements JsonSerializable
      */
     public static function createFromValueArray(?array $data): ?self
     {
-        if($data === null) {
+        if ($data === null) {
             return null;
         }
 

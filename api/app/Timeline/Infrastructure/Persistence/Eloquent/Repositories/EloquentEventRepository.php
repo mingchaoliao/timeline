@@ -150,7 +150,7 @@ class EloquentEventRepository implements EventRepository
         $eloquentCollection = $query->get();
 
         $events = $this->constructEventCollection($eloquentCollection);
-        $events->setCount($count);
+        $events->setTotalCount($count);
 
         return $events;
     }

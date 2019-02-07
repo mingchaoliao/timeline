@@ -132,7 +132,7 @@ class SearchEventRequestTest extends TestCase
 
     public function testCreateRequestFromBody()
     {
-        $request = SearchEventRequest::createFromValueArray([
+        $data = [
             'content' => 'c',
             'startDate' => '2018',
             'endDate' => '2019',
@@ -140,7 +140,8 @@ class SearchEventRequestTest extends TestCase
             'catalogs' => 'c1,c2',
             'page' => 1,
             'pageSize' => 1
-        ]);
+        ];
+        $request = SearchEventRequest::createFromValueArray($data);
 
         $this->assertSame('c', $request->getContent());
         $this->assertSame('2018', $request->getStartDate()->getDate());
@@ -149,17 +150,52 @@ class SearchEventRequestTest extends TestCase
         $this->assertSame(['c1', 'c2'], $request->getCatalogs());
         $this->assertSame(1, $request->getPage());
         $this->assertSame(1, $request->getPageSize());
+        $this->assertSame([
+            'content' => 'c',
+            'startDate' => '2018',
+            'startDateFrom' => null,
+            'startDateTo' => null,
+            'endDate' => '2019',
+            'endDateFrom' => null,
+            'endDateTo' => null,
+            'period' => 'p',
+            'catalogs' => [
+                'c1',
+                'c2'
+            ],
+            'page' => 1,
+            'pageSize' => 1
+        ], $request->toValueArray());
 
-        $request = SearchEventRequest::createFromValueArray([
+        $data = [
             'startDateFrom' => '2018-01-01',
             'startDateTo' => '2018-01-02',
             'endDateFrom' => '2018-02-01',
             'endDateTo' => '2018-02-02',
-        ]);
+        ];
+        $request = SearchEventRequest::createFromValueArray($data);
 
         $this->assertSame('2018-01-01', $request->getStartDateFrom()->format('Y-m-d'));
         $this->assertSame('2018-01-02', $request->getStartDateTo()->format('Y-m-d'));
         $this->assertSame('2018-02-01', $request->getEndDateFrom()->format('Y-m-d'));
         $this->assertSame('2018-02-02', $request->getEndDateTo()->format('Y-m-d'));
+        $this->assertSame([
+            'content' => null,
+            'startDate' => null,
+            'startDateFrom' => '2018-01-01',
+            'startDateTo' => '2018-01-02',
+            'endDate' => null,
+            'endDateFrom' => '2018-02-01',
+            'endDateTo' => '2018-02-02',
+            'period' => null,
+            'catalogs' => [],
+            'page' => 1,
+            'pageSize' => 10
+        ], $request->toValueArray());
+    }
+
+    public function testCreateFromNull()
+    {
+        $this->assertSame(null, SearchEventRequest::createFromValueArray(null));
     }
 }

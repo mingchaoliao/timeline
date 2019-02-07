@@ -28,6 +28,9 @@ class EventDateTest extends TestCase
         $this->assertSame([
             'year' => 2018
         ], $date->toDateArray());
+        $this->assertSame([
+            'date' => '2018'
+        ], $date->toValueArray());
         $this->assertSame(
             '2018-01-01 00:00:00',
             $date->toStartDate()->format('Y-m-d H:i:s')
@@ -49,6 +52,9 @@ class EventDateTest extends TestCase
             'year' => 2018,
             'month' => 3
         ], $date->toDateArray());
+        $this->assertSame([
+            'date' => '2018-03'
+        ], $date->toValueArray());
         $this->assertSame(
             '2018-03-01 00:00:00',
             $date->toStartDate()->format('Y-m-d H:i:s')
@@ -71,6 +77,9 @@ class EventDateTest extends TestCase
             'month' => 3,
             'day' => 13
         ], $date->toDateArray());
+        $this->assertSame([
+            'date' => '2018-03-13'
+        ], $date->toValueArray());
         $this->assertSame(
             '2018-03-13 00:00:00',
             $date->toStartDate()->format('Y-m-d H:i:s')

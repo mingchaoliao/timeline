@@ -191,7 +191,8 @@ class CreateEventRequestTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testContentMustBeProvided() {
+    public function testContentMustBeProvided()
+    {
         $this->expectException(InvalidArgumentException::class);
         CreateEventRequest::createFromValueArray([
             'startDate' => '2018',
@@ -204,7 +205,8 @@ class CreateEventRequestTest extends TestCase
         ]);
     }
 
-    public function testPeriodIdMustBeAValidIdWhenProvided() {
+    public function testPeriodIdMustBeAValidIdWhenProvided()
+    {
         $this->expectException(InvalidArgumentException::class);
         CreateEventRequest::createFromValueArray([
             'startDate' => '2018',
@@ -218,7 +220,8 @@ class CreateEventRequestTest extends TestCase
         ]);
     }
 
-    public function testCatalogIdsMustBeAnArrayWhenProvided() {
+    public function testCatalogIdsMustBeAnArrayWhenProvided()
+    {
         $this->expectException(InvalidArgumentException::class);
         CreateEventRequest::createFromValueArray([
             'startDate' => '2018',
@@ -232,7 +235,8 @@ class CreateEventRequestTest extends TestCase
         ]);
     }
 
-    public function testEachIdInTheCatalogIdsMustBeAValidId() {
+    public function testEachIdInTheCatalogIdsMustBeAValidId()
+    {
         $this->expectException(InvalidArgumentException::class);
         CreateEventRequest::createFromValueArray([
             'startDate' => '2018',
@@ -246,7 +250,8 @@ class CreateEventRequestTest extends TestCase
         ]);
     }
 
-    public function testImageIdsMustBeAnArrayWhenProvided() {
+    public function testImageIdsMustBeAnArrayWhenProvided()
+    {
         $this->expectException(InvalidArgumentException::class);
         CreateEventRequest::createFromValueArray([
             'startDate' => '2018',
@@ -260,7 +265,8 @@ class CreateEventRequestTest extends TestCase
         ]);
     }
 
-    public function testEachIdInTheImageIdsMustBeAValidId() {
+    public function testEachIdInTheImageIdsMustBeAValidId()
+    {
         $this->expectException(InvalidArgumentException::class);
         CreateEventRequest::createFromValueArray([
             'startDate' => '2018',
@@ -274,8 +280,9 @@ class CreateEventRequestTest extends TestCase
         ]);
     }
 
-    public function testCreateRequestFromRequestBody() {
-        $request = CreateEventRequest::createFromValueArray([
+    public function testCreateRequestFromRequestBody()
+    {
+        $data = [
             'startDate' => '2018-01',
             'startDateAttributeId' => null,
             'endDate' => '2019',
@@ -284,7 +291,9 @@ class CreateEventRequestTest extends TestCase
             'periodId' => 1,
             'catalogIds' => [1, 2],
             'imageIds' => [3, 4]
-        ]);
+        ];
+
+        $request = CreateEventRequest::createFromValueArray($data);
 
         $this->assertSame('2018-01', $request->getStartDate()->getDate());
         $this->assertSame(null, $request->getStartDateAttributeId());
@@ -294,5 +303,11 @@ class CreateEventRequestTest extends TestCase
         $this->assertSame(1, $request->getPeriodId()->getValue());
         $this->assertSame([1, 2], $request->getCatalogIds()->toValueArray());
         $this->assertSame([3, 4], $request->getImageIds()->toValueArray());
+        $this->assertSame($data, $request->toValueArray());
+    }
+
+    public function testCreateFromNull()
+    {
+        $this->assertSame(null, CreateEventRequest::createFromValueArray(null));
     }
 }

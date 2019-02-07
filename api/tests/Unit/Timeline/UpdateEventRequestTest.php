@@ -274,8 +274,9 @@ class UpdateEventRequestTest extends TestCase
         ]);
     }
 
-    public function testCreateRequestFromRequestBody() {
-        $request = UpdateEventRequest::createFromValueArray([
+    public function testCreateRequestFromRequestBody()
+    {
+        $data = [
             'startDate' => '2018-01',
             'startDateAttributeId' => null,
             'endDate' => '2019',
@@ -284,7 +285,9 @@ class UpdateEventRequestTest extends TestCase
             'periodId' => 1,
             'catalogIds' => [1, 2],
             'imageIds' => [3, 4]
-        ]);
+        ];
+
+        $request = UpdateEventRequest::createFromValueArray($data);
 
         $this->assertSame('2018-01', $request->getStartDate()->getDate());
         $this->assertSame(null, $request->getStartDateAttributeId());
@@ -294,5 +297,11 @@ class UpdateEventRequestTest extends TestCase
         $this->assertSame(1, $request->getPeriodId()->getValue());
         $this->assertSame([1, 2], $request->getCatalogIds()->toValueArray());
         $this->assertSame([3, 4], $request->getImageIds()->toValueArray());
+        $this->assertSame($data, $request->toValueArray());
+    }
+
+    public function testCreateFromNull()
+    {
+        $this->assertSame(null, UpdateEventRequest::createFromValueArray(null));
     }
 }

@@ -15,6 +15,8 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @covers \App\Timeline\Domain\Collections\CatalogIdCollection
+ * @covers \App\Timeline\Domain\Collections\BaseSingleValueCollection
+ * @covers \App\Timeline\Domain\Collections\BaseCollection
  */
 class CatalogIdCollectionTest extends TestCase
 {
@@ -22,6 +24,8 @@ class CatalogIdCollectionTest extends TestCase
     {
         $collection = CatalogIdCollection::createFromValueArray([1, 2]);
         $this->assertSame(2, count($collection));
+        $this->assertSame([1, 2], $collection->toValueArray());
+        $this->assertSame('[1,2]', $collection->toJson());
     }
 
     public function testCreateFromNull()

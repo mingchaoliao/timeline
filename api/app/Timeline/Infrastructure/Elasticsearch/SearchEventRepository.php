@@ -50,7 +50,7 @@ class SearchEventRepository implements SearchEventRepositoryInterface
         $dateBuckets = $result['aggregations']['startDate']['buckets'];
 
         $eventHits = $this->constructEventHits($hits);
-        $eventHits->setCount($total);
+        $eventHits->setTotalCount($total);
 
         $filterBucket = function (array $bucket) {
             return $bucket['doc_count'] > 0;

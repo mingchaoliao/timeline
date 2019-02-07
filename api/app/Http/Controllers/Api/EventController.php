@@ -35,7 +35,7 @@ class EventController extends Controller
 
         $events = $this->eventService->get($pagableRequest);
 
-        $count = $events->getCount();
+        $count = $events->getTotalCount();
 
         return response()->json($events)->header('X-Total-Count', $count);
     }
@@ -56,7 +56,7 @@ class EventController extends Controller
         $result = $this->eventService->search($searchRequest);
 
         return response()->json($result)
-            ->header('X-Total-Count', $result->getHits()->getCount());
+            ->header('X-Total-Count', $result->getHits()->getTotalCount());
     }
 
     public function create(Request $request)

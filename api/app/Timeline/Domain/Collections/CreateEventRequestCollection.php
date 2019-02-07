@@ -18,7 +18,7 @@ class CreateEventRequestCollection extends BaseCollection
         }
 
         return new static(array_map(function (array $arr) {
-            CreateEventRequest::createFromValueArray($arr);
+            return CreateEventRequest::createFromValueArray($arr);
         }, $data));
     }
 }
