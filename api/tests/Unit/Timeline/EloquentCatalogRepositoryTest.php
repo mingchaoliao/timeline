@@ -9,16 +9,15 @@
 namespace Tests\Unit\Timeline;
 
 
+use App\Timeline\Domain\ValueObjects\CatalogId;
 use App\Timeline\Domain\ValueObjects\UserId;
 use App\Timeline\Exceptions\TimelineException;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentCatalog;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentUser;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentCatalogRepository;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Database\QueryException;
-use Illuminate\Support\Carbon;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\TestCase;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Tests\TestCase;
 
 /**
  * @covers \App\Timeline\Exceptions\TimelineException
@@ -26,195 +25,238 @@ use PHPUnit\Framework\TestCase;
  */
 class EloquentCatalogRepositoryTest extends TestCase
 {
-    /**
-     * @var MockObject
-     */
-    private $catalogModel;
+    use RefreshDatabase;
+
     /**
      * @var EloquentCatalogRepository
      */
     private $catalogRepo;
+    /**
+     * @var Callback
+     */
+    private $sortCatalog;
+    /**
+     * @var Callback
+     */
+    private $createCatalogValueArray;
 
     protected function setUp()
     {
         parent::setUp();
-        $this->catalogModel = $this->getMockBuilder(EloquentCatalog::class)
-            ->setMethods([
-                'select',
-                'withFullInfo',
-                'get',
-                'create',
-                'whereIn'
-            ])
-            ->getMock();
-        $this->catalogModel->method('select')->willReturnSelf();
-        $this->catalogModel->method('withFullInfo')->willReturnSelf();
-        $this->catalogRepo = new EloquentCatalogRepository($this->catalogModel);
+        $this->catalogRepo = new EloquentCatalogRepository(
+            resolve(EloquentCatalog::class)
+        );
+        $this->sortCatalog = function (EloquentCatalog $c1, EloquentCatalog $c2) {
+            $id1 = $c1->getId();
+            $id2 = $c2->getId();
+            if ($id1 === $id2) {
+                return 0;
+            }
+
+            return $id1 < $id2 ? -1 : 1;
+        };
+        $this->createCatalogValueArray = function (EloquentCatalog $eloquentCatalog) {
+            return [
+                'id' => $eloquentCatalog->getId(),
+                'value' => $eloquentCatalog->getValue(),
+                'numberOfEvents' => $eloquentCatalog->getNumberOfEvents(),
+                'createUserId' => $eloquentCatalog->getCreateUserId(),
+                'createUserName' => $eloquentCatalog->getCreateUser()->getName(),
+                'updateUserId' => $eloquentCatalog->getUpdateUserId(),
+                'updateUserName' => $eloquentCatalog->getUpdateUser()->getName(),
+                'createdAt' => $eloquentCatalog->getCreatedAt()->toIso8601String(),
+                'updatedAt' => $eloquentCatalog->getUpdatedAt()->toIso8601String()
+            ];
+        };
     }
 
     public function testGetTypeahead()
     {
-        $eloquentCatalog1 = $this->createMock(EloquentCatalog::class);
-        $eloquentCatalog1->method('getId')->willReturn(1);
-        $eloquentCatalog1->method('getValue')->willReturn('catalog1');
-        $eloquentCatalog2 = $this->createMock(EloquentCatalog::class);
-        $eloquentCatalog2->method('getId')->willReturn(2);
-        $eloquentCatalog2->method('getValue')->willReturn('catalog2');
-
-        $this->catalogModel->method('get')->willReturn(new Collection([$eloquentCatalog1, $eloquentCatalog2]));
+        /** @var EloquentUser $user */
+        $user = factory(EloquentUser::class)->create();
+        /** @var Collection $catalogs */
+        $catalogs = factory(EloquentCatalog::class)->times(2)->create([
+            'create_user_id' => $user->getId(),
+            'update_user_id' => $user->getId()
+        ]);
 
         $results = $this->catalogRepo->getTypeahead();
-        $this->assertSame([
-            [
-                'id' => 1,
-                'value' => 'catalog1'
-            ],
-            [
-                'id' => 2,
-                'value' => 'catalog2'
-            ]
-        ], $results->toValueArray());
+
+        $expectedResults = $catalogs
+            ->sort($this->sortCatalog)
+            ->map(function (EloquentCatalog $eloquentCatalog) {
+                return [
+                    'id' => $eloquentCatalog->getId(),
+                    'value' => $eloquentCatalog->getValue()
+                ];
+            })->toArray();
+
+        $this->assertEquals($expectedResults, $results->toValueArray());
     }
 
-    public function testGetAllCatalogs()
+    public function testGetAll()
     {
-        $eloquentCatalog1 = $this->createMock(EloquentCatalog::class);
-        $c1CreateDate = Carbon::create(2018, 1, 1, 0, 0, 0);
-        $c1UpdateDate = Carbon::create(2018, 2, 2, 0, 0, 0);
-        $eloquentCatalog1->method('getId')->willReturn(1);
-        $eloquentCatalog1->method('getValue')->willReturn('catalog1');
-        $eloquentCatalog1->method('getCreateUserId')->willReturn(1);
-        $eloquentCatalog1->method('getUpdateUserId')->willReturn(1);
-        $eloquentCatalog1->method('getCreatedAt')->willReturn($c1CreateDate);
-        $eloquentCatalog1->method('getUpdatedAt')->willReturn($c1UpdateDate);
-        $eloquentCatalog1->method('getNumberOfEvents')->willReturn(1);
-        $c1User = $this->createMock(EloquentUser::class);
-        $c1User->method('getName')->willReturn('user1');
-        $eloquentCatalog1->method('getCreateUser')->willReturn($c1User);
-        $eloquentCatalog1->method('getUpdateUser')->willReturn($c1User);
+        /** @var EloquentUser $user */
+        $user = factory(EloquentUser::class)->create();
+        /** @var Collection $catalogs */
+        $catalogs = factory(EloquentCatalog::class)->times(2)->create([
+            'create_user_id' => $user->getId(),
+            'update_user_id' => $user->getId()
+        ]);
 
-        $this->catalogModel->method('get')->willReturn(new Collection([$eloquentCatalog1]));
+        $results = $this->catalogRepo->getAll();
 
-        $catalogs = $this->catalogRepo->getAll();
-        $this->assertSame([
-            [
-                'id' => 1,
-                'value' => 'catalog1',
-                'numberOfEvents' => 1,
-                'createUserId' => 1,
-                'createUserName' => 'user1',
-                'updateUserId' => 1,
-                'updateUserName' => 'user1',
-                'createdAt' => $c1CreateDate->toIso8601String(),
-                'updatedAt' => $c1UpdateDate->toIso8601String()
-            ]
-        ], $catalogs->toValueArray());
+        $expectedResults = $catalogs
+            ->sort($this->sortCatalog)
+            ->map($this->createCatalogValueArray)
+            ->toArray();
+
+        $this->assertEquals($expectedResults, $results->toValueArray());
     }
 
     public function testCreateCatalog()
     {
-        $eloquentCatalog1 = $this->createMock(EloquentCatalog::class);
-        $c1CreateDate = Carbon::create(2018, 1, 1, 0, 0, 0);
-        $c1UpdateDate = Carbon::create(2018, 2, 2, 0, 0, 0);
-        $eloquentCatalog1->method('getId')->willReturn(1);
-        $eloquentCatalog1->method('getValue')->willReturn('catalog1');
-        $eloquentCatalog1->method('getCreateUserId')->willReturn(1);
-        $eloquentCatalog1->method('getUpdateUserId')->willReturn(1);
-        $eloquentCatalog1->method('getCreatedAt')->willReturn($c1CreateDate);
-        $eloquentCatalog1->method('getUpdatedAt')->willReturn($c1UpdateDate);
-        $eloquentCatalog1->method('getNumberOfEvents')->willReturn(1);
-        $c1User = $this->createMock(EloquentUser::class);
-        $c1User->method('getName')->willReturn('user1');
-        $eloquentCatalog1->method('getCreateUser')->willReturn($c1User);
-        $eloquentCatalog1->method('getUpdateUser')->willReturn($c1User);
+        /** @var EloquentUser $user */
+        $user = factory(EloquentUser::class)->create();
 
-        $this->catalogModel->method('create')->willReturn($eloquentCatalog1);
+        $catalog = $this->catalogRepo->create('catalog1', new UserId($user->getId()));
 
-        $catalog = $this->catalogRepo->create('a', new UserId(1));
-        $this->assertSame([
-            'id' => 1,
-            'value' => 'catalog1',
-            'numberOfEvents' => 1,
-            'createUserId' => 1,
-            'createUserName' => 'user1',
-            'updateUserId' => 1,
-            'updateUserName' => 'user1',
-            'createdAt' => $c1CreateDate->toIso8601String(),
-            'updatedAt' => $c1UpdateDate->toIso8601String()
-        ], $catalog->toValueArray());
+        $this->assertEquals('catalog1', $catalog->getValue());
     }
 
     public function testCreateCatalogWhichAlreadyExists()
     {
+        /** @var EloquentUser $user */
+        $user = factory(EloquentUser::class)->create();
+        factory(EloquentCatalog::class)->create([
+            'value' => 'catalog1',
+            'create_user_id' => $user->getId(),
+            'update_user_id' => $user->getId()
+        ]);
+
         $this->expectException(TimelineException::class);
-        $queryException = $this->createMock(QueryException::class);
-        $queryException->errorInfo = ['', 1062];
-        $this->catalogModel->method('create')->willThrowException($queryException);
-        $this->catalogRepo->create('a', new UserId(1));
+        $this->catalogRepo->create('catalog1', new UserId($user->getId()));
     }
 
-    public function testCreateCatalogWithNonExistingUserId()
+    public function testCreateCatalogWithNonExistingUser()
     {
         $this->expectException(TimelineException::class);
-        $queryException = $this->createMock(QueryException::class);
-        $queryException->errorInfo = ['', 1452];
-        $this->catalogModel->method('create')->willThrowException($queryException);
-        $this->catalogRepo->create('a', new UserId(1));
+        $this->catalogRepo->create('catalog1', new UserId(1));
     }
 
-    public function testFailedToCreateCatalogBecauseOfUnknownDatabaseError()
+    public function testBulkCreateCatalogs()
     {
-        $this->expectException(QueryException::class);
-        $queryException = $this->createMock(QueryException::class);
-        $queryException->errorInfo = ['', 2000];
-        $this->catalogModel->method('create')->willThrowException($queryException);
-        $this->catalogRepo->create('a', new UserId(1));
+        /** @var EloquentUser $user */
+        $user = factory(EloquentUser::class)->create();
+        factory(EloquentCatalog::class)->create([
+            'value' => 'catalog1',
+            'create_user_id' => $user->getId(),
+            'update_user_id' => $user->getId()
+        ]);
+        $catalogs = $this->catalogRepo->bulkCreate(['catalog1', 'catalog2'], new UserId($user->getId()));
+        $this->assertSame(2, count($catalogs));
+        $this->assertSame('catalog1', $catalogs[0]->getValue());
+        $this->assertSame('catalog2', $catalogs[1]->getValue());
     }
 
-//    public function testBulkCreateCatalogs() {
-//        $eloquentCatalog1 = $this->createMock(EloquentCatalog::class);
-//        $c1CreateDate = Carbon::create(2018, 1, 1, 0, 0, 0);
-//        $c1UpdateDate = Carbon::create(2018, 2, 2, 0, 0, 0);
-//        $eloquentCatalog1->method('getId')->willReturn(1);
-//        $eloquentCatalog1->method('getValue')->willReturn('catalog1');
-//        $eloquentCatalog1->method('getCreateUserId')->willReturn(1);
-//        $eloquentCatalog1->method('getUpdateUserId')->willReturn(1);
-//        $eloquentCatalog1->method('getCreatedAt')->willReturn($c1CreateDate);
-//        $eloquentCatalog1->method('getUpdatedAt')->willReturn($c1UpdateDate);
-//        $eloquentCatalog1->method('getNumberOfEvents')->willReturn(1);
-//        $c1User = $this->createMock(EloquentUser::class);
-//        $c1User->method('getName')->willReturn('user1');
-//        $eloquentCatalog1->method('getCreateUser')->willReturn($c1User);
-//        $eloquentCatalog1->method('getUpdateUser')->willReturn($c1User);
-//
-//        $eloquentCatalog2 = $this->createMock(EloquentCatalog::class);
-//        $c2CreateDate = Carbon::create(2018, 1, 1, 0, 0, 0);
-//        $c2UpdateDate = Carbon::create(2018, 2, 2, 0, 0, 0);
-//        $eloquentCatalog1->method('getId')->willReturn(2);
-//        $eloquentCatalog2->method('getValue')->willReturn('catalog2');
-//        $eloquentCatalog2->method('getCreateUserId')->willReturn(2);
-//        $eloquentCatalog2->method('getUpdateUserId')->willReturn(2);
-//        $eloquentCatalog2->method('getCreatedAt')->willReturn($c2CreateDate);
-//        $eloquentCatalog2->method('getUpdatedAt')->willReturn($c2UpdateDate);
-//        $eloquentCatalog2->method('getNumberOfEvents')->willReturn(2);
-//        $c2User = $this->createMock(EloquentUser::class);
-//        $c2User->method('getName')->willReturn('user2');
-//        $eloquentCatalog2->method('getCreateUser')->willReturn($c2User);
-//        $eloquentCatalog2->method('getUpdateUser')->willReturn($c2User);
-//
-//
-//        $this->catalogModel->method('whereIn')
-//            ->with(
-//                $this->equalTo('value'),
-//                $this->equalTo(['catalog2'])
-//            )
-//            ->willReturnSelf();
-//
-//        $this->catalogModel
-//            ->expects($this->at(0))
-//            ->method('get')
-//            ->willReturn(new Collection([$eloquentCatalog1]));
-//
-//
-//    }
+    public function testUpdateCatalog()
+    {
+        /** @var EloquentUser $createUser */
+        $createUser = factory(EloquentUser::class)->create();
+        /** @var EloquentCatalog $catalog */
+        $catalog = factory(EloquentCatalog::class)->create([
+            'value' => 'value',
+            'create_user_id' => $createUser->getId(),
+            'update_user_id' => $createUser->getId()
+        ]);
+
+        /** @var EloquentUser $updateUser */
+        $updateUser = factory(EloquentUser::class)->create();
+
+        $newCatalog = $this->catalogRepo->update(
+            new CatalogId($catalog->getId()),
+            'new_value',
+            new UserId($updateUser->getId())
+        );
+
+        $this->assertSame($catalog->getId(), $newCatalog->getId()->getValue());
+        $this->assertSame('new_value', $newCatalog->getValue());
+        $this->assertSame($updateUser->getId(), $newCatalog->getUpdateUserId()->getValue());
+    }
+
+    public function testUpdateCatalogWithNonExistingCatalogId()
+    {
+        $this->expectException(TimelineException::class);
+        $this->catalogRepo->update(
+            new CatalogId(1),
+            'new_value',
+            new UserId(1)
+        );
+    }
+
+    public function testUpdateCatalogWithExistingValue()
+    {
+        /** @var EloquentUser $createUser */
+        $createUser = factory(EloquentUser::class)->create();
+        factory(EloquentCatalog::class)->create([
+            'value' => 'value1',
+            'create_user_id' => $createUser->getId(),
+            'update_user_id' => $createUser->getId()
+        ]);
+        /** @var EloquentCatalog $catalog */
+        $catalog = factory(EloquentCatalog::class)->create([
+            'value' => 'value2',
+            'create_user_id' => $createUser->getId(),
+            'update_user_id' => $createUser->getId()
+        ]);
+
+        /** @var EloquentUser $updateUser */
+        $updateUser = factory(EloquentUser::class)->create();
+
+        $this->expectException(TimelineException::class);
+        $this->catalogRepo->update(
+            new CatalogId($catalog->getId()),
+            'value1',
+            new UserId($updateUser->getId())
+        );
+    }
+
+    public function testUpdateCatalogWithNonExistingUser()
+    {
+        /** @var EloquentUser $createUser */
+        $createUser = factory(EloquentUser::class)->create();
+        /** @var EloquentCatalog $catalog */
+        $catalog = factory(EloquentCatalog::class)->create([
+            'value' => 'value',
+            'create_user_id' => $createUser->getId(),
+            'update_user_id' => $createUser->getId()
+        ]);
+
+        $this->expectException(TimelineException::class);
+
+        $this->catalogRepo->update(
+            new CatalogId($catalog->getId()),
+            'new_value',
+            new UserId(1000)
+        );
+    }
+
+    public function testDeleteCatalog()
+    {
+        /** @var EloquentUser $createUser */
+        $createUser = factory(EloquentUser::class)->create();
+        /** @var EloquentCatalog $catalog */
+        $catalog = factory(EloquentCatalog::class)->create([
+            'create_user_id' => $createUser->getId(),
+            'update_user_id' => $createUser->getId()
+        ]);
+        $this->catalogRepo->delete(new CatalogId($catalog->getId()));
+        $this->assertEmpty(EloquentCatalog::all());
+    }
+
+    public function testDeleteCatalogWithNonExistingID()
+    {
+        $this->expectException(TimelineException::class);
+        $this->catalogRepo->delete(new CatalogId(1));
+    }
 }

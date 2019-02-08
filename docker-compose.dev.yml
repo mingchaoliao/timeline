@@ -42,7 +42,9 @@ services:
     command: php -v
     volumes:
       - ./api:/apidist
-    user: "0:0"
+    user: "${HOST_UID}:${HOST_GID}"
+    networks:
+      - test
   queue:
     image: redis:5.0.3-alpine
     volumes:
@@ -53,7 +55,11 @@ services:
     build:
       context: api
       dockerfile: horizon/Dockerfile.dev
-    user: "1000:1000"
+      args:
+        HOST_USER: "${USER}"
+        HOST_UID: "${HOST_UID}"
+        HOST_GID: "${HOST_GID}"
+    user: "${HOST_UID}:${HOST_GID}"
     volumes:
       - ./api:/apidist
     depends_on:
@@ -76,6 +82,15 @@ services:
       MYSQL_DATABASE: timeline
       MYSQL_USER: timeline_user
     networks:
+      - internal
+  mysql_test:
+    image: mysql:5.7.22
+    command: --disable-partition-engine-check
+    environment:
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_DATABASE: timeline_test
+    networks:
+      - test
       - internal
   elasticsearch:
     build: elasticsearch
@@ -102,7 +117,11 @@ services:
     build:
       context: web
       dockerfile: Dockerfile.dev
-    user: "1000:1000"
+      args:
+        HOST_USER: "${USER}"
+        HOST_UID: "${HOST_UID}"
+        HOST_GID: "${HOST_GID}"
+    user: "${HOST_UID}:${HOST_GID}"
     ports:
       - 4200:4200
     volumes:
@@ -117,3 +136,4 @@ volumes:
 
 networks:
   internal:
+  test:

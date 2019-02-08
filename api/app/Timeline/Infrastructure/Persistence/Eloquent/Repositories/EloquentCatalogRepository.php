@@ -45,6 +45,7 @@ class EloquentCatalogRepository implements CatalogRepository
     {
         $payload = $this->catalogModel
             ->select(['id', 'value'])
+            ->orderBy('id')
             ->get()
             ->map(function (EloquentCatalog $period) {
                 return new Typeahead($period->getId(), $period->getValue());
@@ -60,6 +61,7 @@ class EloquentCatalogRepository implements CatalogRepository
     {
         $eloquentCollection = $this->catalogModel
             ->withFullInfo()
+            ->orderBy('id')
             ->get();
 
         return $this->constructCatalogCollection($eloquentCollection);
@@ -148,9 +150,7 @@ class EloquentCatalogRepository implements CatalogRepository
 
             return $this->constructCatalog($this->catalogModel->find($id->getValue()));
         } catch (QueryException $e) {
-            /** @var \PDOException $pdoException */
-            $pdoException = $e->getPrevious();
-            $errorInfo = $pdoException->errorInfo;
+            $errorInfo = $e->errorInfo;
 
             if ($errorInfo['1'] === 1062) { // duplicated value
                 throw TimelineException::ofDuplicatedCatalogValue($value, $e);
