@@ -10,7 +10,6 @@ namespace App\Timeline\Domain\Repositories;
 
 
 use App\Timeline\Domain\Collections\CatalogCollection;
-use App\Timeline\Domain\Collections\CatalogIdCollection;
 use App\Timeline\Domain\Collections\TypeaheadCollection;
 use App\Timeline\Domain\Models\Catalog;
 use App\Timeline\Domain\ValueObjects\CatalogId;
@@ -21,8 +20,6 @@ interface CatalogRepository
     public function getTypeahead(): TypeaheadCollection;
 
     public function getAll(): CatalogCollection;
-
-    public function getByIds(CatalogIdCollection $ids): CatalogCollection;
 
     public function create(string $value, UserId $createUserId): Catalog;
 

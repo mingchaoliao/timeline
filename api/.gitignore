@@ -11,3 +11,4 @@ npm-debug.log
 yarn-error.log
 /.idea
 tests/coverage
+_ide_helper.php

@@ -72,22 +72,6 @@ class CatalogService
     }
 
     /**
-     * @param CatalogIdCollection $ids
-     * @return CatalogCollection
-     * @throws TimelineException
-     */
-    public function getByIds(CatalogIdCollection $ids): CatalogCollection
-    {
-        try {
-            return $this->catalogRepository->getByIds($ids);
-        } catch (TimelineException $e) {
-            throw $e;
-        } catch (\Exception $e) {
-            throw TimelineException::ofUnableToRetrieveCatalogs($e);
-        }
-    }
-
-    /**
      * @param string $value
      * @return Catalog
      * @throws TimelineException

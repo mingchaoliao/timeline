@@ -14,6 +14,7 @@ use App\Timeline\Domain\Models\Event;
 use App\Timeline\Domain\Requests\SearchEventRequest;
 use App\Timeline\Domain\ValueObjects\EventId;
 use App\Timeline\Infrastructure\Elasticsearch\SearchEventRepository;
+use App\Timeline\Infrastructure\Elasticsearch\SearchParamsBuilder;
 use Elasticsearch\Client;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -30,12 +31,17 @@ class ESSearchEventRepositoryTest extends TestCase
     /**
      * @var MockObject
      */
+    private $paramsBuilder;
+    /**
+     * @var MockObject
+     */
     private $es;
 
     protected function setUp()
     {
         $this->es = $this->createMock(Client::class);
-        $this->searchEventRepo = new SearchEventRepository($this->es);
+        $this->paramsBuilder = $this->createMock(SearchParamsBuilder::class);
+        $this->searchEventRepo = new SearchEventRepository($this->es, $this->paramsBuilder);
     }
 
     public function testDeleteDoc()
@@ -116,26 +122,193 @@ class ESSearchEventRepositoryTest extends TestCase
         $this->assertTrue(true);
     }
 
-    public function testSearchEventUsingES() {
+    public function testSearchEventWithoutContent()
+    {
+        $searchRequest = $this->createMock(SearchEventRequest::class);
+        $this->paramsBuilder->method('getParams')->willReturn([]);
+        $this->es->method('search')->willReturn([
+            'hits' => [
+                'total' => 10,
+                'hits' => [
+                    [
+                        '_id' => 1,
+                        '_source' => [
+                            'id' => 1,
+                            'startDateStr' => '2018-01',
+                            'startDateFrom' => '2018-01-01',
+                            'startDateTo' => '2018-01-31',
+                            'startDateAttribute' => null,
+                            'endDateStr' => '2019',
+                            'endDateFrom' => '2019-01-01',
+                            'endDateTo' => '2019-12-31',
+                            'endDateAttribute' => 'attr1',
+                            'period' => 'period1',
+                            'catalogs' => [],
+                            'content' => '12345678',
+                        ]
+                    ],
+                    [
+                        '_id' => 2,
+                        '_source' => [
+                            'id' => 2,
+                            'startDateStr' => '2018-01',
+                            'startDateFrom' => '2018-01-01',
+                            'startDateTo' => '2018-01-31',
+                            'startDateAttribute' => null,
+                            'endDateStr' => '2019',
+                            'endDateFrom' => '2019-01-01',
+                            'endDateTo' => '2019-12-31',
+                            'endDateAttribute' => 'attr2',
+                            'period' => 'period2',
+                            'catalogs' => ['catalogs1', 'catalogs2'],
+                            'content' => '123456789',
+                        ]
+                    ]
+                ]
+            ],
+            'aggregations' => [
+                'period' => [
+                    'buckets' => [
+                        [
+                            'key' => 'period1',
+                            'doc_count' => 1
+                        ],
+                        [
+                            'key' => 'period2',
+                            'doc_count' => 1
+                        ]
+                    ]
+                ],
+                'catalogs' => [
+                    'buckets' => [
+                        [
+                            'key' => 'catalog1',
+                            'doc_count' => 3
+                        ]
+                    ]
+                ],
+                'startDate' => [
+                    'buckets' => [
+                        [
+                            'key_as_string' => '2018',
+                            'doc_count' => 3
+                        ],
+                        [
+                            'key_as_string' => '2018',
+                            'doc_count' => 0
+                        ]
+                    ]
+                ]
+            ]
+        ]);
 
+        $result = $this->searchEventRepo->search($searchRequest);
+        $this->assertSame(10, $result->getHits()->getTotalCount());
+        $this->assertSame([
+            'hits' => [
+                [
+                    'id' => 1,
+                    'startDate' => '2018-01',
+                    'endDate' => '2019',
+                    'startDateAttribute' => null,
+                    'endDateAttribute' => 'attr1',
+                    'content' => '1234 ...'
+                ],
+                [
+                    'id' => 2,
+                    'startDate' => '2018-01',
+                    'endDate' => '2019',
+                    'startDateAttribute' => null,
+                    'endDateAttribute' => 'attr2',
+                    'content' => '1234 ...'
+                ]
+            ],
+            'periods' => [
+                [
+                    'value' => 'period1',
+                    'count' => 1
+                ],
+                [
+                    'value' => 'period2',
+                    'count' => 1
+                ]
+            ],
+            'catalogs' => [
+                [
+                    'value' => 'catalog1',
+                    'count' => 3
+                ]
+            ],
+            'dates' => [
+                [
+                    'value' => '2018',
+                    'count' => 3
+                ]
+            ]
+        ], $result->toValueArray());
     }
 
-    private function createRequest(array $data): MockObject
+    public function testSearchEventWithContent()
     {
-        $request = $this->createMock(SearchEventRequest::class);
+        $searchRequest = $this->createMock(SearchEventRequest::class);
+        $this->paramsBuilder->method('getParams')->willReturn([]);
+        $this->es->method('search')->willReturn([
+            'hits' => [
+                'total' => 10,
+                'hits' => [
+                    [
+                        '_id' => 1,
+                        '_source' => [
+                            'id' => 1,
+                            'startDateStr' => '2018-01',
+                            'startDateFrom' => '2018-01-01',
+                            'startDateTo' => '2018-01-31',
+                            'startDateAttribute' => null,
+                            'endDateStr' => '2019',
+                            'endDateFrom' => '2019-01-01',
+                            'endDateTo' => '2019-12-31',
+                            'endDateAttribute' => 'attr1',
+                            'period' => 'period1',
+                            'catalogs' => [],
+                            'content' => '12345678',
+                        ],
+                        'highlight' => [
+                            'content' => [
+                                '<em>1234</em>5',
+                                '<em>8</em>'
+                            ]
+                        ]
+                    ]
+                ]
+            ],
+            'aggregations' => [
+                'period' => [
+                    'buckets' => []
+                ],
+                'catalogs' => [
+                    'buckets' => []
+                ],
+                'startDate' => [
+                    'buckets' => []
+                ]
+            ]
+        ]);
 
-        $request->method('getContent')->willReturn($data['content'] ?? null);
-        $request->method('getStartDate')->willReturn($data['startDate'] ?? null);
-        $request->method('getStartDateFrom')->willReturn($data['startDateFrom'] ?? null);
-        $request->method('getStartDateTo')->willReturn($data['startDateTo'] ?? null);
-        $request->method('getEndDate')->willReturn($data['endDate'] ?? null);
-        $request->method('getEndDateFrom')->willReturn($data['endDateFrom'] ?? null);
-        $request->method('getEndDateTo')->willReturn($data['endDateTo'] ?? null);
-        $request->method('getPeriod')->willReturn($data['period'] ?? null);
-        $request->method('getCatalogs')->willReturn($data['catalogs'] ?? []);
-        $request->method('getPage')->willReturn($data['page'] ?? 1);
-        $request->method('getPageSize')->willReturn($data['pageSize'] ?? 10);
-
-        return $request;
+        $result = $this->searchEventRepo->search($searchRequest);
+        $this->assertSame([
+            'hits' => [
+                [
+                    'id' => 1,
+                    'startDate' => '2018-01',
+                    'endDate' => '2019',
+                    'startDateAttribute' => null,
+                    'endDateAttribute' => 'attr1',
+                    'content' => '<em>1234</em>5 ... <em>8</em> ...'
+                ]
+            ],
+            'periods' => [],
+            'catalogs' => [],
+            'dates' => []
+        ], $result->toValueArray());
     }
 }

@@ -49,6 +49,10 @@ class EloquentCatalog extends Model
         return $this->updated_at;
     }
 
+    public function scopeWithFullInfo(Builder $query) {
+        $query->with(['create_user', 'update_user']);
+    }
+
     public function create_user(): BelongsTo {
         return $this->belongsTo(EloquentUser::class,'create_user_id', 'id');
     }

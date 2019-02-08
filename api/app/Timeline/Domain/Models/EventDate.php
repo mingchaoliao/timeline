@@ -55,7 +55,7 @@ class EventDate extends BaseModel
         return new static($str);
     }
 
-    public function toStartDate(): Carbon
+    public function getFrom(): Carbon
     {
         $date = Carbon::createFromFormat($this->format, $this->date);
         switch ($this->format) {
@@ -72,7 +72,7 @@ class EventDate extends BaseModel
         return $date;
     }
 
-    public function toEndDate(): Carbon
+    public function getTo(): Carbon
     {
         $date = Carbon::createFromFormat($this->format, $this->date);
         switch ($this->format) {

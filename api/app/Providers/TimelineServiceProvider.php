@@ -19,6 +19,7 @@ use App\Timeline\Domain\Services\PeriodService;
 use App\Timeline\Domain\Services\TimelineService;
 use App\Timeline\Domain\Services\UserService;
 use App\Timeline\Infrastructure\Elasticsearch\SearchEventRepository;
+use App\Timeline\Infrastructure\Elasticsearch\SearchParamsBuilder;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentCatalog;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentDateAttribute;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentEvent;
@@ -131,7 +132,10 @@ class TimelineServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(SearchEventRepositoryInterface::class, function () {
-            return new SearchEventRepository(resolve(\Elasticsearch\Client::class));
+            return new SearchEventRepository(
+                resolve(\Elasticsearch\Client::class),
+                new SearchParamsBuilder()
+            );
         });
 
         $this->app->singleton(EventRepository::class, function () use (

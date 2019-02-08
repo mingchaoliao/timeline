@@ -10,7 +10,6 @@ namespace App\Timeline\Infrastructure\Persistence\Eloquent\Repositories;
 
 
 use App\Timeline\Domain\Collections\CatalogCollection;
-use App\Timeline\Domain\Collections\CatalogIdCollection;
 use App\Timeline\Domain\Collections\TypeaheadCollection;
 use App\Timeline\Domain\Models\Catalog;
 use App\Timeline\Domain\Models\Typeahead;
@@ -60,21 +59,10 @@ class EloquentCatalogRepository implements CatalogRepository
     public function getAll(): CatalogCollection
     {
         $eloquentCollection = $this->catalogModel
-            ->with(['create_user', 'update_user'])
+            ->withFullInfo()
             ->get();
 
         return $this->constructCatalogCollection($eloquentCollection);
-    }
-
-    /**
-     * @param CatalogIdCollection $ids
-     * @return CatalogCollection
-     */
-    public function getByIds(CatalogIdCollection $ids): CatalogCollection
-    {
-        return $this->constructCatalogCollection(
-            $this->catalogModel->findMany($ids->toValueArray())
-        );
     }
 
     /**
@@ -94,13 +82,11 @@ class EloquentCatalogRepository implements CatalogRepository
                 ])
             );
         } catch (QueryException $e) {
-            /** @var \PDOException $pdoException */
-            $pdoException = $e->getPrevious();
-            $errorInfo = $pdoException->errorInfo;
+            $errorInfo = $e->errorInfo;
 
-            if ($errorInfo['1'] === 1062) { // duplicated value
+            if ($errorInfo[1] === 1062) { // duplicated value
                 throw TimelineException::ofDuplicatedCatalogValue($value, $e);
-            } elseif ($errorInfo['1'] === 1452) { // non-exist user id
+            } elseif ($errorInfo[1] === 1452) { // non-exist user id
                 throw TimelineException::ofUserWithIdDoesNotExist($createUserId, $e);
             }
 
@@ -112,7 +98,7 @@ class EloquentCatalogRepository implements CatalogRepository
      * @param array $values
      * @param UserId $createUserId
      * @return CatalogCollection
-     * @throws TimelineException
+     * @throws \Throwable
      */
     public function bulkCreate(array $values, UserId $createUserId): CatalogCollection
     {

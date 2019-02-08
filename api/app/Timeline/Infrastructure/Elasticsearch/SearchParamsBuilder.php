@@ -13,21 +13,7 @@ use App\Timeline\Domain\Requests\SearchEventRequest;
 
 class SearchParamsBuilder
 {
-    /**
-     * @var array
-     */
-    private $params;
-
-    /**
-     * SearchRequestBuilder constructor.
-     * @param array $params
-     */
-    public function __construct(array $params)
-    {
-        $this->params = $params;
-    }
-
-    public static function createFromRequest(SearchEventRequest $request): self
+    public function getParams(SearchEventRequest $request): array
     {
         $startDate = $request->getStartDate();
         $startDateFrom = $request->getStartDateFrom();
@@ -45,61 +31,85 @@ class SearchParamsBuilder
         $query = [];
 
         if ($startDate !== null) {
-            $config = [
+            $query['bool']['must'][] = [
                 'range' => [
-                    'startDate' => [
-                        'format' => 'yyyy-MM-dd'
+                    'startDateFrom' => [
+                        'format' => 'yyyy-MM-dd',
+                        'gte' => $startDate->getFrom()->format('Y-m-d'),
                     ]
                 ]
             ];
-            $config['range']['startDateFrom']['gte'] = $startDate->toStartDate()->format('Y-m-d');
-            $config['range']['startDateTo']['lte'] = $startDate->toEndDate()->format('Y-m-d');
 
-            $query['bool']['must'][] = $config;
-        } elseif ($startDateFrom !== null || $startDateTo !== null) {
-            $config = [
+            $query['bool']['must'][] = [
                 'range' => [
-                    'startDate' => [
-                        'format' => 'yyyy-MM-dd'
+                    'startDateTo' => [
+                        'format' => 'yyyy-MM-dd',
+                        'lte' => $startDate->getTo()->format('Y-m-d'),
                     ]
                 ]
             ];
+        } elseif ($startDateFrom !== null || $startDateTo !== null) {
             if ($startDateFrom !== null) {
-                $config['range']['startDateFrom']['gte'] = $startDateFrom->format('Y-m-d');
+                $query['bool']['must'][] = [
+                    'range' => [
+                        'startDateFrom' => [
+                            'format' => 'yyyy-MM-dd',
+                            'gte' => $startDateFrom->format('Y-m-d'),
+                        ]
+                    ]
+                ];
             }
             if ($startDateTo !== null) {
-                $config['range']['startDateTo']['lte'] = $startDateTo->format('Y-m-d');
+                $query['bool']['must'][] = [
+                    'range' => [
+                        'startDateTo' => [
+                            'format' => 'yyyy-MM-dd',
+                            'lte' => $startDateTo->format('Y-m-d'),
+                        ]
+                    ]
+                ];
             }
-            $query['bool']['must'][] = $config;
         }
 
         if ($endDate !== null) {
-            $config = [
+            $query['bool']['must'][] = [
                 'range' => [
-                    'endDate' => [
-                        'format' => 'yyyy-MM-dd'
+                    'endDateFrom' => [
+                        'format' => 'yyyy-MM-dd',
+                        'gte' => $endDate->getFrom()->format('Y-m-d'),
                     ]
                 ]
             ];
-            $config['range']['endDateFrom']['gte'] = $endDate->toStartDate()->format('Y-m-d');
-            $config['range']['endDateTo']['lte'] = $endDate->toEndDate()->format('Y-m-d');
 
-            $query['bool']['must'][] = $config;
-        } elseif ($endDateFrom !== null || $endDateTo !== null) {
-            $config = [
+            $query['bool']['must'][] = [
                 'range' => [
-                    'endDate' => [
-                        'format' => 'yyyy-MM-dd'
+                    'endDateTo' => [
+                        'format' => 'yyyy-MM-dd',
+                        'lte' => $endDate->getTo()->format('Y-m-d'),
                     ]
                 ]
             ];
+        } elseif ($endDateFrom !== null || $endDateTo !== null) {
             if ($endDateFrom !== null) {
-                $config['range']['endDateFrom']['gte'] = $endDateFrom->format('Y-m-d');
+                $query['bool']['must'][] = [
+                    'range' => [
+                        'endDateFrom' => [
+                            'format' => 'yyyy-MM-dd',
+                            'gte' => $endDateFrom->format('Y-m-d'),
+                        ]
+                    ]
+                ];
             }
             if ($endDateTo !== null) {
-                $config['range']['endDateTo']['lte'] = $endDateTo->format('Y-m-d');
+                $query['bool']['must'][] = [
+                    'range' => [
+                        'endDateTo' => [
+                            'format' => 'yyyy-MM-dd',
+                            'lte' => $endDateTo->format('Y-m-d'),
+                        ]
+                    ]
+                ];
             }
-            $query['bool']['must'][] = $config;
         }
 
         if ($period !== null) {
@@ -173,18 +183,10 @@ class SearchParamsBuilder
 
         if ($content === null) {
             $params['body']['sort'] = [
-                'startDate' => 'desc'
+                'startDateFrom' => 'desc'
             ];
         }
 
-        return new static($params);
-    }
-
-    /**
-     * @return array
-     */
-    public function getParams(): array
-    {
-        return $this->params;
+        return $params;
     }
 }

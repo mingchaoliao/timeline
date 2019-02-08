@@ -33,11 +33,11 @@ class EventDateTest extends TestCase
         ], $date->toValueArray());
         $this->assertSame(
             '2018-01-01 00:00:00',
-            $date->toStartDate()->format('Y-m-d H:i:s')
+            $date->getFrom()->format('Y-m-d H:i:s')
         );
         $this->assertSame(
             '2018-12-31 23:59:59',
-            $date->toEndDate()->format('Y-m-d H:i:s')
+            $date->getTo()->format('Y-m-d H:i:s')
         );
     }
 
@@ -57,11 +57,11 @@ class EventDateTest extends TestCase
         ], $date->toValueArray());
         $this->assertSame(
             '2018-03-01 00:00:00',
-            $date->toStartDate()->format('Y-m-d H:i:s')
+            $date->getFrom()->format('Y-m-d H:i:s')
         );
         $this->assertSame(
             '2018-03-31 23:59:59',
-            $date->toEndDate()->format('Y-m-d H:i:s')
+            $date->getTo()->format('Y-m-d H:i:s')
         );
     }
 
@@ -82,11 +82,11 @@ class EventDateTest extends TestCase
         ], $date->toValueArray());
         $this->assertSame(
             '2018-03-13 00:00:00',
-            $date->toStartDate()->format('Y-m-d H:i:s')
+            $date->getFrom()->format('Y-m-d H:i:s')
         );
         $this->assertSame(
             '2018-03-13 23:59:59',
-            $date->toEndDate()->format('Y-m-d H:i:s')
+            $date->getTo()->format('Y-m-d H:i:s')
         );
     }
 

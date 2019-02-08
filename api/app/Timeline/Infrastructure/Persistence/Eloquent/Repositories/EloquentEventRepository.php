@@ -295,9 +295,9 @@ class EloquentEventRepository implements EventRepository
         try {
             $this->dbh->transaction(function () use ($eloquentEvent, $request, $id, $updateUserId) {
                 $eloquentEvent->update([
-                    'start_date' => $request->getStartDate()->toStartDate(),
+                    'start_date' => $request->getStartDate()->getFrom(),
                     'start_date_str' => $request->getStartDate()->getDate(),
-                    'end_date' => $request->getEndDate() === null ? null : $request->getEndDate()->toEndDate(),
+                    'end_date' => $request->getEndDate() === null ? null : $request->getEndDate()->getTo(),
                     'end_date_str' => $request->getEndDate() === null ? null : $request->getEndDate()->getDate(),
                     'start_date_attribute_id' => $request->getStartDateAttributeId(),
                     'end_date_attribute_id' => $request->getEndDateAttributeId(),
@@ -442,9 +442,9 @@ class EloquentEventRepository implements EventRepository
          * @var EloquentEvent $eloquentEvent
          * */
         $eloquentEvent = $this->eventModel->create([
-            'start_date' => $request->getStartDate()->toStartDate(),
+            'start_date' => $request->getStartDate()->getFrom(),
             'start_date_str' => $request->getStartDate()->getDate(),
-            'end_date' => $request->getEndDate() === null ? null : $request->getEndDate()->toEndDate(),
+            'end_date' => $request->getEndDate() === null ? null : $request->getEndDate()->getTo(),
             'end_date_str' => $request->getEndDate() === null ? null : $request->getEndDate()->getDate(),
             'start_date_attribute_id' => $request->getStartDateAttributeId() === null ? null : $request->getStartDateAttributeId()->getValue(),
             'end_date_attribute_id' => $request->getEndDateAttributeId() === null ? null : $request->getEndDateAttributeId()->getValue(),

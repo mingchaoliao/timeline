@@ -16,9 +16,11 @@
     "laravel/horizon": "^2.0",
     "laravel/tinker": "^1.0",
     "tymon/jwt-auth": "1.0.0-rc.3",
-    "ext-json": "*"
+    "ext-json": "*",
+    "ext-pdo": "*"
   },
   "require-dev": {
+    "barryvdh/laravel-ide-helper": "^2.5",
     "beyondcode/laravel-dump-server": "^1.0",
     "filp/whoops": "^2.0",
     "fzaninotto/faker": "^1.4",

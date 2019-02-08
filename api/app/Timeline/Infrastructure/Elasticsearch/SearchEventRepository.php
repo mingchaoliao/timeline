@@ -27,21 +27,27 @@ class SearchEventRepository implements SearchEventRepositoryInterface
      * @var \Elasticsearch\Client
      */
     private $es;
+    /**
+     * @var SearchParamsBuilder
+     */
+    private $searchParamsBuilder;
 
     /**
-     * ESSearchEventRepository constructor.
+     * SearchEventRepository constructor.
      * @param \Elasticsearch\Client $es
+     * @param SearchParamsBuilder $searchParamsBuilder
      */
-    public function __construct(\Elasticsearch\Client $es)
+    public function __construct(\Elasticsearch\Client $es, SearchParamsBuilder $searchParamsBuilder)
     {
         $this->es = $es;
+        $this->searchParamsBuilder = $searchParamsBuilder;
     }
 
     public function search(SearchEventRequest $request): EventSearchResult
     {
-        $builder = SearchParamsBuilder::createFromRequest($request);
+        $params = $this->searchParamsBuilder->getParams($request);
 
-        $result = $this->es->search($builder->getParams());
+        $result = $this->es->search($params);
 
         $total = $result['hits']['total'];
         $hits = $result['hits']['hits'];
@@ -59,9 +65,7 @@ class SearchEventRepository implements SearchEventRepositoryInterface
         return new EventSearchResult(
             $eventHits,
             $this->constructBuckets($periodBuckets),
-            $this->constructBuckets(
-                array_filter($catalogBuckets, $filterBucket)
-            ),
+            $this->constructBuckets($catalogBuckets),
             $this->constructDateBuckets(
                 array_filter($dateBuckets, $filterBucket)
             )
@@ -107,7 +111,7 @@ class SearchEventRepository implements SearchEventRepositoryInterface
     private function truncateContent(string $content, float $ratio): string
     {
         $len = mb_strlen($content, 'UTF-8');
-        return mb_substr($content, 0, floor($len * $ratio), 'UTF-8') . ' ... ';
+        return mb_substr($content, 0, floor($len * $ratio), 'UTF-8') . ' ...';
     }
 
     public function index(Event $event): void

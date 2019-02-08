@@ -245,12 +245,12 @@ class Event extends BaseModel
         $body = [
             'id' => $this->getId()->getValue(),
             'startDateStr' => $this->getStartDate()->getDate(),
-            'startDateFrom' => $this->getStartDate()->toStartDate()->format('Y-m-d'),
-            'startDateTo' => $this->getStartDate()->toEndDate()->format('Y-m-d'),
+            'startDateFrom' => $this->getStartDate()->getFrom()->format('Y-m-d'),
+            'startDateTo' => $this->getStartDate()->getTo()->format('Y-m-d'),
             'startDateAttribute' => $this->getStartDateAttribute() === null ? null : $this->getStartDateAttribute()->getValue(),
             'endDateStr' => $this->getEndDate() === null ? null : $this->getEndDate()->getDate(),
-            'endDateFrom' => $this->getEndDate() === null ? null : $this->getEndDate()->toStartDate()->format('Y-m-d'),
-            'endDateTo' => $this->getEndDate() === null ? null : $this->getEndDate()->toEndDate()->format('Y-m-d'),
+            'endDateFrom' => $this->getEndDate() === null ? null : $this->getEndDate()->getFrom()->format('Y-m-d'),
+            'endDateTo' => $this->getEndDate() === null ? null : $this->getEndDate()->getTo()->format('Y-m-d'),
             'endDateAttribute' => $this->getEndDateAttribute() === null ? null : $this->getEndDateAttribute()->getValue(),
             'period' => $this->getPeriod() === null ? null : $this->getPeriod()->getValue(),
             'catalogs' => $this->getCatalogCollection()
