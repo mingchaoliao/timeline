@@ -44,6 +44,7 @@ class EloquentDateAttributeRepository implements DateAttributeRepository
     {
         $payload = $this->dateAttributeModel
             ->select(['id', 'value'])
+            ->orderBy('id')
             ->get()
             ->map(function (EloquentDateAttribute $dateAttribute) {
                 return new Typeahead($dateAttribute->getId(), $dateAttribute->getValue());
@@ -59,6 +60,7 @@ class EloquentDateAttributeRepository implements DateAttributeRepository
     {
         $eloquentCollection = $this->dateAttributeModel
             ->with(['create_user', 'update_user'])
+            ->orderBy('id')
             ->get();
 
         return $this->constructDateAttributeCollection($eloquentCollection);
@@ -81,9 +83,7 @@ class EloquentDateAttributeRepository implements DateAttributeRepository
                 ])
             );
         } catch (QueryException $e) {
-            /** @var \PDOException $pdoException */
-            $pdoException = $e->getPrevious();
-            $errorInfo = $pdoException->errorInfo;
+            $errorInfo = $e->errorInfo;
 
             if ($errorInfo['1'] === 1062) { // duplicated value
                 throw TimelineException::ofDuplicatedDateAttributeValue($value, $e);
@@ -149,9 +149,7 @@ class EloquentDateAttributeRepository implements DateAttributeRepository
 
             return $this->constructDateAttribute($this->dateAttributeModel->find($id->getValue()));
         } catch (QueryException $e) {
-            /** @var \PDOException $pdoException */
-            $pdoException = $e->getPrevious();
-            $errorInfo = $pdoException->errorInfo;
+            $errorInfo = $e->errorInfo;
 
             if ($errorInfo['1'] === 1062) { // duplicated value
                 throw TimelineException::ofDuplicatedDateAttributeValue($value, $e);

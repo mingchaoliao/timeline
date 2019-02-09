@@ -92,7 +92,7 @@ class EloquentUserRepository implements UserRepository
      */
     public function getAll(): UserCollection
     {
-        return $this->constructUserCollection($this->userModel->all());
+        return $this->constructUserCollection($this->userModel->orderBy('id')->get());
     }
 
     /**
@@ -126,11 +126,9 @@ class EloquentUserRepository implements UserRepository
 
             return $this->constructUser($eloquentUser);
         } catch (QueryException $e) {
-            /** @var \PDOException $pdoException */
-            $pdoException = $e->getPrevious();
-            $errorInfo = $pdoException->errorInfo;
+            $errorInfo = $e->errorInfo;
 
-            if ($errorInfo['1'] === 1062) { // duplicated value
+            if ($errorInfo[1] === 1062) { // duplicated email
                 throw TimelineException::ofDuplicatedUserEmail($email, $e);
             }
 
@@ -161,8 +159,6 @@ class EloquentUserRepository implements UserRepository
             throw TimelineException::ofUserWithIdDoesNotExist($id);
         }
 
-        $passwordHash = $this->hasher->make($password);
-
         $update = [];
 
         if ($name !== null) {
@@ -170,6 +166,7 @@ class EloquentUserRepository implements UserRepository
         }
 
         if ($password !== null) {
+            $passwordHash = $this->hasher->make($password);
             $update['password'] = $passwordHash;
         }
 

@@ -44,6 +44,7 @@ class EloquentPeriodRepository implements PeriodRepository
     {
         $payload = $this->periodModel
             ->select(['id', 'value'])
+            ->orderBy('id')
             ->get()
             ->map(function (EloquentPeriod $period) {
                 return new Typeahead($period->getId(), $period->getValue());
@@ -59,6 +60,7 @@ class EloquentPeriodRepository implements PeriodRepository
     {
         $eloquentCollection = $this->periodModel
             ->with(['create_user', 'update_user'])
+            ->orderBy('id')
             ->get();
 
         return $this->constructPeriodCollection($eloquentCollection);
@@ -81,9 +83,7 @@ class EloquentPeriodRepository implements PeriodRepository
                 ])
             );
         } catch (QueryException $e) {
-            /** @var \PDOException $pdoException */
-            $pdoException = $e->getPrevious();
-            $errorInfo = $pdoException->errorInfo;
+            $errorInfo = $e->errorInfo;
 
             if ($errorInfo['1'] === 1062) { // duplicated value
                 throw TimelineException::ofDuplicatedPeriodValue($value, $e);
@@ -149,9 +149,7 @@ class EloquentPeriodRepository implements PeriodRepository
 
             return $this->constructPeriod($this->periodModel->find($id->getValue()));
         } catch (QueryException $e) {
-            /** @var \PDOException $pdoException */
-            $pdoException = $e->getPrevious();
-            $errorInfo = $pdoException->errorInfo;
+            $errorInfo = $e->errorInfo;
 
             if ($errorInfo['1'] === 1062) { // duplicated value
                 throw TimelineException::ofDuplicatedPeriodValue($value);

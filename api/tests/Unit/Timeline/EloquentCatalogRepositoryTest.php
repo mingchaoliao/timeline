@@ -32,11 +32,11 @@ class EloquentCatalogRepositoryTest extends TestCase
      */
     private $catalogRepo;
     /**
-     * @var Callback
+     * @var callable
      */
     private $sortCatalog;
     /**
-     * @var Callback
+     * @var callable
      */
     private $createCatalogValueArray;
 

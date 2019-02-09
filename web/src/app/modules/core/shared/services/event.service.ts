@@ -131,7 +131,9 @@ export class EventService {
   bulkCreate(events: Array<any>): Observable<boolean> {
     return new Observable<boolean>(
       observer => {
-        this.httpService.post(Url.bulkCreateEvents(), {}, events).subscribe(
+        this.httpService.post(Url.bulkCreateEvents(), {}, {
+            events: events
+        }).subscribe(
           responseBody => observer.next(true),
           error => observer.error(error),
           () => observer.complete()

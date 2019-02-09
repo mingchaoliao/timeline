@@ -51,6 +51,7 @@ class EloquentCatalogRepository implements CatalogRepository
                 return new Typeahead($period->getId(), $period->getValue());
             })
             ->toArray();
+
         return new TypeaheadCollection($payload);
     }
 
@@ -65,6 +66,19 @@ class EloquentCatalogRepository implements CatalogRepository
             ->get();
 
         return $this->constructCatalogCollection($eloquentCollection);
+    }
+
+    public function getByValue(string $value): ?Catalog
+    {
+        $eloquentCatalog = $this->catalogModel
+            ->where('value', $value)
+            ->first();
+
+        if ($eloquentCatalog === null) {
+            return null;
+        }
+
+        return $this->constructCatalog($eloquentCatalog);
     }
 
     /**

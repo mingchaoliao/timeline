@@ -74,7 +74,7 @@ class EventController extends Controller
             'events' => 'required|array|filled'
         ]);
 
-        $createEventRequestCollection = CreateEventRequestCollection::createFromValueArray($request->all());
+        $createEventRequestCollection = CreateEventRequestCollection::createFromValueArray($request->all()['events']);
 
         $event = $this->eventService->bulkCreate($createEventRequestCollection);
 

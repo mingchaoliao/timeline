@@ -21,6 +21,8 @@ interface CatalogRepository
 
     public function getAll(): CatalogCollection;
 
+    public function getByValue(string $value): ?Catalog;
+
     public function create(string $value, UserId $createUserId): Catalog;
 
     public function bulkCreate(array $values, UserId $createUserId): CatalogCollection;
