@@ -67,7 +67,7 @@ class SearchEventRepository implements SearchEventRepositoryInterface
             $this->constructBuckets($periodBuckets),
             $this->constructBuckets($catalogBuckets),
             $this->constructDateBuckets(
-                array_filter($dateBuckets, $filterBucket)
+                array_values(array_filter($dateBuckets, $filterBucket))
             )
         );
     }

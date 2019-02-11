@@ -194,8 +194,16 @@ class ESSearchEventRepositoryTest extends TestCase
                             'doc_count' => 3
                         ],
                         [
-                            'key_as_string' => '2018',
+                            'key_as_string' => '2017',
                             'doc_count' => 0
+                        ],
+                        [
+                            'key_as_string' => '2016',
+                            'doc_count' => 0
+                        ],
+                        [
+                            'key_as_string' => '2015',
+                            'doc_count' => 4
                         ]
                     ]
                 ]
@@ -240,9 +248,13 @@ class ESSearchEventRepositoryTest extends TestCase
                 ]
             ],
             'dates' => [
-                [
+                0 => [
                     'value' => '2018',
                     'count' => 3
+                ],
+                1 => [
+                    'value' => '2015',
+                    'count' => 4
                 ]
             ]
         ], $result->toValueArray());

@@ -97,7 +97,6 @@ export class SearchEventComponent implements OnInit, AfterViewInit {
 
   private search(params: any) {
     const startDate = params['startDate'];
-    const endDate = params['endDate'];
     const period = params['period'];
     const catalogs = params['catalogs'];
     const content = params['content'];
@@ -108,7 +107,6 @@ export class SearchEventComponent implements OnInit, AfterViewInit {
 
       this.eventService.search(
         startDate,
-        endDate,
         period,
         catalogs,
         content,

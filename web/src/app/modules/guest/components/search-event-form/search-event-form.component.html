@@ -13,6 +13,18 @@
                    formControlName="content">
           </div>
         </div>
+        <div class="pr-3 ml-2" *ngIf="isAdvancedSearchCollapsed">
+          <button type="submit" class="btn btn-outline-primary" (click)="onSearch()" i18n="search">Search
+          </button>
+
+          <button type="button" class="btn btn-link"
+                  (click)="isAdvancedSearchCollapsed = !isAdvancedSearchCollapsed"
+                  [attr.aria-expanded]="!isAdvancedSearchCollapsed"
+                  aria-controls="advancedSearch"
+                  style="font-size: 0.75rem;"
+          >Advanced Search
+          </button>
+        </div>
         <div class="col-12" id="advancedSearch" [ngbCollapse]="isAdvancedSearchCollapsed">
           <div class="row">
             <div class="col-6">
@@ -21,14 +33,6 @@
                 <app-event-datepicker id="startDate" formControlName="startDate"></app-event-datepicker>
               </div>
             </div>
-            <div class="col-6">
-              <div class="form-group">
-                <label i18n="end date" for="endDate">End Date</label>
-                <app-event-datepicker id="endDate" formControlName="endDate"></app-event-datepicker>
-              </div>
-            </div>
-          </div>
-          <div class="row">
             <div class="col-6">
               <div class="form-group">
                 <label for="period" i18n="period">Period</label>
@@ -60,28 +64,22 @@
                 </ng-select>
               </div>
             </div>
+            <div class="col-6 text-right mt-auto mb-3">
+              <button type="submit"
+                      class="btn btn-outline-primary mt-auto"
+                      (click)="onSearch()"
+                      i18n="search">Search
+              </button>
+
+              <button type="button" class="btn btn-link"
+                      (click)="isAdvancedSearchCollapsed = !isAdvancedSearchCollapsed"
+                      [attr.aria-expanded]="!isAdvancedSearchCollapsed"
+                      aria-controls="advancedSearch"
+                      style="font-size: 0.75rem;"
+              >Basic Search
+              </button>
+            </div>
           </div>
-        </div>
-        <div [class]="isAdvancedSearchCollapsed ? 'pr-3 ml-2' : 'col text-right'">
-          <button type="submit" class="btn btn-outline-primary" (click)="onSearch()" i18n="search">Search</button>
-
-          <button type="button" class="btn btn-link"
-                  (click)="isAdvancedSearchCollapsed = !isAdvancedSearchCollapsed"
-                  [attr.aria-expanded]="!isAdvancedSearchCollapsed"
-                  aria-controls="advancedSearch"
-                  *ngIf="!isAdvancedSearchCollapsed"
-                  style="font-size: 0.75rem;"
-          >Basic Search
-          </button>
-
-          <button type="button" class="btn btn-link"
-                  (click)="isAdvancedSearchCollapsed = !isAdvancedSearchCollapsed"
-                  [attr.aria-expanded]="!isAdvancedSearchCollapsed"
-                  aria-controls="advancedSearch"
-                  *ngIf="isAdvancedSearchCollapsed"
-                  style="font-size: 0.75rem;"
-          >Advanced Search
-          </button>
         </div>
       </div>
     </form>

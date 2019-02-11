@@ -39,12 +39,12 @@ export class SearchEventFormComponent implements OnInit {
   public isAdvancedSearchCollapsed = true;
 
   constructor(
-    private formBuilder: FormBuilder,
-    private common: CommonService,
-    private router: Router,
-    private periodService: PeriodService,
-    private catalogService: CatalogService,
-    private route: ActivatedRoute
+      private formBuilder: FormBuilder,
+      private common: CommonService,
+      private router: Router,
+      private periodService: PeriodService,
+      private catalogService: CatalogService,
+      private route: ActivatedRoute
   ) {
     this.route.queryParams.subscribe(query => {
       if (query['startDate'] || query['endDate'] || query['period'] || query['catalogs']) {
@@ -53,7 +53,6 @@ export class SearchEventFormComponent implements OnInit {
 
       this.searchEventForm = this.formBuilder.group({
         'startDate': [query['startDate'], []],
-        'endDate': [query['endDate'], []],
         'content': [query['content'], []],
         'period': [null, []],
         'catalogs': [null, []],
@@ -75,27 +74,27 @@ export class SearchEventFormComponent implements OnInit {
     });
 
     this.periodService.getTypeahead().subscribe(
-      periods => {
-        this.periodOptions = periods;
-      },
-      error => {
-        NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve periods'));
-      },
-      () => {
-        this.setPeriodByLabel(this.route.snapshot.queryParams['period']);
-      }
+        periods => {
+          this.periodOptions = periods;
+        },
+        error => {
+          NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve periods'));
+        },
+        () => {
+          this.setPeriodByLabel(this.route.snapshot.queryParams['period']);
+        }
     );
 
     this.catalogService.getTypeahead().subscribe(
-      catalogs => {
-        this.catalogOptions = catalogs;
-      },
-      e => {
-        NotificationEmitter.emit(Notification.error(e.error.message, 'Unable to retrieve catalogs'));
-      },
-      () => {
-        this.setCatalogByLabels(this.route.snapshot.queryParams['catalogs']);
-      }
+        catalogs => {
+          this.catalogOptions = catalogs;
+        },
+        e => {
+          NotificationEmitter.emit(Notification.error(e.error.message, 'Unable to retrieve catalogs'));
+        },
+        () => {
+          this.setCatalogByLabels(this.route.snapshot.queryParams['catalogs']);
+        }
     );
   }
 
@@ -133,17 +132,12 @@ export class SearchEventFormComponent implements OnInit {
         page: 1
       };
       const startDate = this.searchEventForm.value.startDate;
-      const endDate = this.searchEventForm.value.endDate;
       const period = this.searchEventForm.value.period;
       const catalogs = this.searchEventForm.value.catalogs;
       const content = this.searchEventForm.value.content;
 
       if (startDate) {
         queryParams['startDate'] = startDate;
-      }
-
-      if (endDate) {
-        queryParams['endDate'] = endDate;
       }
 
       if (period) {

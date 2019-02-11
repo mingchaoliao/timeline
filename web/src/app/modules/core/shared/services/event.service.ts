@@ -57,7 +57,6 @@ export class EventService {
 
   search(
     startDate: string,
-    endDate: string,
     period: string,
     catalogs: string,
     content: string,
@@ -70,9 +69,6 @@ export class EventService {
     };
     if (startDate) {
       query['startDate'] = startDate;
-    }
-    if (endDate) {
-      query['endDate'] = endDate;
     }
     if (period) {
       query['period'] = period;

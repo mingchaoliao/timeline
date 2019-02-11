@@ -168,7 +168,7 @@ class SearchParamsBuilder
                     ],
                     'startDate' => [
                         'date_histogram' => [
-                            'field' => 'startDate',
+                            'field' => 'startDateFrom',
                             'interval' => '1y',
                             'format' => 'yyyy'
                         ]
