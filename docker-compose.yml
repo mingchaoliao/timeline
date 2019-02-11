@@ -11,13 +11,13 @@ services:
       - api
       - web
     volumes:
-      - etc/production/nginx/conf.d:/etc/nginx/conf.d
-      - etc/production/nginx/ssl:/etc/nginx/ssl
+      - ./etc/production/nginx/conf.d:/etc/nginx/conf.d
+      - ./etc/production/nginx/ssl:/etc/nginx/ssl
       - apistorage:/apidist/storage
       - webdist:/webdist
     env_file:
-      - etc/production/docker/web.env
-      - etc/production/docker/api.env
+      - ./etc/production/docker/web.env
+      - ./etc/production/docker/api.env
     networks:
       - internal
   api:
@@ -27,13 +27,34 @@ services:
     user: apiuser
     volumes:
       - apistorage:/apidist/storage
-      - api/.env:/apidist/.env
+      - ./api/.env:/apidist/.env
     env_file:
-      - etc/production/docker/mysql.env
-      - etc/production/docker/api.env
+      - ./etc/production/docker/mysql.env
+      - ./etc/production/docker/api.env
     depends_on:
       - mysql
       - elasticsearch
+      - queue
+    networks:
+      - internal
+  queue:
+    image: redis:5.0.3-alpine
+    volumes:
+      - queuedata1:/data
+    networks:
+      - internal
+  horizon:
+    build:
+      context: api
+      dockerfile: horizon/Dockerfile
+    user: apiuser
+    volumes:
+      - apistorage:/apidist/storage
+      - ./api/.env:/apidist/.env
+    depends_on:
+      - mysql
+      - elasticsearch
+      - queue
     networks:
       - internal
   mysql:
@@ -42,7 +63,7 @@ services:
     volumes:
       - dbdata1:/var/lib/mysql
     env_file:
-      - etc/production/docker/mysql.env
+      - ./etc/production/docker/mysql.env
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       MYSQL_DATABASE: timeline
@@ -71,6 +92,8 @@ volumes:
   webdist:
     driver: local
   apistorage:
+    driver: local
+  queuedata1:
     driver: local
 
 networks:

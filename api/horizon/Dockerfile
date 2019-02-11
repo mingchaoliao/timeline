@@ -39,4 +39,5 @@ RUN mkdir -p /apidist/storage/framework/views
 
 #RUN composer install --prefer-source --prefer-dist --no-dev --optimize-autoloader --no-interaction
 RUN composer install
-RUN ln -sf /apidist/storage/app/public /apidist/public/storage
+
+CMD ["php", "artisan", "horizon"]
