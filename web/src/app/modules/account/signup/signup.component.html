@@ -1,46 +1,50 @@
 <div class="container">
   <div class="row">
-    <div class="col">
-      <form [formGroup]="signupForm">
-        <div class="form-group">
-          <label for="name" i18n="name label@@nameLabel">Name</label>
-          <input type="text"
-                 class="form-control"
-                 id="name"
-                 i18n-placeholder="name input box placeholder@@namePlaceholder"
-                 formControlName="name"
-                 placeholder="Enter full name"
-                 appAutofocus
-          >
+    <div class="col-xl-6 col-md-8 offset-xl-3 offset-md-2">
+      <div class="row">
+        <div class="col">
+          <form [formGroup]="signupForm">
+            <div class="form-group">
+              <label for="name" i18n="name label@@nameLabel">Name</label>
+              <input type="text"
+                     class="form-control"
+                     id="name"
+                     i18n-placeholder="name input box placeholder@@namePlaceholder"
+                     formControlName="name"
+                     placeholder="Enter full name"
+                     appAutofocus
+              >
+            </div>
+            <div class="form-group">
+              <label for="email" i18n="email label@@emailLabel">Email</label>
+              <input type="text"
+                     class="form-control"
+                     id="email"
+                     i18n-placeholder="email input box placeholder@@emailPlaceholder"
+                     formControlName="email"
+                     placeholder="Enter email">
+            </div>
+            <div class="form-group">
+              <label for="password" i18n="password label@@passwordLabel">Password</label>
+              <input type="password"
+                     class="form-control"
+                     id="password"
+                     i18n-placeholder="password placeholder@@passwordPlaceholder"
+                     formControlName="password"
+                     placeholder="Enter password">
+            </div>
+            <app-button [style]="'btn-primary'" (onclick)="onSubmit($event)" i18n="sign up button text@@signUpBtn">
+              Sign up
+            </app-button>
+          </form>
         </div>
-        <div class="form-group">
-          <label for="email" i18n="email label@@emailLabel">Email</label>
-          <input type="text"
-                 class="form-control"
-                 id="email"
-                 i18n-placeholder="email input box placeholder@@emailPlaceholder"
-                 formControlName="email"
-                 placeholder="Enter email">
+      </div>
+      <div class="row mt-3">
+        <div class="col">
+          <ng-container i18n>Already have an account?</ng-container>
+          <a routerLink="/account/login" i18n="sign in link text@@signInBtn">Sign in</a>
         </div>
-        <div class="form-group">
-          <label for="password" i18n="password label@@passwordLabel">Password</label>
-          <input type="password"
-                 class="form-control"
-                 id="password"
-                 i18n-placeholder="password placeholder@@passwordPlaceholder"
-                 formControlName="password"
-                 placeholder="Enter password">
-        </div>
-        <app-button [style]="'btn-primary'" (onclick)="onSubmit($event)" i18n="sign up button text@@signUpBtn">
-          Sign up
-        </app-button>
-      </form>
-    </div>
-  </div>
-  <div class="row mt-3">
-    <div class="col">
-      <ng-container i18n>Already have an account?</ng-container>
-      <a routerLink="/account/login" i18n="sign in link text@@signInBtn">Sign in</a>
+      </div>
     </div>
   </div>
 </div>

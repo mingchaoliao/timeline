@@ -1,8 +1,8 @@
-<div class="container">
+<div class="container pb-3">
   <app-search-event-form></app-search-event-form>
   <ng-container *ngIf="result">
-    <div class="row">
-      <div class="col-3" style="border-right: 1px solid #DDDDDD;">
+    <div class="row mt-3">
+      <div class="col-md-3">
         <app-faceted-search-bar
           [facets]="[
             {
@@ -10,27 +10,27 @@
               name: 'Year',
               numDisplayed: 5,
               increment: 5,
-              disable: getFromRoute('startDate')
+              disable: route.snapshot.queryParams['startDate'] ? [route.snapshot.queryParams['startDate']] : []
             },
             {
               buckets: result.periods,
               name: 'Period',
               numDisplayed: 5,
               increment: 5,
-              disable: getFromRoute('period')
+              disable: route.snapshot.queryParams['period'] ? [route.snapshot.queryParams['period']] : []
             },
             {
               buckets: result.catalogs,
               name: 'Catalog',
               numDisplayed: 5,
               increment: 5,
-              disable: getFromRoute('catalogs')
+              disable: route.snapshot.queryParams['catalogs'] ? route.snapshot.queryParams['catalogs'].split(',') : []
             }
           ]"
           (onFacetChange)="onFacetChange($event)"
         ></app-faceted-search-bar>
       </div>
-      <div class="col">
+      <div class="col-md-9">
         <div class="row" *ngIf="!result.hits.length">
           <div class="col-12 mt-3">
             No event found.
@@ -61,5 +61,4 @@
       </div>
     </div>
   </ng-container>
-
 </div>

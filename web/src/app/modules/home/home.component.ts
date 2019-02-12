@@ -3,6 +3,7 @@ import {AfterViewInit, Component, OnInit} from '@angular/core';
 import {TimelineService} from '../core/shared/services/timeline.service';
 import {Notification} from '../core/shared/models/notification';
 import {NotificationEmitter} from '../core/shared/events/notificationEmitter';
+import {environment} from "../../../environments/environment";
 
 declare var TL: any;
 
@@ -29,7 +30,10 @@ export class HomeComponent implements OnInit, AfterViewInit {
   getTimeline() {
     this.timelineService.get().subscribe(
       timeline => {
-        new TL.Timeline('timeline', timeline);
+        new TL.Timeline('timeline', timeline, {
+          language: 'en',
+          script_path: environment.apiHost + '/timeline'
+        });
       },
       error => {
         console.log(error);

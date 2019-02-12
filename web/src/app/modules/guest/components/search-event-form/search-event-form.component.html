@@ -2,7 +2,7 @@
   <div class="col-12">
     <form [formGroup]="searchEventForm">
       <div class="row">
-        <div [class]="isAdvancedSearchCollapsed ? 'flex-fill pl-3' : 'col-12'">
+        <div [class]="isAdvancedSearchCollapsed ? 'col-lg-9 col-md-8 col-sm-12' : 'col-12'">
           <div class="form-group">
             <label for="content" i18n="content" class="sr-only">Content</label>
             <input type="text"
@@ -13,7 +13,7 @@
                    formControlName="content">
           </div>
         </div>
-        <div class="pr-3 ml-2" *ngIf="isAdvancedSearchCollapsed">
+        <div class="col" *ngIf="isAdvancedSearchCollapsed">
           <button type="submit" class="btn btn-outline-primary" (click)="onSearch()" i18n="search">Search
           </button>
 
@@ -25,15 +25,17 @@
           >Advanced Search
           </button>
         </div>
+      </div>
+      <div class="row">
         <div class="col-12" id="advancedSearch" [ngbCollapse]="isAdvancedSearchCollapsed">
           <div class="row">
-            <div class="col-6">
+            <div class="col-md-6">
               <div class="form-group">
                 <label i18n="start date" for="startDate">Start Date</label>
                 <app-event-datepicker id="startDate" formControlName="startDate"></app-event-datepicker>
               </div>
             </div>
-            <div class="col-6">
+            <div class="col-md-6">
               <div class="form-group">
                 <label for="period" i18n="period">Period</label>
                 <ng-select [items]="periodOptions"
@@ -48,7 +50,7 @@
                 </ng-select>
               </div>
             </div>
-            <div class="col-6">
+            <div class="col-md-6">
               <div class="form-group">
                 <label for="catalogs" i18n="catalog">Catalogs</label>
                 <ng-select [items]="catalogOptions"
@@ -64,7 +66,7 @@
                 </ng-select>
               </div>
             </div>
-            <div class="col-6 text-right mt-auto mb-3">
+            <div class="col-md-6 text-right mt-auto mb-3">
               <button type="submit"
                       class="btn btn-outline-primary mt-auto"
                       (click)="onSearch()"

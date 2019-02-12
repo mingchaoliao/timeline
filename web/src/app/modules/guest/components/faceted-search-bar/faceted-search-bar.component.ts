@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {ChangeDetectorRef, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {Bucket} from '../../../core/shared/models/eventSearchResult';
 
 export interface Facet {
@@ -21,13 +21,13 @@ export interface FacetLink {
   styleUrls: ['./faceted-search-bar.component.css']
 })
 export class FacetedSearchBarComponent implements OnInit {
-
-  @Input('facets') facets: Array<Facet>;
+  @Input('facets') facets: Array<Facet> = [];
   @Output('onFacetChange') onChange: EventEmitter<FacetLink> = new EventEmitter<FacetLink>();
+  @Input('aaaa') aaa = [];
 
   public status: any = {};
 
-  constructor() {
+  constructor(private cd: ChangeDetectorRef) {
   }
 
   ngOnInit() {

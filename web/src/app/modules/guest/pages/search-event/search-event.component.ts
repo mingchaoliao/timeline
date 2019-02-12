@@ -21,7 +21,7 @@ export class SearchEventComponent implements OnInit, AfterViewInit {
 
   constructor(
     private common: CommonService,
-    private route: ActivatedRoute,
+    public route: ActivatedRoute,
     private router: Router,
     private eventService: EventService
   ) {
@@ -30,16 +30,6 @@ export class SearchEventComponent implements OnInit, AfterViewInit {
         this.search(params);
       }
     );
-  }
-
-  getFromRoute(key: string): Array<string> {
-    const value: string = this.route.snapshot.queryParams[key];
-
-    if (value) {
-      return value.split(',');
-    }
-
-    return [];
   }
 
   public onPageChange(page) {
@@ -139,5 +129,4 @@ export class SearchEventComponent implements OnInit, AfterViewInit {
       }
     }
   }
-
 }
