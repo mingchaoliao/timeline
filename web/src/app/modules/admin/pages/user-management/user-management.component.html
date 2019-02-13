@@ -1,5 +1,5 @@
 <div class="container">
-  <table class="table table-striped">
+  <table class="table table-striped table-responsive">
     <thead>
     <tr>
       <th scope="col">ID</th>
@@ -8,6 +8,7 @@
       <th scope="col">Admin</th>
       <th scope="col">Editor</th>
       <th scope="col">Active</th>
+      <th scope="col">Action</th>
       <th scope="col">Created At</th>
       <th scope="col">Updated At</th>
     </tr>
@@ -47,9 +48,17 @@
         >
         <img src="/assets/img/loading.svg" alt="loading" style="height: 20px;" *ngIf="user['activeLoading']">
       </td>
+      <td>
+        <button
+          class="btn btn-outline-danger btn-sm"
+          [disabled]="user.id === getCurrentUserId()"
+          (click)="resetPasswordModal.init(user.id)">Reset Password</button>
+      </td>
       <td>{{ user.createdAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}}</td>
       <td>{{ user.updatedAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}}</td>
     </tr>
     </tbody>
   </table>
 </div>
+
+<app-reset-password-modal #resetPasswordModal></app-reset-password-modal>

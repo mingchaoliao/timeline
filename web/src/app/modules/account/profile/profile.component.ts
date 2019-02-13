@@ -25,8 +25,8 @@ export class ProfileComponent implements OnInit, OnDestroy {
     });
 
     this._changePasswordForm = fb.group({
-      'oldPassword': [null, [Validators.required]],
-      'newPassword': [null, [Validators.required]],
+      'oldPassword': [null, [Validators.required, Validators.min(8)]],
+      'newPassword': [null, [Validators.required, Validators.min(8)]],
     });
   }
 

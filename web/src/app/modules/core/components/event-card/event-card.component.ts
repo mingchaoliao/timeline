@@ -1,4 +1,12 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, Input, OnInit, ViewEncapsulation} from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  ViewEncapsulation
+} from '@angular/core';
 import {DomSanitizer} from '@angular/platform-browser';
 import {CommonService} from '../../shared/services/common.service';
 import {UserService} from '../../shared/services/user.service';
@@ -49,14 +57,19 @@ export class EventCardComponent implements OnInit {
   ngOnInit() {
   }
 
-  loadDetailView(id: number) {
+  loadDetailView(loading: EventEmitter<boolean>, id: number) {
     if (!this.event) {
+      loading.emit(true);
+      this.cdr.detectChanges();
       this.eventService.getById(id).subscribe(
         event => {
           this.event = event;
+          loading.emit(false);
           this.cdr.detectChanges();
         },
         e => {
+          loading.emit(false);
+          this.cdr.detectChanges();
           // TODO: error
         }
       );

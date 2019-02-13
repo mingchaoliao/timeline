@@ -39,7 +39,7 @@ Route::group(['middleware' => ['auth:api', 'editor']], function () {
     Route::delete('/event/{id}', 'EventController@delete');
 
     Route::get('/period', 'PeriodController@getAll');
-    Route::post('/period', 'PeriodController@createPeriod');
+    Route::post('/period', 'PeriodController@create');
     Route::post('/period/bulk', 'PeriodController@bulkCreate');
     Route::put('/period/{id}', 'PeriodController@update');
     Route::delete('/period/{id}', 'PeriodController@delete');

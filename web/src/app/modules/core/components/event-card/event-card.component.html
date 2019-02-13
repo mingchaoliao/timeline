@@ -2,7 +2,7 @@
   <div class="col-12" *ngIf="hit && !isDetailView">
     {{ hit.startDate.date }}
     <div [innerHTML]="sanitizer.bypassSecurityTrustHtml(hit.content)"></div>
-    <button class="btn btn-link" (click)="loadDetailView(hit.id)">[see more]</button>
+    <app-button [style]="'btn-link'" (onclick)="loadDetailView($event, hit.id)">[see more]</app-button>
   </div>
 
   <div class="col-12" *ngIf="event && isDetailView">

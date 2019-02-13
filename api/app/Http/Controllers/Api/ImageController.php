@@ -44,7 +44,7 @@ class ImageController extends Controller
         $params = $request->all();
         $params['id'] = $id;
 
-        $validatorFactory->validate($request->all(), [
+        $validatorFactory->validate($params, [
             'id' => 'required|id',
             'description' => 'required|string'
         ]);

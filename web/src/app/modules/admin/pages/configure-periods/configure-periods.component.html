@@ -5,7 +5,12 @@
       </button>
     </div>
   </div>
-  <div class="row">
+  <div class="row mt-3" *ngIf="periods && periods.length === 0">
+    <div class="col-12">
+      There is no period.
+    </div>
+  </div>
+  <div class="row" *ngIf="periods && periods.length !== 0">
     <div class="col-6 mt-3" *ngFor="let period of periods; let index = index">
       <div class="card">
         <div class="card-body">
@@ -38,19 +43,22 @@
 
 <ng-template #createModal let-c="close" let-d="dismiss">
   <div class="modal-body">
-    <div class="row">
-      <div class="col-12">
-        <div class="form-group">
-          <label for="value">Value:</label>
-          <input #input type="text" id="value" class="form-control" appAutofocus>
+    <form [formGroup]="createPeriodForm">
+      <div class="row">
+        <div class="col-12">
+          <div class="form-group">
+            <label for="value">Value:</label>
+            <input #input formControlName="value" type="text" id="value" class="form-control" appAutofocus>
+          </div>
+        </div>
+        <div class="col-12 text-right">
+          <button class="btn btn-outline-secondary" (click)="d('close')">Cancel</button>
+          <app-button [style]="'btn-outline-primary ml-2'"
+                      [disabled]="!createPeriodForm.dirty || !createPeriodForm.valid"
+                      (onclick)="createNew($event, input.value)">Create
+          </app-button>
         </div>
       </div>
-      <div class="col-12 text-right">
-        <button class="btn btn-outline-secondary" (click)="d('close')">Cancel</button>
-        <app-button [style]="'btn-outline-primary ml-2'" [disabled]="!input.value"
-                    (onclick)="createNew($event, input.value)">Create
-        </app-button>
-      </div>
-    </div>
+    </form>
   </div>
 </ng-template>

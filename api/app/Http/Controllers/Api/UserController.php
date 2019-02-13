@@ -30,7 +30,7 @@ class UserController extends Controller
         $validatorFactory->validate($request->all(), [
             'name' => 'required|string',
             'email' => 'required|email',
-            'password' => 'required|string'
+            'password' => 'required|string|min:8'
         ]);
 
         $token = $this->userService->register(
@@ -82,8 +82,8 @@ class UserController extends Controller
 
         $validatorFactory->validate($params, [
             'name' => 'nullable|string',
-            'newPassword' => 'nullable|string',
-            'oldPassword' => 'nullable|string',
+            'newPassword' => 'nullable|string|min:8',
+            'oldPassword' => 'nullable|string|min:8',
             'isAdmin' => 'nullable|boolean',
             'isEditor' => 'nullable|boolean',
             'isActive' => 'nullable|boolean'

@@ -124,7 +124,7 @@ export class UserService {
         return new Observable<boolean>(observer => {
             this.httpService.put(Url.updateUser(id), {}, {
                 oldPassword: oldPassword,
-                newPassword: oldPassword
+                newPassword: newPassword
             }).subscribe(
                 responseBody => {
                     observer.next(<boolean>responseBody);
