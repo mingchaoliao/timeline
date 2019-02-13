@@ -82,17 +82,21 @@ class UserController extends Controller
 
         $validatorFactory->validate($params, [
             'name' => 'nullable|string',
-            'password' => 'nullable|string',
+            'newPassword' => 'nullable|string',
+            'oldPassword' => 'nullable|string',
             'isAdmin' => 'nullable|boolean',
-            'isEditor' => 'nullable|boolean'
+            'isEditor' => 'nullable|boolean',
+            'isActive' => 'nullable|boolean'
         ]);
 
         $user = $this->userService->update(
             new UserId(intval($id)),
             $request->get('name'),
-            $request->get('password'),
+            $request->get('oldPassword'),
+            $request->get('newPassword'),
             $request->get('isAdmin'),
-            $request->get('isEditor')
+            $request->get('isEditor'),
+            $request->get('isActive')
         );
 
         return response()->json($user);

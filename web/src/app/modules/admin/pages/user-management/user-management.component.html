@@ -7,6 +7,7 @@
       <th scope="col">Email</th>
       <th scope="col">Admin</th>
       <th scope="col">Editor</th>
+      <th scope="col">Active</th>
       <th scope="col">Created At</th>
       <th scope="col">Updated At</th>
     </tr>
@@ -35,6 +36,16 @@
                *ngIf="!user['editorLoading']"
         >
         <img src="/assets/img/loading.svg" alt="loading" style="height: 20px;" *ngIf="user['editorLoading']">
+      </td>
+      <td>
+        <input type="checkbox"
+               id="activeCheck"
+               [checked]="user.isActive"
+               (change)="activateOrInactivateAccount(user, $event)"
+               [disabled]="user.id === getCurrentUserId()"
+               *ngIf="!user['activeLoading']"
+        >
+        <img src="/assets/img/loading.svg" alt="loading" style="height: 20px;" *ngIf="user['activeLoading']">
       </td>
       <td>{{ user.createdAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}}</td>
       <td>{{ user.updatedAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}}</td>

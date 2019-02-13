@@ -95,6 +95,9 @@ class TimelineException extends \Exception implements HttpExceptionInterface
     public const INVALID_IMAGE_ID = 10074;
     public const INVALID_DATE_STRING = 10075;
     public const INVALID_INTEGER = 10076;
+    public const OLD_PASSWORD_IS_NOT_CORRECT = 10077;
+    public const USER_WITH_EMAIL_DOES_NOT_FOUND = 10078;
+    public const USER_ACCOUNT_IS_LOCKED = 10079;
 
     /**
      * @var int
@@ -661,5 +664,25 @@ class TimelineException extends \Exception implements HttpExceptionInterface
     public static function ofInvalidInteger(\Throwable $previous = null): self
     {
         return new static('value must be an integer', static::INVALID_INTEGER, 400, [], $previous);
+    }
+
+    public static function ofOldPasswordIsNotCorrect(\Throwable $previous = null): self
+    {
+        return new static('old password does not match with our record', static::OLD_PASSWORD_IS_NOT_CORRECT, 400, [], $previous);
+    }
+
+    public static function ofUserWithEmailDoesNotFound(Email $email, \Throwable $previous = null): self
+    {
+        return new static(sprintf(
+            'user account does not found: "%s"',
+            (string)$email
+        ), static::USER_WITH_EMAIL_DOES_NOT_FOUND, 400, [], $previous);
+    }
+
+    public static function ofUserAccountIsLocked(\Throwable $previous = null): self
+    {
+        return new static(
+            'user account has been inactivated, please contact system administrator.'
+            , static::USER_ACCOUNT_IS_LOCKED, 400, [], $previous);
     }
 }

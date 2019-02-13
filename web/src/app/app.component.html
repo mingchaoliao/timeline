@@ -11,19 +11,19 @@
         </a>
       </div>
       <div class="col-xs-6 col-sm-4 d-flex justify-content-end align-items-center px-0">
-        <a class="btn btn-link nav-item" routerLink="/" [class.nav-item-active]="isRouteActive('/')">
+        <a class="btn btn-link pr-0 nav-item" routerLink="/" [class.nav-item-active]="isRouteActive('/')">
           Home
         </a>
-        <a class="btn btn-link nav-item" routerLink="/app/event/search" [class.nav-item-active]="isRouteActive('/app/event/search')">
+        <a class="btn btn-link pr-0 nav-item" routerLink="/app/event/search" [class.nav-item-active]="isRouteActive('/app/event/search')">
           Events
         </a>
-        <a class="btn btn-link"
+        <a class="btn btn-link pr-0 nav-item"
            routerLink="/account/login"
            [style.opacity]="isRouteActive('/account/login') ? 1 : 0.5"
            *ngIf="getUser() === null"
            i18n="sign in button text@@signInBtn">Sign
           in</a>
-        <div class="dropdown" *ngIf="getUser() !== null">
+        <div class="dropdown btn btn-link pr-0" *ngIf="getUser() !== null">
           <a class="btn-link dropdown-toggle nav-item" href="#" role="button" id="dropdownMenuLink"
              data-toggle="dropdown"
              aria-haspopup="true" aria-expanded="false">
@@ -32,6 +32,8 @@
           </a>
 
           <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
+            <a class="dropdown-item" routerLink="/account/profile"
+               i18n="create event navigation link@@createEventNavLink">Profile</a>
             <a class="dropdown-item" routerLink="/admin/create-event" *ngIf="getUser().isAdmin || getUser().isEditor"
                i18n="create event navigation link@@createEventNavLink">Create
               Event</a>

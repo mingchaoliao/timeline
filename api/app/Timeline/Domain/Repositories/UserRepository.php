@@ -21,6 +21,8 @@ interface UserRepository
 
     public function login(Email $email, string $password): UserToken;
 
+    public function validatePassword(UserId $id, string $password): bool;
+
     public function getAll(): UserCollection;
 
     public function create(
@@ -36,6 +38,7 @@ interface UserRepository
         ?string $name = null,
         ?string $password = null,
         ?bool $isAdmin = null,
-        ?bool $isEditor = null
+        ?bool $isEditor = null,
+        ?bool $isActive = null
     ): User;
 }

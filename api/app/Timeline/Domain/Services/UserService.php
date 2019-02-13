@@ -110,7 +110,7 @@ class UserService
             $currentUser = $this->getCurrentUser();
 
             if ($currentUser === null) {
-                TimelineException::ofUnauthenticated();
+                throw TimelineException::ofUnauthenticated();
             }
 
             if(!$currentUser->isAdmin()) {
@@ -128,43 +128,54 @@ class UserService
     /**
      * @param UserId $id
      * @param null|string $name
-     * @param null|string $password
+     * @param null|string $oldPassword
+     * @param null|string $newPassword
      * @param bool|null $isAdmin
      * @param bool|null $isEditor
+     * @param bool|null $isActive
      * @return User
      * @throws TimelineException
      */
     public function update(
         UserId $id,
         ?string $name = null,
-        ?string $password = null,
+        ?string $oldPassword = null,
+        ?string $newPassword = null,
         ?bool $isAdmin = null,
-        ?bool $isEditor = null
+        ?bool $isEditor = null,
+        ?bool $isActive = null
     ): User
     {
         try {
             $currentUser = $this->getCurrentUser();
 
             if ($currentUser === null) {
-                TimelineException::ofUnauthenticated();
+                throw TimelineException::ofUnauthenticated();
             }
 
             if (!$currentUser->isAdmin()) {
-                if ($isAdmin !== null || $isEditor !== null) {
-                    TimelineException::ofUnauthorizedToUpdateUserPrivilege();
+                if ($isAdmin !== null || $isEditor !== null || $isActive !== null) {
+                    throw TimelineException::ofUnauthorizedToUpdateUserPrivilege();
                 }
 
                 if (!$currentUser->getId()->equalsWith($id)) {
-                    TimelineException::ofUnauthorizedToUpdateUserProfile();
+                    throw TimelineException::ofUnauthorizedToUpdateUserProfile();
+                }
+            }
+
+            if(!$currentUser->isAdmin() || $id->equalsWith($currentUser->getId())) {
+                if(!$this->userRepository->validatePassword($id, $oldPassword)) {
+                    throw TimelineException::ofOldPasswordIsNotCorrect();
                 }
             }
 
             return $this->userRepository->update(
                 $id,
                 $name,
-                $password,
+                $newPassword,
                 $isAdmin,
-                $isEditor
+                $isEditor,
+                $isActive
             );
         } catch (TimelineException $e) {
             throw $e;

@@ -72,6 +72,17 @@ class EloquentUserRepository implements UserRepository
      */
     public function login(Email $email, string $password): UserToken
     {
+        /** @var EloquentUser|null $user */
+        $user = $this->userModel->where('email', $email->getValue())->first();
+
+        if($user === null) {
+            throw TimelineException::ofUserWithEmailDoesNotFound($email);
+        }
+
+        if(!$user->isActive()) {
+            throw TimelineException::ofUserAccountIsLocked();
+        }
+
         $token = $this->guard->attempt([
             'email' => $email->getValue(),
             'password' => $password
@@ -85,6 +96,16 @@ class EloquentUserRepository implements UserRepository
             'Bearer',
             $token
         );
+    }
+
+    public function validatePassword(UserId $id, string $password): bool
+    {
+        /** @var EloquentUser $eloquentUser */
+        $eloquentUser = $this->userModel->find($id->getValue());
+        if ($eloquentUser === null) {
+            return false;
+        }
+        return $this->hasher->check($password, $eloquentUser->getPasswordHash());
     }
 
     /**
@@ -142,6 +163,7 @@ class EloquentUserRepository implements UserRepository
      * @param null|string $password
      * @param bool|null $isAdmin
      * @param bool|null $isEditor
+     * @param bool|null $isActive
      * @return User
      * @throws TimelineException
      */
@@ -150,7 +172,8 @@ class EloquentUserRepository implements UserRepository
         ?string $name = null,
         ?string $password = null,
         ?bool $isAdmin = null,
-        ?bool $isEditor = null
+        ?bool $isEditor = null,
+        ?bool $isActive = null
     ): User
     {
         $eloquentUser = $this->userModel->find($id->getValue());
@@ -178,6 +201,10 @@ class EloquentUserRepository implements UserRepository
             $update['is_editor'] = $isEditor ? 1 : 0;
         }
 
+        if ($isActive !== null) {
+            $update['is_active'] = $isActive ? 1 : 0;
+        }
+
         if (count($update) !== 0) {
             $eloquentUser->update($update);
         }
@@ -197,6 +224,7 @@ class EloquentUserRepository implements UserRepository
             new Email($eloquentUser->getEmail()),
             $eloquentUser->isAdmin(),
             $eloquentUser->isEditor(),
+            $eloquentUser->isActive(),
             $eloquentUser->getCreatedAt(),
             $eloquentUser->getUpdatedAt()
         );

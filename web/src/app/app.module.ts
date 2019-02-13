@@ -11,6 +11,7 @@ import {HttpClientModule} from '@angular/common/http';
 import {environment} from '../environments/environment';
 import {AdminGuard} from './admin-guard';
 import {EditorGuard} from './editor-guard';
+import {AuthGuard} from "./auth-guard";
 
 export function tokenGetter() {
   return localStorage.getItem('access_token');
@@ -39,7 +40,8 @@ export function tokenGetter() {
   ],
   providers: [
     AdminGuard,
-    EditorGuard
+    EditorGuard,
+    AuthGuard
   ],
   bootstrap: [AppComponent]
 })

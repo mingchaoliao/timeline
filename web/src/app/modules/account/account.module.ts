@@ -6,6 +6,7 @@ import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import {LoginComponent} from './login/login.component';
 import {SignupComponent} from './signup/signup.component';
 import {ACCOUNT_ROUTING} from './account.route';
+import { ProfileComponent } from './profile/profile.component';
 
 @NgModule({
   imports: [
@@ -18,7 +19,8 @@ import {ACCOUNT_ROUTING} from './account.route';
   ],
   declarations: [
     LoginComponent,
-    SignupComponent
+    SignupComponent,
+    ProfileComponent
   ]
 })
 export class AccountModule {

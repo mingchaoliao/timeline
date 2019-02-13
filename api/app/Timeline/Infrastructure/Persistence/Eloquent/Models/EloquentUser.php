@@ -23,7 +23,8 @@ class EloquentUser extends Authenticatable implements JWTSubject
         'email',
         'password',
         'is_admin',
-        'is_editor'
+        'is_editor',
+        'is_active'
     ];
 
     /**
@@ -44,6 +45,10 @@ class EloquentUser extends Authenticatable implements JWTSubject
     public function getId(): int
     {
         return $this->id;
+    }
+
+    public function isActive(): bool {
+        return $this->is_active === 1;
     }
 
     public function getName(): string

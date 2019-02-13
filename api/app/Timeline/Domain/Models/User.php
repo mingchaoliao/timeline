@@ -35,6 +35,10 @@ class User extends BaseModel
      */
     private $isEditor;
     /**
+     * @var bool
+     */
+    private $isActive;
+    /**
      * @var Carbon
      */
     private $createdAt;
@@ -50,16 +54,18 @@ class User extends BaseModel
      * @param Email $email
      * @param bool $isAdmin
      * @param bool $isEditor
+     * @param bool $isActive
      * @param Carbon $createdAt
      * @param Carbon|null $updatedAt
      */
-    public function __construct(UserId $id, string $name, Email $email, bool $isAdmin, bool $isEditor, Carbon $createdAt, ?Carbon $updatedAt)
+    public function __construct(UserId $id, string $name, Email $email, bool $isAdmin, bool $isEditor, bool $isActive, Carbon $createdAt, ?Carbon $updatedAt)
     {
         $this->id = $id;
         $this->name = $name;
         $this->email = $email;
         $this->isAdmin = $isAdmin;
         $this->isEditor = $isEditor;
+        $this->isActive = $isActive;
         $this->createdAt = $createdAt;
         $this->updatedAt = $updatedAt;
     }
@@ -105,6 +111,14 @@ class User extends BaseModel
     }
 
     /**
+     * @return bool
+     */
+    public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    /**
      * @return Carbon
      */
     public function getCreatedAt(): Carbon
@@ -131,6 +145,7 @@ class User extends BaseModel
             'email' => $this->getEmail()->getValue(),
             'isAdmin' => $this->isAdmin(),
             'isEditor' => $this->isEditor(),
+            'isActive' => $this->isActive(),
             'createdAt' => $this->getCreatedAt()->toIso8601String(),
             'updatedAt' => $this->getUpdatedAt()->toIso8601String()
         ];
