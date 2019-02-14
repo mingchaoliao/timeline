@@ -1,4 +1,4 @@
-version: '2'
+version: '3.7'
 services:
   nginx:
     build:
@@ -7,47 +7,47 @@ services:
     ports:
       - 80:80
       - 443:443
+    restart: always
     depends_on:
       - api
-      - web
+      - web_build
     volumes:
       - ./etc/production/nginx/conf.d:/etc/nginx/conf.d
       - ./etc/production/nginx/ssl:/etc/nginx/ssl
       - apistorage:/apidist/storage
       - webdist:/webdist
-    env_file:
-      - ./etc/production/docker/web.env
-      - ./etc/production/docker/api.env
     networks:
-      - internal
+      - api
   api:
     build:
       context: api
       dockerfile: Dockerfile
-    user: apiuser
+    user: "1500:1500"
+    restart: always
     volumes:
       - apistorage:/apidist/storage
-      - ./api/.env:/apidist/.env
-    env_file:
-      - ./etc/production/docker/mysql.env
-      - ./etc/production/docker/api.env
     depends_on:
       - mysql
       - elasticsearch
       - queue
     networks:
-      - internal
+      - api
+      - db
+      - es
+      - queue
   queue:
     image: redis:5.0.3-alpine
+    restart: always
     volumes:
       - queuedata1:/data
     networks:
-      - internal
+      - queue
   horizon:
     build:
       context: api
       dockerfile: horizon/Dockerfile
-    user: apiuser
+    user: "1500:1500"
+    restart: always
     volumes:
       - apistorage:/apidist/storage
       - ./api/.env:/apidist/.env
@@ -56,10 +56,13 @@ services:
       - elasticsearch
       - queue
     networks:
-      - internal
+      - db
+      - es
+      - queue
   mysql:
     image: mysql:5.7.22
     command: --disable-partition-engine-check
+    restart: always
     volumes:
       - dbdata1:/var/lib/mysql
     env_file:
@@ -69,16 +72,17 @@ services:
       MYSQL_DATABASE: timeline
       MYSQL_USER: timeline_user
     networks:
-      - internal
+      - db
   elasticsearch:
     build: elasticsearch
+    restart: always
     volumes:
       - esdata1:/usr/share/elasticsearch/data
     environment:
       discovery.type: single-node
     networks:
-      - internal
-  web:
+      - es
+  web_build:
     build:
       context: web
       dockerfile: Dockerfile
@@ -97,4 +101,7 @@ volumes:
     driver: local
 
 networks:
-  internal:
+  api:
+  db:
+  es:
+  queue:
