@@ -2,117 +2,121 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exceptions\CatalogNotFoundException;
-use App\Repositories\CatalogRepository;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Input;
+use App\Timeline\App\Validators\ValidatorFactory;
+use App\Timeline\Domain\Services\CatalogService;
+use App\Timeline\Domain\ValueObjects\CatalogId;
+use Illuminate\Http\Request;
 
 class CatalogController extends Controller
 {
-    private $catalogRepository;
+    /**
+     * @var CatalogService
+     */
+    private $catalogService;
 
-    public function __construct(CatalogRepository $catalogRepository)
+    /**
+     * CatalogController constructor.
+     * @param CatalogService $catalogService
+     */
+    public function __construct(CatalogService $catalogService)
     {
-        $this->catalogRepository = $catalogRepository;
-    }
-
-    public function getTypeahead()
-    {
-        $options = $this->catalogRepository->getTypeahead();
-        return response()->json($options);
-    }
-
-    public function get()
-    {
-        $collection = $this->catalogRepository->getCollection();
-        return response()->json($collection);
+        $this->catalogService = $catalogService;
     }
 
     /**
-     * @OAS\Post(
-     *     path="/api/catalog",
-     *     tags={"catalog"},
-     *     summary="Get all catalogs",
-     *     description="Get all catalogs",
-     *     operationId="catalog.post",
-     *     @OAS\Response(
-     *         response="default",
-     *         description="successful operation"
-     *     )
-     * )
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
      */
-    public function createCatalog(Request $request) {
-        $this->validate(
-            $request,
-            [
-                'value' => [
-                    'required',
-                    function($attribute, $value, $fail) {
-                        if($this->catalogRepository->doesValueExist($value)) {
-                            return $fail('Duplicated catalog');
-                        }
-                    },
-                ]
-            ],
-            [
-                'required' => 'Missing value'
-            ]
-        );
+    public function getTypeahead()
+    {
+        return response()->json($this->catalogService->getTypeahead());
+    }
 
-        $catalog = $this->catalogRepository->create(
-            $request->get('value'),
-            Auth::user()->getId()
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
+    public function getAll()
+    {
+        return response()->json($this->catalogService->getAll());
+    }
+
+    /**
+     * @param Request $request
+     * @param ValidatorFactory $validatorFactory
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
+    public function create(Request $request, ValidatorFactory $validatorFactory)
+    {
+        $validatorFactory->validate($request->all(), [
+            'value' => 'required|string'
+        ]);
+
+        $catalog = $this->catalogService->create($request->get('value'));
+
+        return response()->json($catalog);
+    }
+
+    /**
+     * @param string $id
+     * @param Request $request
+     * @param ValidatorFactory $validatorFactory
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
+    public function update(string $id, Request $request, ValidatorFactory $validatorFactory)
+    {
+        $params = $request->all();
+        $params['id'] = $id;
+
+        $validatorFactory->validate($params, [
+            'id' => 'required|id',
+            'value' => 'required|string'
+        ]);
+
+        $catalog = $this->catalogService->update(
+            new CatalogId(intval($id)),
+            $request->get('value')
         );
 
         return response()->json($catalog);
     }
 
-    public function update(Request $request)
+    /**
+     * @param string $id
+     * @param ValidatorFactory $validatorFactory
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
+    public function delete(string $id, ValidatorFactory $validatorFactory)
     {
-        $this->validate($request, [
-            'id' => 'integer|gt:0',
-            'value' => 'string'
+        $validatorFactory->validate(['id' => $id], [
+            'id' => 'required|id'
         ]);
-        $catalog = $this->catalogRepository->update(
-            Input::get('id'),
-            Input::get('value')
-        );
-        return response()->json($catalog->toArray());
+
+        $isSuccess = $this->catalogService->delete(new CatalogId(intval($id)));
+
+        return response()->json($isSuccess);
     }
 
-    public function delete(Request $request)
+    /**
+     * @param Request $request
+     * @param ValidatorFactory $validatorFactory
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
+    public function bulkCreate(Request $request, ValidatorFactory $validatorFactory)
     {
-        $this->validate($request, [
-            'id' => 'integer|gt:0'
-        ]);
-        return response()->json($this->catalogRepository->delete(Input::get('id')));
-    }
-
-    public function bulkCreate(Request $request) {
-        $this->validate($request, [
-            'values' => [
-                'required',
-                function($attribute, $value, $fail) {
-                    if(!is_array($value)) {
-                        $fail('Parameter "values" must be a list of string');
-                        return;
-                    }
-                    foreach($value as $item) {
-                        if(!is_string($item)) {
-                            $fail('Parameter "values" must be a list of string');
-                        }
-                    }
-                },
-            ]
-        ], [
-            'required' => 'Values is required'
+        $validatorFactory->validate($request->all(), [
+            'values' => 'required|array|filled',
+            'values.*' => 'string',
         ]);
 
         $values = $request->get('values');
 
-        $response = $this->catalogRepository->bulkCreate($values, Auth::user()->getId());
+        $response = $this->catalogService->bulkCreate($values);
 
         return response()->json($response);
     }

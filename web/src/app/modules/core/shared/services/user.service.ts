@@ -4,19 +4,25 @@ import {HttpService} from './http.service';
 import {User} from '../models/user';
 import {Observable} from 'rxjs';
 import {Token, TokenType} from '../models/token';
+import {Router} from '@angular/router';
 
 @Injectable()
 export class UserService {
     private static currentUser: User = null;
 
     constructor(
-        private httpService: HttpService
+        private httpService: HttpService,
+        private router: Router
     ) {
 
     }
 
     public static getCurrentUser(): User {
         return UserService.currentUser;
+    }
+
+    static clearCurrentUser() {
+        UserService.currentUser = null;
     }
 
     public getAll(): Observable<Array<User>> {
@@ -44,9 +50,81 @@ export class UserService {
 
     public grantOrRevokeAdminPrivilege(id: number, isAdmin: boolean): Observable<boolean> {
         return new Observable<boolean>(observer => {
-            this.httpService.put(Url.grantOrRevokeAdminPrivilege(), {}, {
-                id: id,
+            this.httpService.put(Url.updateUser(id), {}, {
                 isAdmin: isAdmin
+            }).subscribe(
+                responseBody => {
+                    observer.next(<boolean>responseBody);
+                },
+                error => {
+                    observer.error(error);
+                },
+                () => {
+                    observer.complete();
+                }
+            );
+        });
+    }
+
+    public grantOrRevokeEditorPrivilege(id: number, isEditor: boolean): Observable<boolean> {
+        return new Observable<boolean>(observer => {
+            this.httpService.put(Url.updateUser(id), {}, {
+                isEditor: isEditor
+            }).subscribe(
+                responseBody => {
+                    observer.next(<boolean>responseBody);
+                },
+                error => {
+                    observer.error(error);
+                },
+                () => {
+                    observer.complete();
+                }
+            );
+        });
+    }
+
+    public activateOrInactivateAccount(id: number, isActive: boolean): Observable<boolean> {
+        return new Observable<boolean>(observer => {
+            this.httpService.put(Url.updateUser(id), {}, {
+                isActive: isActive
+            }).subscribe(
+                responseBody => {
+                    observer.next(<boolean>responseBody);
+                },
+                error => {
+                    observer.error(error);
+                },
+                () => {
+                    observer.complete();
+                }
+            );
+        });
+    }
+
+    public updateProfile(id: number, name: string): Observable<User> {
+        return new Observable<User>(observer => {
+            this.httpService.put(Url.updateUser(id), {}, {
+                name: name
+            }).subscribe(
+                responseBody => {
+                    observer.next(User.fromJson(responseBody));
+                },
+                error => {
+                    observer.error(error);
+                },
+                () => {
+                    observer.complete();
+                }
+            );
+        });
+    }
+
+    public updatePassword(id: number, oldPassword: string, newPassword: string): Observable<boolean> {
+        return new Observable<boolean>(observer => {
+            this.httpService.put(Url.updateUser(id), {}, {
+                oldPassword: oldPassword,
+                newPassword: newPassword
             }).subscribe(
                 responseBody => {
                     observer.next(<boolean>responseBody);
@@ -85,8 +163,10 @@ export class UserService {
                 }).subscribe(
                     responseBody => {
                         try {
-                            UserService.currentUser = User.fromJson(responseBody);
-                            localStorage.setItem('access_token', responseBody['accessToken']);
+                            localStorage.setItem('access_token', responseBody['token']);
+                            this.getCurrentUser(true).subscribe(
+                                user => UserService.currentUser = User.fromJson(user)
+                            );
                             observer.next(UserService.currentUser);
                         } catch (e) {
                             observer.error(e);
@@ -162,5 +242,9 @@ export class UserService {
                 }
             }
         );
+    }
+
+    setCurrentUser(user: User) {
+        UserService.currentUser = user;
     }
 }

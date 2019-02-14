@@ -2,44 +2,54 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\DomainModels\Image;
 use App\Http\Controllers\Controller;
-use App\Repositories\ImageRepository;
+use App\Timeline\App\Validators\ValidatorFactory;
+use App\Timeline\Domain\Services\ImageService;
+use App\Timeline\Domain\ValueObjects\ImageId;
 use Illuminate\Http\Request;
 
 class ImageController extends Controller
 {
-    private $imageRepository;
+    /**
+     * @var ImageService
+     */
+    private $imageService;
 
-    public function __construct(ImageRepository $imageRepository)
+    /**
+     * ImageController constructor.
+     * @param ImageService $imageService
+     */
+    public function __construct(ImageService $imageService)
     {
-        $this->imageRepository = $imageRepository;
+        $this->imageService = $imageService;
     }
 
-    public function uploadImage(Request $request)
+    public function upload(Request $request, ValidatorFactory $validatorFactory)
     {
-        $this->validate(
-            $request,
-            [
-                'image' => 'required|image'
-            ],
-            [
-                'required' => 'Missing image file',
-                'image' => 'Invalid image file'
-            ]
+        $validatorFactory->validate($request->all(), [
+            'image' => 'required|image',
+            'description' => 'nullable|string'
+        ]);
+
+        $image = $this->imageService->upload(
+            $request->file('image'),
+            $request->get('description') ?? null
         );
 
-        $uploadedFile = $request->file('image');
+        return response()->json($image);
+    }
 
-        $extension = $uploadedFile->getClientOriginalExtension();
+    public function update(string $id, Request $request, ValidatorFactory $validatorFactory)
+    {
+        $params = $request->all();
+        $params['id'] = $id;
 
-        $name = str_random(32) . '.' . $extension;
-
-        $uploadedFile->storeAs(Image::TMP_PATH,$name);
-
-        return response()->json([
-            'path' => $name,
-            'originalName' => $uploadedFile->getClientOriginalName()
+        $validatorFactory->validate($params, [
+            'id' => 'required|id',
+            'description' => 'required|string'
         ]);
+
+        $image = $this->imageService->update(new ImageId(intval($id)), $request->get('description'));
+        return response()->json($image);
     }
 }

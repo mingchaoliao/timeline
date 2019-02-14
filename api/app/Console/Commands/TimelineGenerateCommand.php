@@ -2,19 +2,17 @@
 
 namespace App\Console\Commands;
 
-use App\Repositories\EventRepository;
-use Carbon\Carbon;
+use App\Timeline\Domain\Services\TimelineService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Storage;
 
 class TimelineGenerateCommand extends Command
 {
     /**
-     * @var EventRepository
+     * @var TimelineService
      */
-    private $eventRepository;
+    private $timelineService;
 
     /**
      * The name and signature of the console command.
@@ -33,12 +31,12 @@ class TimelineGenerateCommand extends Command
     /**
      * Create a new command instance.
      *
-     * @return void
+     * @param TimelineService $timelineService
      */
-    public function __construct(EventRepository $eventRepository)
+    public function __construct(TimelineService $timelineService)
     {
         parent::__construct();
-        $this->eventRepository = $eventRepository;
+        $this->timelineService = $timelineService;
     }
 
     /**
@@ -48,26 +46,8 @@ class TimelineGenerateCommand extends Command
      */
     public function handle()
     {
-        $events = $this->eventRepository->getCollection();
+        $timelineData = json_encode($this->timelineService->getTimelineArray());
 
-        $timelineConfig = $events->toTimelineArray();
-
-        if(count($timelineConfig) === 0) {
-            $timelineConfig = [
-                [
-                    'start_date' => [
-                        'year' => Carbon::now()->year
-                    ],
-                    'unique_id' => 1,
-                    'text' => ['text' => '<p>Sign in as administrator to create the first event!</p>']
-                ]
-            ];
-        }
-
-        $json = json_encode([
-            'events' => $timelineConfig
-        ]);
-
-        File::put(Storage::path('public/timeline.json'), $json);
+        File::put(Storage::path('public/timeline.json'), $timelineData);
     }
 }

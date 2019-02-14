@@ -2,190 +2,104 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exceptions\HttpException;
 use App\Http\Controllers\Controller;
-use App\Repositories\UserRepository;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\BadResponseException;
+use App\Timeline\App\Validators\ValidatorFactory;
+use App\Timeline\Domain\Services\UserService;
+use App\Timeline\Domain\ValueObjects\Email;
+use App\Timeline\Domain\ValueObjects\UserId;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Input;
-use Laravel\Passport\Http\Controllers\AccessTokenController;
 
 class UserController extends Controller
 {
     /**
-     * @var UserRepository
+     * @var UserService
      */
-    private $userRepository;
-    /**
-     * @var Client
-     */
-    private $httpClient;
-    /**
-     * @var AccessTokenController
-     */
-    private $accessTokenController;
+    private $userService;
 
-    public function __construct(
-        UserRepository $userRepository,
-        Client $httpClient,
-        AccessTokenController $accessTokenController
-    ) {
-        $this->userRepository = $userRepository;
-        $this->httpClient = $httpClient;
-        $this->accessTokenController = $accessTokenController;
+    /**
+     * UserController constructor.
+     * @param UserService $userService
+     */
+    public function __construct(UserService $userService)
+    {
+        $this->userService = $userService;
     }
 
-    public function register(Request $request)
+    public function register(Request $request, ValidatorFactory $validatorFactory)
     {
-        $this->validate($request, [
-            'name' => 'string',
-            'email' => 'email',
-            'password' => 'string'
+        $validatorFactory->validate($request->all(), [
+            'name' => 'required|string',
+            'email' => 'required|email',
+            'password' => 'required|string|min:8'
         ]);
 
-        try {
-            $user = $this->userRepository->createUser(
-                $request->get('name'),
-                $request->get('email'),
-                $request->get('password'),
-                false
-            );
+        $token = $this->userService->register(
+            $request->get('name'),
+            new Email($request->get('email')),
+            $request->get('password')
+        );
 
-            $token = $this->getToken(
-                'WebPasswordGrantClient',
-                $request->get('email'),
-                $request->get('password'),
-                $request
-            );
-
-            return response()->json(array_merge($user->toArray(), $token));
-        } catch (\InvalidArgumentException $e) {
-            return response()->json([
-                'message' => $e->getMessage()
-            ], 400);
-        } catch (BadResponseException $e) {
-            return response()->json(
-                json_decode($e->getResponse()->getBody()->getContents()),
-                $e->getResponse()->getStatusCode()
-            );
-        } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        return response()->json($token);
     }
 
     public function getCurrentUser()
     {
-        $user = $this->userRepository->getCurrentUser();
+        $user = $this->userService->getCurrentUser();
+
+        if ($user === null) {
+            return response()->json(null, 404);
+        }
 
         return response()->json($user);
     }
 
-    public function grantOrRevokeAdminPrivilege(Request $request) {
-        $this->validate($request,[
-            'id' => 'integer|gt:0',
-            'isAdmin' => 'boolean'
-        ]);
-
-        return response()->json($this->userRepository->grantOrRevokeAdminPrivilege(
-            Input::get('id'),
-            Input::get('isAdmin')
-        ));
-    }
-
-    public function login(Request $request)
+    public function login(Request $request, ValidatorFactory $validatorFactory)
     {
-        $this->validate($request, [
+        $validatorFactory->validate($request->all(), [
             'email' => 'required|email',
             'password' => 'required|string'
         ]);
 
-        try {
-            $token = $this->getToken(
-                'WebPasswordGrantClient',
-                $request->get('email'),
-                $request->get('password'),
-                $request
-            );
+        $token = $this->userService->login(
+            new Email($request->get('email')),
+            $request->get('password')
+        );
 
-            $user = $this->userRepository->getByEmail($request->get('email'));
-
-            $userArray = $user->toArray();
-
-            return response()->json(array_merge($userArray, $token));
-        } catch (HttpException $e) {
-            if ($e->isJson()) {
-                return response()->json(json_decode($e->getMessage(), true),
-                    $e->getCode());
-            }
-
-            return response()->json(['message' => $e->getMessage()], $e->getCode());
-        } catch (\Exception $e) {
-            return response()->json(['message' => $e->getMessage()], 500);
-        }
+        return response()->json($token);
     }
 
-    public function getAllUser() {
-        return response()->json($this->userRepository->getAll()->toJsonArray());
+    public function getAllUser()
+    {
+        $users = $this->userService->getAll();
+
+        return response()->json($users);
     }
 
-    /**
-     * @param string $oauthClientName
-     * @param string $email
-     * @param string $password
-     *
-     *
-     * @param Request $request
-     *
-     * @return array
-     * @throws HttpException
-     * @throws \Exception
-     */
-    private function getToken(
-        string $oauthClientName,
-        string $email,
-        string $password,
-        Request $request
-    ): array {
-        $oauthClient = DB::table('oauth_clients')->select([
-            'id',
-            'secret'
-        ])->where('name', $oauthClientName)->first();
+    public function update(string $id, Request $request, ValidatorFactory $validatorFactory)
+    {
+        $params = $request->all();
+        $params['id'] = $id;
 
-        if ($oauthClient === null) {
-            throw new \Exception('Invalid oauth client');
-        }
+        $validatorFactory->validate($params, [
+            'name' => 'nullable|string',
+            'newPassword' => 'nullable|string|min:8',
+            'oldPassword' => 'nullable|string|min:8',
+            'isAdmin' => 'nullable|boolean',
+            'isEditor' => 'nullable|boolean',
+            'isActive' => 'nullable|boolean'
+        ]);
 
-        $requestTokenData = [
-            'grant_type' => 'password',
-            'client_id' => $oauthClient->id,
-            'client_secret' => $oauthClient->secret,
-            'username' => $email,
-            'password' => $password,
-            'scope' => '',
-        ];
+        $user = $this->userService->update(
+            new UserId(intval($id)),
+            $request->get('name'),
+            $request->get('oldPassword'),
+            $request->get('newPassword'),
+            $request->get('isAdmin'),
+            $request->get('isEditor'),
+            $request->get('isActive')
+        );
 
-        $request->request->add($requestTokenData);
-
-        /**
-         * @var Response $response
-         * */
-        $response = App::call('Laravel\Passport\Http\Controllers\AccessTokenController@issueToken');
-
-        if ($response->getStatusCode() >= 400) {
-            throw HttpException::withJsonMessage($response->getContent(),
-                $response->getStatusCode());
-        }
-
-        $content = json_decode($response->getContent(), true);
-
-        return [
-            'tokenType' => $content['token_type'],
-            'accessToken' => $content['access_token']
-        ];
+        return response()->json($user);
     }
 }
 

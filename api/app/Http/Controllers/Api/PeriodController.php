@@ -3,104 +3,125 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\PeriodRepository;
+use App\Timeline\App\Validators\ValidatorFactory;
+use App\Timeline\Domain\Services\PeriodService;
+use App\Timeline\Domain\ValueObjects\PeriodId;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Input;
 
 class PeriodController extends Controller
 {
-    private $periodRepository;
+    /**
+     * @var PeriodService
+     */
+    private $periodService;
 
-    public function __construct(PeriodRepository $periodRepository)
+    /**
+     * PeriodController constructor.
+     * @param PeriodService $periodRepository
+     */
+    public function __construct(PeriodService $periodRepository)
     {
-        $this->periodRepository = $periodRepository;
+        $this->periodService = $periodRepository;
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
     public function getTypeahead()
     {
-        $options = $this->periodRepository->getTypeahead();
-        return response()->json($options);
+        return response()->json($this->periodService->getTypeahead());
     }
 
-    public function get()
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
+    public function getAll()
     {
-        $collection = $this->periodRepository->getCollection();
-        return response()->json($collection);
+        return response()->json($this->periodService->getAll());
     }
 
-    public function update(Request $request)
+    /**
+     * @param Request $request
+     * @param ValidatorFactory $validatorFactory
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
+    public function create(Request $request, ValidatorFactory $validatorFactory)
     {
-        $this->validate($request, [
-            'id' => 'integer|gt:0',
-            'value' => 'string'
+        $validatorFactory->validate($request->all(), [
+            'value' => 'required|string'
         ]);
-        $period = $this->periodRepository->update(
-            Input::get('id'),
-            Input::get('value')
-        );
-        return response()->json($period->toArray());
+
+        $period = $this->periodService->create($request->get('value'));
+
+        return response()->json($period);
     }
 
-    public function delete(Request $request)
+    /**
+     * @param string $id
+     * @param Request $request
+     * @param ValidatorFactory $validatorFactory
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
+    public function update(string $id, Request $request, ValidatorFactory $validatorFactory)
     {
-        $this->validate($request, [
-            'id' => 'integer|gt:0'
+        $params = $request->all();
+        $params['id'] = $id;
+
+        $validatorFactory->validate($params, [
+            'id' => 'required|id',
+            'value' => 'required|string'
         ]);
-        return response()->json($this->periodRepository->delete(Input::get('id')));
-    }
 
-    public function createPeriod(Request $request)
-    {
-        $this->validate(
-            $request,
-            [
-                'value' => [
-                    'required',
-                    function ($attribute, $value, $fail) {
-                        if ($this->periodRepository->doesValueExist($value)) {
-                            return $fail('Duplicated period');
-                        }
-                    },
-                ]
-            ],
-            [
-                'required' => 'Missing value'
-            ]
-        );
-
-        $period = $this->periodRepository->create(
-            $request->get('value'),
-            Auth::user()->getId()
+        $period = $this->periodService->update(
+            PeriodId::createFromString($id),
+            $request->get('value')
         );
 
         return response()->json($period);
     }
 
-    public function bulkCreate(Request $request)
+    /**
+     * @param string $id
+     * @param ValidatorFactory $validatorFactory
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
+    public function delete(string $id, ValidatorFactory $validatorFactory)
     {
+        $validatorFactory->validate(['id' => $id], [
+            'id' => 'required|id'
+        ]);
+
+        $isSuccess = $this->periodService->delete(PeriodId::createFromString($id));
+
+        return response()->json($isSuccess);
+    }
+
+    /**
+     * @param Request $request
+     * @param ValidatorFactory $validatorFactory
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     * @throws \Illuminate\Validation\ValidationException
+     */
+    public function bulkCreate(Request $request, ValidatorFactory $validatorFactory)
+    {
+        $validatorFactory->validate($request->all(), [
+            'values' => 'required|array|filled',
+            'values.*' => 'string',
+        ]);
+
         $this->validate($request, [
-            'values' => [
-                'required',
-                function ($attribute, $value, $fail) {
-                    if (!is_array($value)) {
-                        $fail('Parameter "values" must be a list of string');
-                        return;
-                    }
-                    foreach ($value as $item) {
-                        if (!is_string($item)) {
-                            $fail('Parameter "values" must be a list of string');
-                        }
-                    }
-                },
-            ]
-        ], [
-            'required' => 'Parameter "values" is required'
+            'values' => 'array'
         ]);
 
         $values = $request->get('values');
 
-        $response = $this->periodRepository->bulkCreate($values, Auth::user()->getId());
+        $response = $this->periodService->bulkCreate($values);
 
         return response()->json($response);
     }

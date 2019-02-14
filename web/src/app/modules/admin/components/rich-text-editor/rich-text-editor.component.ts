@@ -70,7 +70,7 @@ export class RichTextEditorComponent implements OnInit, ControlValueAccessor, Af
         ['misc', ['redo', 'undo', 'help']],
       ],
       tabsize: 2,
-      height: 100
+      height: 300
     });
 
     if (this.isDisplayed) {

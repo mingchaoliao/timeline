@@ -15,16 +15,16 @@ class CreateEventsTable extends Migration
     {
         Schema::create('events', function (Blueprint $table) {
             $table->increments('id');
+            $table->string('start_date_str');
             $table->dateTime('start_date');
-            $table->unsignedInteger('start_date_format_id');
             $table->unsignedInteger('start_date_attribute_id')->nullable();
+            $table->string('end_date_str')->nullable();
             $table->dateTime('end_date')->nullable();
-            $table->unsignedInteger('end_date_format_id')->nullable();
             $table->unsignedInteger('end_date_attribute_id')->nullable();
             $table->text('content');
             $table->unsignedInteger('period_id')->nullable();
             $table->unsignedInteger('create_user_id');
-            $table->unsignedInteger('update_user_id')->nullable();
+            $table->unsignedInteger('update_user_id');
             $table->timestamps();
         });
     }

@@ -1,0 +1,98 @@
+version: '3.7'
+services:
+  nginx:
+    image: nginx:1.15.8-alpine
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - api
+    working_dir: /apidist
+    volumes:
+      - ./etc/development/nginx/conf.d:/etc/nginx/conf.d
+      - ./etc/development/nginx/ssl:/etc/nginx/ssl
+      - ./api:/apidist
+  api:
+    build:
+      context: api
+      dockerfile: Dockerfile.dev
+    working_dir: /apidist
+    volumes:
+      - ./api:/apidist
+    depends_on:
+      - mysql
+      - elasticsearch
+      - queue
+  api_test:
+    build:
+      context: api
+      dockerfile: Dockerfile.dev
+    command: php -v
+    working_dir: /apidist
+    volumes:
+      - ./api:/apidist
+  queue:
+    image: redis:5.0.3-alpine3.9
+    volumes:
+      - queuedata1:/data
+  horizon:
+    build:
+      context: api
+      dockerfile: horizon/Dockerfile.dev
+    volumes:
+      - ./api:/apidist
+    depends_on:
+      - mysql
+      - elasticsearch
+      - queue
+  mysql:
+    image: mysql:5.7.25
+    command: --disable-partition-engine-check
+    volumes:
+      - dbdata1:/var/lib/mysql
+    env_file:
+      - ./etc/development/docker/mysql.env
+    ports:
+      - 13306:3306
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_DATABASE: timeline
+      MYSQL_USER: timeline_user
+  mysql_test:
+    image: mysql:5.7.25
+    command: --disable-partition-engine-check
+    environment:
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_DATABASE: timeline_test
+  elasticsearch:
+    build: elasticsearch
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      discovery.type: single-node
+  elastichq:
+    image: elastichq/elasticsearch-hq
+    ports:
+      - 5000:5000
+    environment:
+      HQ_DEFAULT_URL: "http://elasticsearch:9200"
+    depends_on:
+      - elasticsearch
+  web:
+    build:
+      context: web
+      dockerfile: Dockerfile.dev
+    ports:
+      - 4200:4200
+    volumes:
+      - ./web:/webdist
+volumes:
+  esdata1:
+    driver: local
+  dbdata1:
+    driver: local
+  queuedata1:
+    driver: local

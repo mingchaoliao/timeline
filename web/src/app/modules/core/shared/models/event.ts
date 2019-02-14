@@ -1,17 +1,88 @@
 import {DateAttribute} from './dateAttribute';
-import {DateFormat} from './dateFormat';
 import {Period} from './period';
 import {Catalog} from './catalog';
 import {Image} from './image';
+import {NgbDateStruct} from '@ng-bootstrap/ng-bootstrap';
+import * as moment from 'moment';
+
+export class EventDate {
+  public static readonly FORMAT_YEAR = 'YYYY';
+  public static readonly FORMAT_YEAR_MONTH = 'YYYY-MM';
+  public static readonly FORMAT_YEAR_MONTH_DAY = 'YYYY-MM-DD';
+  public static readonly REGEXR_YEAR = /^[0-9]{4}$/;
+  public static readonly REGEXR_YEAR_MONTH = /^([0-9]{4})-(0[1-9]|1[0-2])$/;
+  public static readonly REGEXR_YEAR_MONTH_DAY = /^([0-9]{4})-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/;
+
+  private readonly _date: string;
+  private readonly _format: string;
+  private readonly _moment;
+
+  public static validate(str: string): boolean {
+    return this.getFormat(str) !== null;
+  }
+
+  public static getFormat(str: string): string {
+    if (str.match(this.REGEXR_YEAR)) {
+      return this.FORMAT_YEAR;
+    } else if (str.match(this.REGEXR_YEAR_MONTH)) {
+      return this.FORMAT_YEAR_MONTH;
+    } else if (str.match(this.REGEXR_YEAR_MONTH_DAY)) {
+      return this.FORMAT_YEAR_MONTH_DAY;
+    }
+    return null;
+  }
+
+  constructor(date: string) {
+    this._date = date;
+    const format = EventDate.getFormat(date);
+    if (!format) {
+      throw new Error(`Invalid event date ${date}`);
+    }
+    this._format = format;
+    this._moment = moment(date, format);
+  }
+
+  get date(): string {
+    return this._date;
+  }
+
+  static createFromString(str: string) {
+    if (!str) {
+      return null;
+    }
+
+    return new EventDate(str);
+  }
+
+  public isAttributeAllowed(): boolean {
+    return this._format === EventDate.FORMAT_YEAR;
+  }
+
+  public getYear(): number {
+    return this._moment.year();
+  }
+
+  public getMonth(): number {
+    if (this._format === EventDate.FORMAT_YEAR) {
+      return null;
+    }
+    return this._moment.month() + 1;
+  }
+
+  public getDay(): number {
+    if (this._format !== EventDate.FORMAT_YEAR_MONTH_DAY) {
+      return null;
+    }
+    return this._moment.day();
+  }
+}
 
 export class Event {
   private readonly _id: number;
-  private readonly _startDate: Date;
-  private readonly _endDate: Date;
+  private readonly _startDate: EventDate;
+  private readonly _endDate: EventDate;
   private readonly _startDateAttribute: DateAttribute;
   private readonly _endDateAttribute: DateAttribute;
-  private readonly _startDateFormat: DateFormat;
-  private readonly _endDateFormat: DateFormat;
   private readonly _period: Period;
   private readonly _catalogs: Array<Catalog>;
   private readonly _content: string;
@@ -21,16 +92,12 @@ export class Event {
   private readonly _createdAt: Date;
   private readonly _updatedAt: Date;
 
-  constructor(id: number, startDate: Date, endDate: Date, startDateAttribute: DateAttribute, endDateAttribute: DateAttribute,
-              startDateFormat: DateFormat, endDateFormat: DateFormat, period: Period, catalogs: Array<Catalog>, content: string,
-              images: Array<Image>, createUserId: number, updateUserId: number, createdAt: Date, updatedAt: Date) {
+  constructor(id: number, startDate: EventDate, endDate: EventDate, startDateAttribute: DateAttribute, endDateAttribute: DateAttribute, period: Period, catalogs: Array<Catalog>, content: string, images: Array<Image>, createUserId: number, updateUserId: number, createdAt: Date, updatedAt: Date) {
     this._id = id;
     this._startDate = startDate;
     this._endDate = endDate;
     this._startDateAttribute = startDateAttribute;
     this._endDateAttribute = endDateAttribute;
-    this._startDateFormat = startDateFormat;
-    this._endDateFormat = endDateFormat;
     this._period = period;
     this._catalogs = catalogs;
     this._content = content;
@@ -45,11 +112,11 @@ export class Event {
     return this._id;
   }
 
-  get startDate(): Date {
+  get startDate(): EventDate {
     return this._startDate;
   }
 
-  get endDate(): Date {
+  get endDate(): EventDate {
     return this._endDate;
   }
 
@@ -59,14 +126,6 @@ export class Event {
 
   get endDateAttribute(): DateAttribute {
     return this._endDateAttribute;
-  }
-
-  get startDateFormat(): DateFormat {
-    return this._startDateFormat;
-  }
-
-  get endDateFormat(): DateFormat {
-    return this._endDateFormat;
   }
 
   get period(): Period {
@@ -107,12 +166,10 @@ export class Event {
     }
     return new Event(
       json['id'],
-      json['startDate'],
-      json['endDate'],
+      EventDate.createFromString(json['startDate']),
+      EventDate.createFromString(json['endDate']),
       DateAttribute.fromJson(json['startDateAttribute']),
       DateAttribute.fromJson(json['endDateAttribute']),
-      DateFormat.fromJson(json['startDateFormat']),
-      DateFormat.fromJson(json['endDateFormat']),
       Period.fromJson(json['period']),
       Catalog.fromArray(json['catalogCollection']),
       json['content'],

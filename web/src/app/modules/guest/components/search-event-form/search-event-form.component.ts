@@ -1,15 +1,12 @@
 import {Component, OnInit, ViewChild} from '@angular/core';
 import * as moment from 'moment';
-import {AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators} from '@angular/forms';
+import {AbstractControl, FormBuilder, FormGroup, ValidatorFn} from '@angular/forms';
 import {CommonService} from '../../../core/shared/services/common.service';
 import {ActivatedRoute, NavigationEnd, NavigationExtras, Router} from '@angular/router';
 import {PeriodService} from '../../../core/shared/services/period.service';
 import {CatalogService} from '../../../core/shared/services/catalog.service';
 import {Notification} from '../../../core/shared/models/notification';
 import {NotificationEmitter} from '../../../core/shared/events/notificationEmitter';
-import {NgbDateStruct} from '@ng-bootstrap/ng-bootstrap';
-import {NgOption} from '@ng-select/ng-select';
-import {Typeahead} from '../../../core/shared/models/typeahead';
 
 export function dateValidator(): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {
@@ -39,29 +36,23 @@ export class SearchEventFormComponent implements OnInit {
   public searchEventForm: FormGroup;
   public periodOptions: any = [];
   public catalogOptions: any = [];
+  public isAdvancedSearchCollapsed = true;
 
   constructor(
-    private formBuilder: FormBuilder,
-    private common: CommonService,
-    private router: Router,
-    private periodService: PeriodService,
-    private catalogService: CatalogService,
-    private route: ActivatedRoute
+      private formBuilder: FormBuilder,
+      private common: CommonService,
+      private router: Router,
+      private periodService: PeriodService,
+      private catalogService: CatalogService,
+      private route: ActivatedRoute
   ) {
     this.route.queryParams.subscribe(query => {
+      if (query['startDate'] || query['endDate'] || query['period'] || query['catalogs']) {
+        this.isAdvancedSearchCollapsed = false;
+      }
+
       this.searchEventForm = this.formBuilder.group({
-        'startDateFrom': [this.dateStringToNgbDate(query['startDateFrom']), [
-          dateValidator()
-        ]],
-        'startDateTo': [this.dateStringToNgbDate(query['startDateTo']), [
-          dateValidator()
-        ]],
-        'endDateFrom': [this.dateStringToNgbDate(query['endDateFrom']), [
-          dateValidator()
-        ]],
-        'endDateTo': [this.dateStringToNgbDate(query['endDateTo']), [
-          dateValidator()
-        ]],
+        'startDate': [query['startDate'], []],
         'content': [query['content'], []],
         'period': [null, []],
         'catalogs': [null, []],
@@ -73,44 +64,44 @@ export class SearchEventFormComponent implements OnInit {
         const query = this.route.snapshot.queryParams;
 
         if (this.periodOptions && this.periodOptions.length) {
-          this.setPeriodById(query['period']);
+          this.setPeriodByLabel(query['period']);
         }
 
         if (this.catalogOptions && this.catalogOptions.length) {
-          this.setCatalogByIds(query['catalogs']);
+          this.setCatalogByLabels(query['catalogs']);
         }
       }
     });
 
     this.periodService.getTypeahead().subscribe(
-      periods => {
-        this.periodOptions = periods;
-      },
-      error => {
-        NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve periods'));
-      },
-      () => {
-        this.setPeriodById(this.route.snapshot.queryParams['period']);
-      }
+        periods => {
+          this.periodOptions = periods;
+        },
+        error => {
+          NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve periods'));
+        },
+        () => {
+          this.setPeriodByLabel(this.route.snapshot.queryParams['period']);
+        }
     );
 
     this.catalogService.getTypeahead().subscribe(
-      catalogs => {
-        this.catalogOptions = catalogs;
-      },
-      e => {
-        NotificationEmitter.emit(Notification.error(e.error.message, 'Unable to retrieve catalogs'));
-      },
-      () => {
-        this.setCatalogByIds(this.route.snapshot.queryParams['catalogs']);
-      }
+        catalogs => {
+          this.catalogOptions = catalogs;
+        },
+        e => {
+          NotificationEmitter.emit(Notification.error(e.error.message, 'Unable to retrieve catalogs'));
+        },
+        () => {
+          this.setCatalogByLabels(this.route.snapshot.queryParams['catalogs']);
+        }
     );
   }
 
-  setPeriodById(id: string) {
-    if (id) {
+  setPeriodByLabel(label: string) {
+    if (label) {
       setTimeout(() => {
-        const option = this.findNgOptionById(this.periodNgSelect.itemsList.items, parseInt(id));
+        const option = this.periodNgSelect.itemsList.findByLabel(label);
         if (option) {
           this.periodNgSelect.select(option);
         }
@@ -118,39 +109,18 @@ export class SearchEventFormComponent implements OnInit {
     }
   }
 
-  setCatalogByIds(catalogStr: string) {
+  setCatalogByLabels(labelStr: string) {
     setTimeout(() => {
-      if (catalogStr) {
-        const ids = catalogStr.split(',').map((catalog) => catalog.trim());
-        for (const id of ids) {
-          const option = this.findNgOptionById(this.catalogNgSelect.itemsList.items, parseInt(id));
+      if (labelStr) {
+        const labels = labelStr.split(',');
+        for (const label of labels) {
+          const option = this.catalogNgSelect.itemsList.findByLabel(label);
           if (option) {
             this.catalogNgSelect.select(option);
           }
         }
       }
     }, 10);
-  }
-
-  findNgOptionById(options: Array<NgOption>, id: number): NgOption {
-    for (const option of options) {
-      if ((<Typeahead>option.value).id === id) {
-        return option;
-      }
-    }
-    return null;
-  }
-
-  dateStringToNgbDate(str: string): NgbDateStruct {
-    if (str === '' || str === undefined || str === null) {
-      return null;
-    }
-    const date = moment(str);
-    return {
-      year: date.year(),
-      month: date.month() + 1,
-      day: date.date()
-    };
   }
 
   ngOnInit() {
@@ -161,44 +131,13 @@ export class SearchEventFormComponent implements OnInit {
       const queryParams = {
         page: 1
       };
-      const startDateFrom = this.searchEventForm.value.startDateFrom;
-      const startDateTo = this.searchEventForm.value.startDateTo;
-      const endDateFrom = this.searchEventForm.value.endDateFrom;
-      const endDateTo = this.searchEventForm.value.endDateTo;
+      const startDate = this.searchEventForm.value.startDate;
       const period = this.searchEventForm.value.period;
       const catalogs = this.searchEventForm.value.catalogs;
       const content = this.searchEventForm.value.content;
 
-      if (startDateFrom) {
-        queryParams['startDateFrom'] = moment({
-          year: startDateFrom['year'],
-          month: startDateFrom['month'] - 1,
-          day: startDateFrom['day']
-        }).format('YYYY-MM-DD');
-      }
-
-      if (startDateTo) {
-        queryParams['startDateTo'] = moment({
-          year: startDateTo['year'],
-          month: startDateTo['month'] - 1,
-          day: startDateTo['day']
-        }).format('YYYY-MM-DD');
-      }
-
-      if (endDateFrom) {
-        queryParams['endDateFrom'] = moment({
-          year: endDateFrom['year'],
-          month: endDateFrom['month'] - 1,
-          day: endDateFrom['day']
-        }).format('YYYY-MM-DD');
-      }
-
-      if (endDateTo) {
-        queryParams['endDateTo'] = moment({
-          year: endDateTo['year'],
-          month: endDateTo['month'] - 1,
-          day: endDateTo['day']
-        }).format('YYYY-MM-DD');
+      if (startDate) {
+        queryParams['startDate'] = startDate;
       }
 
       if (period) {

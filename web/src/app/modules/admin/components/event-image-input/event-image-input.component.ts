@@ -2,10 +2,10 @@ import {Component, forwardRef, OnInit} from '@angular/core';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {CommonService} from '../../../core/shared/services/common.service';
 import {Url} from '../../../core/shared/classes/url';
-import {UserService} from '../../../core/shared/services/user.service';
 import {ImageService} from '../../../core/shared/services/image.service';
 import {Notification} from '../../../core/shared/models/notification';
 import {NotificationEmitter} from '../../../core/shared/events/notificationEmitter';
+import {Image} from '../../../core/shared/models/image';
 
 @Component({
   selector: 'app-event-image-input',
@@ -22,7 +22,8 @@ import {NotificationEmitter} from '../../../core/shared/events/notificationEmitt
 export class EventImageInputComponent
   implements OnInit, ControlValueAccessor {
 
-  public images = [];
+  public images: Array<Image> = [];
+  public imageUploadStatus: any = {};
 
   private propagateChange = (_: any) => {
   };
@@ -31,11 +32,12 @@ export class EventImageInputComponent
 
   }
 
-  getImageUrl(path: string): string {
-    return Url.getImageByPath(
-      path,
-      UserService.getCurrentUser() === null ? false : UserService.getCurrentUser().isAdmin
-    );
+  getImageUrl(image): string {
+    if(image && image.eventId) {
+      return Url.getImage(image.path);
+    } else {
+      return Url.getTempImage(image.path);
+    }
   }
 
   ngOnInit() {
@@ -59,13 +61,27 @@ export class EventImageInputComponent
   }
 
   changeFile(event, index) {
-    this.images[index].file = event.srcElement.files[0];
-    this.propagateChange(this.images);
-    this.images[index].uploadStatus = 'Uploading';
-    this.imageService.upload(this.images[index].file).subscribe(
-      imageUploadReceipt => {
-        this.images[index].path = imageUploadReceipt.path;
-        this.images[index].uploadStatus = 'Uploaded';
+    const newImageFile = event.srcElement.files[0];
+    this.imageUploadStatus[index] = 'Uploading';
+    this.imageService.upload(newImageFile).subscribe(
+      image => {
+        this.images[index] = image;
+        this.imageUploadStatus[index] = 'Uploaded';
+       this.propagateChange(this.images);
+      },
+      error => {
+        NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to upload image'));
+      }
+    );
+  }
+
+  changeDescription(event, index) {
+    const newDescription = event.srcElement.value;
+    this.imageUploadStatus[index] = 'Updating';
+    this.imageService.updateDescription(this.images[index].id, newDescription).subscribe(
+      image => {
+        this.images[index] = image;
+        this.imageUploadStatus[index] = 'Updated';
         this.propagateChange(this.images);
       },
       error => {
@@ -74,23 +90,13 @@ export class EventImageInputComponent
     );
   }
 
-  changeDescription(event, index) {
-    this.images[index].description = event.srcElement.value;
-    this.propagateChange(this.images);
-  }
-
   addImage() {
-    this.images.push({
-      file: null,
-      description: null,
-      uploadStatus: '',
-      path: ''
-    });
-    this.propagateChange(this.images);
+    this.images.push(null);
   }
 
   onDelete(index) {
     this.images.splice(index, 1);
+    this.imageUploadStatus[index] = undefined;
     this.propagateChange(this.images);
   }
 }

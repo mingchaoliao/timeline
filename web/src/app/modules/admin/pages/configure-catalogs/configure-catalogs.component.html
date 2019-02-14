@@ -1,18 +1,27 @@
 <div class="container">
   <div class="row">
     <div class="col-12">
-      <button class="btn btn-outline-primary" (click)="createModalRef = modalService.open(createModal)">Create New</button>
+      <button class="btn btn-outline-primary" (click)="createModalRef = modalService.open(createModal)">Create New
+      </button>
     </div>
   </div>
-  <div class="row">
+  <div class="row mt-3" *ngIf="catalogs && catalogs.length === 0">
+    <div class="col-12">
+      There is no catalog.
+    </div>
+  </div>
+  <div class="row" *ngIf="catalogs && catalogs.length !== 0">
     <div class="col-6 mt-3" *ngFor="let catalog of catalogs; let index = index">
       <div class="card">
         <div class="card-body">
           <div class="row">
             <div class="col-12">
-              <input type="text" #input (change)="catalog['dirty'] = $event.srcElement.value !== catalog.value" class="form-control" id="value_{{ catalog.id }}" [value]="catalog.value">
+              <input type="text" #input (change)="catalog['dirty'] = $event.srcElement.value !== catalog.value"
+                     class="form-control" id="value_{{ catalog.id }}" [value]="catalog.value">
             </div>
-            <div class="col-12"># of associated events: <a routerLink="/app/event/search" [queryParams]="{catalogs: catalog.id}">{{ catalog.numberOfEvents }}</a></div>
+            <div class="col-12"># of associated events: <a routerLink="/app/event/search"
+                                                           [queryParams]="{catalogs: catalog.value}">{{ catalog.numberOfEvents }}</a>
+            </div>
             <div class="col-12">
               Created At: {{ catalog.createdAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }} by {{ catalog.createUserName }}
             </div>
@@ -20,7 +29,9 @@
               Updated At: {{ catalog.updatedAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }} by {{ catalog.updateUserName }}
             </div>
             <div class="col-12">
-              <app-button [style]="'btn-outline-primary mr-2'" *ngIf="catalog['dirty']" (onclick)="update($event, index, input.value)">Save</app-button>
+              <app-button [style]="'btn-outline-primary mr-2'" *ngIf="catalog['dirty']"
+                          (onclick)="update($event, index, input.value)">Save
+              </app-button>
               <app-button [style]="'btn-outline-danger'" (onclick)="delete($event, index)">Delete</app-button>
             </div>
           </div>
@@ -32,17 +43,22 @@
 
 <ng-template #createModal let-c="close" let-d="dismiss">
   <div class="modal-body">
-    <div class="row">
-      <div class="col-12">
-        <div class="form-group">
-          <label for="value">Value:</label>
-          <input #input type="text" id="value" class="form-control" appAutofocus>
+    <form [formGroup]="createCatalogForm">
+      <div class="row">
+        <div class="col-12">
+          <div class="form-group">
+            <label for="value">Value:</label>
+            <input #input formControlName="value" type="text" id="value" class="form-control" appAutofocus>
+          </div>
+        </div>
+        <div class="col-12 text-right">
+          <button class="btn btn-outline-secondary" (click)="d('close')">Cancel</button>
+          <app-button [style]="'btn-outline-primary ml-2'"
+                      [disabled]="!createCatalogForm.dirty || !createCatalogForm.valid"
+                      (onclick)="createNew($event, input.value)">Create
+          </app-button>
         </div>
       </div>
-      <div class="col-12 text-right">
-        <button class="btn btn-outline-secondary" (click)="d('close')">Cancel</button>
-        <app-button [style]="'btn-outline-primary ml-2'" [disabled]="!input.value" (onclick)="createNew($event, input.value)">Create</app-button>
-      </div>
-    </div>
+    </form>
   </div>
 </ng-template>

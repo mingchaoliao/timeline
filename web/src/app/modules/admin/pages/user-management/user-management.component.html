@@ -1,12 +1,16 @@
 <div class="container">
-  <table class="table table-striped">
+  <table class="table table-striped table-responsive">
     <thead>
     <tr>
       <th scope="col">ID</th>
       <th scope="col">Name</th>
       <th scope="col">Email</th>
-      <th scope="col">Is Admin</th>
-      <th scope="col">Register At</th>
+      <th scope="col">Admin</th>
+      <th scope="col">Editor</th>
+      <th scope="col">Active</th>
+      <th scope="col">Action</th>
+      <th scope="col">Created At</th>
+      <th scope="col">Updated At</th>
     </tr>
     </thead>
     <tbody>
@@ -15,17 +19,46 @@
       <td>{{ user.name }}</td>
       <td>{{ user.email }}</td>
       <td>
-        <input class="form-check-input"
-               type="checkbox"
-               id="gridCheck1"
+        <input type="checkbox"
+               id="adminCheck"
                [checked]="user.isAdmin"
-               (change)="grantOrRevokeAdminFor(user, $event)"
-               *ngIf="!user['isLoading']"
+               (change)="grantOrRevokeAdminPrivilege(user, $event)"
+               [disabled]="user.id === getCurrentUserId()"
+               *ngIf="!user['adminLoading']"
         >
-        <img src="/assets/img/loading.svg" alt="loading" style="height: 20px;" *ngIf="user['isLoading']">
+        <img src="/assets/img/loading.svg" alt="loading" style="height: 20px;" *ngIf="user['adminLoading']">
+      </td>
+      <td>
+        <input type="checkbox"
+               id="editorCheck"
+               [checked]="user.isEditor"
+               (change)="grantOrRevokeEditorPrivilege(user, $event)"
+               [disabled]="user.id === getCurrentUserId()"
+               *ngIf="!user['editorLoading']"
+        >
+        <img src="/assets/img/loading.svg" alt="loading" style="height: 20px;" *ngIf="user['editorLoading']">
+      </td>
+      <td>
+        <input type="checkbox"
+               id="activeCheck"
+               [checked]="user.isActive"
+               (change)="activateOrInactivateAccount(user, $event)"
+               [disabled]="user.id === getCurrentUserId()"
+               *ngIf="!user['activeLoading']"
+        >
+        <img src="/assets/img/loading.svg" alt="loading" style="height: 20px;" *ngIf="user['activeLoading']">
+      </td>
+      <td>
+        <button
+          class="btn btn-outline-danger btn-sm"
+          [disabled]="user.id === getCurrentUserId()"
+          (click)="resetPasswordModal.init(user.id)">Reset Password</button>
       </td>
       <td>{{ user.createdAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}}</td>
+      <td>{{ user.updatedAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}}</td>
     </tr>
     </tbody>
   </table>
 </div>
+
+<app-reset-password-modal #resetPasswordModal></app-reset-password-modal>

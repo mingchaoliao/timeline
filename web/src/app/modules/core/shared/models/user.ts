@@ -3,6 +3,8 @@ export class User {
     protected readonly _name: string;
     protected readonly _email: string;
     private _isAdmin: boolean;
+    private _isEditor: boolean;
+    private _isActive: boolean;
     protected readonly _createdAt: Date;
     protected readonly _updatedAt: Date;
 
@@ -11,6 +13,8 @@ export class User {
         name: string,
         email: string,
         isAdmin: boolean,
+        isEditor: boolean,
+        isActive: boolean,
         createdAt: Date,
         updatedAt: Date
     ) {
@@ -18,6 +22,8 @@ export class User {
         this._name = name;
         this._email = email;
         this._isAdmin = isAdmin;
+        this._isEditor = isEditor;
+        this._isActive = isActive;
         this._createdAt = createdAt;
         this._updatedAt = updatedAt;
     }
@@ -42,12 +48,28 @@ export class User {
         this._isAdmin = value;
     }
 
+    get isEditor(): boolean {
+        return this._isEditor;
+    }
+
+    set isEditor(value: boolean) {
+        this._isEditor = value;
+    }
+
     get createdAt(): Date {
         return this._createdAt;
     }
 
     get updatedAt(): Date {
         return this._updatedAt;
+    }
+
+    get isActive(): boolean {
+        return this._isActive;
+    }
+
+    set isActive(value: boolean) {
+        this._isActive = value;
     }
 
     static fromJson(json: any): User {
@@ -59,6 +81,8 @@ export class User {
             json['name'],
             json['email'],
             json['isAdmin'],
+            json['isEditor'],
+            json['isActive'],
             json['createdAt'],
             json['updatedAt']
         );

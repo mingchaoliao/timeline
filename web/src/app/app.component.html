@@ -5,24 +5,26 @@
       </div>
       <div class="col text-sm-left text-md-center px-0">
         <a class="blog-header-logo text-dark" routerLink="/">
-          <h1 style="font-size: 1.5em;">
+          <h1 class="m-0" style="font-size: 1.5em;">
             {{ title }}
           </h1>
         </a>
       </div>
       <div class="col-xs-6 col-sm-4 d-flex justify-content-end align-items-center px-0">
-        <a class="text-primary mx-3" routerLink="/app/event/search">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-               stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <circle cx="10.5" cy="10.5" r="7.5"></circle>
-            <line x1="21" y1="21" x2="15.8" y2="15.8"></line>
-          </svg>
+        <a class="btn btn-link pr-0 nav-item" routerLink="/" [class.nav-item-active]="isRouteActive('/')">
+          Home
         </a>
-        <a class="btn btn-sm btn-outline-primary" routerLink="/account/login" *ngIf="getUser() === null"
+        <a class="btn btn-link pr-0 nav-item" routerLink="/app/event/search" [class.nav-item-active]="isRouteActive('/app/event/search')">
+          Events
+        </a>
+        <a class="btn btn-link pr-0 nav-item"
+           routerLink="/account/login"
+           [style.opacity]="isRouteActive('/account/login') ? 1 : 0.5"
+           *ngIf="getUser() === null"
            i18n="sign in button text@@signInBtn">Sign
           in</a>
-        <div class="dropdown show" *ngIf="getUser() !== null">
-          <a class="btn-link dropdown-toggle" href="#" role="button" id="dropdownMenuLink"
+        <div class="dropdown btn btn-link pr-0" *ngIf="getUser() !== null">
+          <a class="btn-link dropdown-toggle nav-item" href="#" role="button" id="dropdownMenuLink"
              data-toggle="dropdown"
              aria-haspopup="true" aria-expanded="false">
             <span class="d-none d-sm-inline">{{ getUser().name }}</span>
@@ -30,22 +32,24 @@
           </a>
 
           <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-            <a class="dropdown-item" routerLink="/admin/create-event" *ngIf="getUser().isAdmin"
+            <a class="dropdown-item" routerLink="/account/profile"
+               i18n="create event navigation link@@createEventNavLink">Profile</a>
+            <a class="dropdown-item" routerLink="/admin/create-event" *ngIf="getUser().isAdmin || getUser().isEditor"
                i18n="create event navigation link@@createEventNavLink">Create
               Event</a>
-            <a class="dropdown-item" routerLink="/admin/import-event" *ngIf="getUser().isAdmin"
+            <a class="dropdown-item" routerLink="/admin/import-event" *ngIf="getUser().isAdmin || getUser().isEditor"
                i18n="import events navigation link@@importEventNavLink">Import
               Events</a>
             <a class="dropdown-item" routerLink="/admin/user-management" *ngIf="getUser().isAdmin"
                i18n="user management navigation link@@userManagementNavLink">User
               Management</a>
-            <a class="dropdown-item" routerLink="/admin/configure-periods" *ngIf="getUser().isAdmin"
+            <a class="dropdown-item" routerLink="/admin/configure-periods" *ngIf="getUser().isAdmin || getUser().isEditor"
                i18n="periods configuration navigation link@@configurePeriodsEventNavLink">Configure
               Periods</a>
-            <a class="dropdown-item" routerLink="/admin/configure-catalogs" *ngIf="getUser().isAdmin"
+            <a class="dropdown-item" routerLink="/admin/configure-catalogs" *ngIf="getUser().isAdmin || getUser().isEditor"
                i18n="catalogs configuration navigation link@@configureCatalogsNavLink">Configure
               Catalogs</a>
-            <a class="dropdown-item" routerLink="/admin/configure-date-attributes" *ngIf="getUser().isAdmin"
+            <a class="dropdown-item" routerLink="/admin/configure-date-attributes" *ngIf="getUser().isAdmin || getUser().isEditor"
                i18n="date attributes configuration navigation link@@configureDateAttributesEventNavLink">Configure Date
               Attributes</a>
             <a class="dropdown-item" (click)="logout()" routerLink="/" i18n="logout navigation link@@logoutNavLink">Logout</a>

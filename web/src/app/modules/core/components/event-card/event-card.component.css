@@ -5,3 +5,7 @@
 .event-image {
   width: 100%;
 }
+
+em.hl {
+  color: red;
+}

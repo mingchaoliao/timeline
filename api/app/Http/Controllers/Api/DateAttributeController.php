@@ -2,104 +2,121 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Exceptions\DateAttributeNotFoundException;
-use App\Repositories\DateAttributeRepository;
-use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Input;
+use App\Timeline\App\Validators\ValidatorFactory;
+use App\Timeline\Domain\Services\DateAttributeService;
+use App\Timeline\Domain\ValueObjects\DateAttributeId;
+use Illuminate\Http\Request;
 
 class DateAttributeController extends Controller
 {
-    private $dateAttributeRepository;
+    /**
+     * @var DateAttributeService
+     */
+    private $dateAttributeService;
 
-    public function __construct(DateAttributeRepository $dateAttributeRepository)
+    /**
+     * DateAttributeController constructor.
+     * @param DateAttributeService $dateAttributeService
+     */
+    public function __construct(DateAttributeService $dateAttributeService)
     {
-        $this->dateAttributeRepository = $dateAttributeRepository;
+        $this->dateAttributeService = $dateAttributeService;
     }
 
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
     public function getTypeahead()
     {
-        $options = $this->dateAttributeRepository->getTypeahead();
-        return response()->json($options);
+        return response()->json($this->dateAttributeService->getTypeahead());
     }
 
-    public function get()
+    /**
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
+    public function getAll()
     {
-        $collection = $this->dateAttributeRepository->getCollection();
-        return response()->json($collection);
+        return response()->json($this->dateAttributeService->getAll());
     }
 
-    public function update(Request $request)
+    /**
+     * @param Request $request
+     * @param ValidatorFactory $validatorFactory
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
+    public function create(Request $request, ValidatorFactory $validatorFactory)
     {
-        $this->validate($request, [
-            'id' => 'integer|gt:0',
-            'value' => 'string'
+        $validatorFactory->validate($request->all(), [
+            'value' => 'required|string'
         ]);
-        $attribute = $this->dateAttributeRepository->update(
-            Input::get('id'),
-            Input::get('value')
-        );
-        return response()->json($attribute->toArray());
+
+        $dateAttribute = $this->dateAttributeService->create($request->get('value'));
+
+        return response()->json($dateAttribute);
     }
 
-    public function delete(Request $request)
+    /**
+     * @param string $id
+     * @param Request $request
+     * @param ValidatorFactory $validatorFactory
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
+    public function update(string $id, Request $request, ValidatorFactory $validatorFactory)
     {
-        $this->validate($request, [
-            'id' => 'integer|gt:0'
+        $params = $request->all();
+        $params['id'] = $id;
+
+        $validatorFactory->validate($params, [
+            'id' => 'required|id',
+            'value' => 'required|string'
         ]);
-        return response()->json($this->dateAttributeRepository->delete(Input::get('id')));
-    }
 
-    public function createDateAttribute(Request $request) {
-        $this->validate(
-            $request,
-            [
-                'value' => [
-                    'required',
-                    function($attribute, $value, $fail) {
-                        if($this->dateAttributeRepository->doesValueExist($value)) {
-                            return $fail('Duplicated date attribute');
-                        }
-                    },
-                ]
-            ],
-            [
-                'required' => 'Missing value'
-            ]
-        );
-
-        $dateAttribute = $this->dateAttributeRepository->create(
-            $request->get('value'),
-            Auth::user()->getId()
+        $dateAttribute = $this->dateAttributeService->update(
+            DateAttributeId::createFromString($id),
+            $request->get('value')
         );
 
         return response()->json($dateAttribute);
     }
 
-    public function bulkCreate(Request $request) {
-        $this->validate($request, [
-            'values' => [
-                'required',
-                function($attribute, $value, $fail) {
-                    if(!is_array($value)) {
-                        $fail('Parameter "values" must be a list of string');
-                        return;
-                    }
-                    foreach($value as $item) {
-                        if(!is_string($item)) {
-                            $fail('Parameter "values" must be a list of string');
-                        }
-                    }
-                },
-            ]
-        ], [
-            'required' => 'Parameter "values" is required'
+    /**
+     * @param string $id
+     * @param ValidatorFactory $validatorFactory
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
+    public function delete(string $id, ValidatorFactory $validatorFactory)
+    {
+        $validatorFactory->validate(['id' => $id], [
+            'id' => 'required|id'
+        ]);
+
+        $isSuccess = $this->dateAttributeService->delete(DateAttributeId::createFromString($id));
+
+        return response()->json($isSuccess);
+    }
+
+    /**
+     * @param Request $request
+     * @param ValidatorFactory $validatorFactory
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \App\Timeline\Exceptions\TimelineException
+     */
+    public function bulkCreate(Request $request, ValidatorFactory $validatorFactory)
+    {
+        $validatorFactory->validate($request->all(), [
+            'values' => 'required|array|filled',
+            'values.*' => 'string',
         ]);
 
         $values = $request->get('values');
 
-        $response = $this->dateAttributeRepository->bulkCreate($values, Auth::user()->getId());
+        $response = $this->dateAttributeService->bulkCreate($values);
 
         return response()->json($response);
     }

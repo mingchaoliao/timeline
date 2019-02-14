@@ -16,6 +16,7 @@ import { ConfigurePeriodsComponent } from './pages/configure-periods/configure-p
 import { ConfigureCatalogsComponent } from './pages/configure-catalogs/configure-catalogs.component';
 import { ConfigureDateAttributesComponent } from './pages/configure-date-attributes/configure-date-attributes.component';
 import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
+import { ResetPasswordModalComponent } from './components/reset-password-modal/reset-password-modal.component';
 
 @NgModule({
     imports: [
@@ -38,7 +39,8 @@ import { ConfirmationModalComponent } from './components/confirmation-modal/conf
         ConfigurePeriodsComponent,
         ConfigureCatalogsComponent,
         ConfigureDateAttributesComponent,
-        ConfirmationModalComponent
+        ConfirmationModalComponent,
+        ResetPasswordModalComponent
     ],
     exports: []
 })

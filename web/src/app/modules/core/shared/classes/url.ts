@@ -1,131 +1,162 @@
 import {environment} from '../../../../../environments/environment';
 
 export class Url {
-    public static login(): string {
-        return environment.wsRoot + '/login';
+  private static getBase(withPrefix = true): string {
+    const host = environment.apiHost.replace(/\/+$/, '');
+    if (withPrefix) {
+      const prefix = environment.apiPrefix.replace(/^\/+|\/+$/, '');
+      return `${host}/${prefix}`;
+    } else {
+      return host;
     }
+  }
 
-    public static getCurrentUser(): string {
-        return environment.wsRoot + '/user';
-    }
+  private static getUrl(path: string, withPrefix = true): string {
+    path = path.replace(/^\/+|\/+$/, '');
+    return Url.getBase(withPrefix) + '/' + path;
+  }
 
-    static register() {
-        return environment.wsRoot + '/register';
-    }
+  public static login(): string {
+    return Url.getUrl('/login');
+  }
 
-    static getEvents(): string {
-        return environment.wsRoot + '/event';
-    }
+  public static getCurrentUser(): string {
+    return Url.getUrl('/user/current');
+  }
 
-    static getAllUser(): string {
-        return environment.wsRoot + '/user/all';
-    }
+  static register(): string {
+    return Url.getUrl('/register');
+  }
 
-    static grantOrRevokeAdminPrivilege(): string {
-        return environment.wsRoot + '/user/grantOrRevokeAdminPrivilege';
-    }
+  static getEvents(): string {
+    return Url.getUrl('/event');
+  }
 
-    static getImageByPath(path: string, withAdminAccess: boolean = false): string {
-        if (withAdminAccess) {
-            return environment.wsRoot + '/admin/image/' + path;
-        }
+  static getAllUser(): string {
+    return Url.getUrl('/user');
+  }
 
-        return environment.wsRoot + '/image/' + path;
-    }
+  static updateUser(id: number): string {
+    return Url.getUrl(`/user/${id}`);
+  }
 
-    static getEventById(id: number): string {
-        return environment.wsRoot + '/event/' + id;
-    }
+  static getTempImage(path: string): string {
+    return Url.getUrl(`/admin/images/${path}`, false);
+  }
 
-    static getPeriod(): string {
-        return environment.wsRoot + '/period';
-    }
+  static getImage(path: string): string {
+    return Url.getUrl(`/storage/images/${path}`, false);
+  }
 
-    static updatePeriod(): string {
-        return environment.wsRoot + '/period';
-    }
+  static getEventById(id: number): string {
+    return Url.getUrl('/event/' + id);
+  }
 
-    static deletePeriod(): string {
-        return environment.wsRoot + '/period';
-    }
+  static getPeriod(): string {
+    return Url.getUrl('/period');
+  }
 
-    static updateCatalog(): string {
-        return environment.wsRoot + '/catalog';
-    }
+  static updatePeriod(id: number): string {
+    return Url.getUrl('/period/' + id);
+  }
 
-    static deleteCatalog(): string {
-        return environment.wsRoot + '/catalog';
-    }
+  static deletePeriod(id: number): string {
+    return Url.getUrl('/period/' + id);
+  }
 
-    static getPeriodTypeahead(): string {
-        return environment.wsRoot + '/period/typeahead';
-    }
+  static updateCatalog(id: number): string {
+    return Url.getUrl('/catalog/' + id);
+  }
 
-    static createPeriod(): string {
-        return environment.wsRoot + '/period';
-    }
+  static deleteCatalog(id: number): string {
+    return Url.getUrl('/catalog/' + id);
+  }
 
-    static bulkCreatePeriod(): string {
-        return environment.wsRoot + '/period/bulkCreate';
-    }
+  static getPeriodTypeahead(): string {
+    return Url.getUrl('/period/typeahead');
+  }
 
-    static getCatalogTypeahead(): string {
-        return environment.wsRoot + '/catalog/typeahead';
-    }
+  static createPeriod(): string {
+    return Url.getUrl('/period');
+  }
 
-    static getCatalog(): string {
-        return environment.wsRoot + '/catalog';
-    }
+  static bulkCreatePeriod(): string {
+    return Url.getUrl('/period/bulk');
+  }
 
-    static createCatalog(): string {
-        return environment.wsRoot + '/catalog';
-    }
+  static getCatalogTypeahead(): string {
+    return Url.getUrl('/catalog/typeahead');
+  }
 
-    static bulkCreateCatalog(): string {
-        return environment.wsRoot + '/catalog/bulkCreate';
-    }
+  static getCatalog(): string {
+    return Url.getUrl('/catalog');
+  }
 
-    static getDateAttributeTypeahead(): string {
-        return environment.wsRoot + '/dateAttribute/typeahead';
-    }
+  static createCatalog(): string {
+    return Url.getUrl('/catalog');
+  }
 
-    static getDateAttribute(): string {
-        return environment.wsRoot + '/dateAttribute';
-    }
+  static bulkCreateCatalog(): string {
+    return Url.getUrl('/catalog/bulk');
+  }
 
-    static createDateAttribute(): string {
-        return environment.wsRoot + '/dateAttribute';
-    }
+  static getDateAttributeTypeahead(): string {
+    return Url.getUrl('/dateAttribute/typeahead');
+  }
 
-    static updateDateAttribute(): string {
-        return environment.wsRoot + '/dateAttribute';
-    }
+  static getDateAttribute(): string {
+    return Url.getUrl('/dateAttribute');
+  }
 
-    static deleteDateAttribute(): string {
-        return environment.wsRoot + '/dateAttribute';
-    }
+  static createDateAttribute(): string {
+    return Url.getUrl('/dateAttribute');
+  }
 
-    static bulkCreateDateAttribute(): string {
-        return environment.wsRoot + '/dateAttribute/bulkCreate';
-    }
+  static updateDateAttribute(id: number): string {
+    return Url.getUrl('/dateAttribute/' + id);
+  }
 
-    static getDateFormat(): string {
-        return environment.wsRoot + '/dateFormat';
-    }
+  static deleteDateAttribute(id: number): string {
+    return Url.getUrl('/dateAttribute/' + id);
+  }
 
-    static getTimeline(): string {
-        return environment.wsRoot + '/storage/timeline.json';
-    }
+  static bulkCreateDateAttribute(): string {
+    return Url.getUrl('/dateAttribute/bulk');
+  }
 
-    static createEvent(): string {
-        return environment.wsRoot + '/event';
-    }
+  static getDateFormat(): string {
+    return Url.getUrl('/dateFormat');
+  }
 
-    static updateEventById(id: number): string {
-        return environment.wsRoot + '/event/' + id;
-    }
+  static getTimeline(): string {
+    return Url.getUrl('/storage/timeline.json', false);
+  }
 
-    static bulkCreateEvents(): string {
-        return environment.wsRoot + '/event/bulkCreate';
-    }
+  static createEvent(): string {
+    return Url.getUrl('/event');
+  }
+
+  static updateEventById(id: number): string {
+    return Url.getUrl('/event/' + id);
+  }
+
+  static bulkCreateEvents(): string {
+    return Url.getUrl('/event/bulk');
+  }
+
+  static uploadImage(): string {
+    return Url.getUrl('/image');
+  }
+
+  static searchEvent(): string {
+    return Url.getUrl('/event/search');
+  }
+
+  static deleteEvent(id: number): string {
+    return Url.getUrl('/event/' + id);
+  }
+
+  static updateImageDescription(id: number): string {
+    return Url.getUrl('/image/' + id);
+  }
 }

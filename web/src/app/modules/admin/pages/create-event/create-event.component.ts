@@ -7,14 +7,15 @@ import {Router} from '@angular/router';
 import {PeriodService} from '../../../core/shared/services/period.service';
 import {CatalogService} from '../../../core/shared/services/catalog.service';
 import {DateAttributeService} from '../../../core/shared/services/dateAttribute.service';
-import {DateFormatService} from '../../../core/shared/services/dateFormat.service';
 import {EventService} from '../../../core/shared/services/event.service';
 import {Notification} from '../../../core/shared/models/notification';
 import {NotificationEmitter} from '../../../core/shared/events/notificationEmitter';
+import {EventDate} from '../../../core/shared/models/event';
+import {Image} from '../../../core/shared/models/image';
 
 export function dateValidator(): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {
-    return control.value == null || moment(control.value).isValid() ? null : {'invalidDate': {value: control.value}};
+    return control.value == null || EventDate.validate(control.value) ? null : {'invalidDate': {value: control.value}};
   };
 }
 
@@ -60,8 +61,6 @@ export class CreateEventComponent
   private periodOptionsKvMap: any = {};
   private dateAttributeOptionsKvMap: any = {};
   private catalogOptionsKvMap: any = {};
-  private dateFormats: any = [];
-  private dateFormatKvMap: any = {};
 
   public addPeriod = (name) => {
     return new Promise((resolve) => {
@@ -125,7 +124,6 @@ export class CreateEventComponent
     private periodService: PeriodService,
     private catalogService: CatalogService,
     private dateAttributeService: DateAttributeService,
-    private dateFormatService: DateFormatService,
     private eventService: EventService
   ) {
     this.dateAttributeService.get().subscribe(
@@ -157,21 +155,11 @@ export class CreateEventComponent
         NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve catalogs'));
       }
     );
-
-    this.dateFormatService.get().subscribe(
-      dateFormats => {
-        this.dateFormats = dateFormats;
-        this.dateFormatKvMap = this.common.kvArrToMap(this.dateFormats, 'value', 'id');
-      },
-      error => {
-        NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve date formats'));
-      }
-    );
   }
 
   ngOnInit() {
     this.createEventForm = this.formBuilder.group({
-      'startDate': [this.eventData ? this.eventData.startDate : null, [
+      'startDate': [this.eventData && this.eventData.startDate ? this.eventData.startDate.date : null, [
         Validators.required,
         Validators.pattern('(^[0-9]{4}$)|(^[0-9]{4}-[0-9]{2}$)|(^[0-9]{4}-[0-9]{2}-[0-9]{2}$)'),
         dateValidator()
@@ -179,7 +167,7 @@ export class CreateEventComponent
       'startDateAttributeId': [
         this.eventData ? (this.eventData.startDateAttribute ? this.eventData.startDateAttribute.id : null) : null, []
       ],
-      'endDate': [this.eventData ? this.eventData.endDate : null, [
+      'endDate': [this.eventData && this.eventData.endDate ? this.eventData.endDate.date : null, [
         Validators.pattern('(^[0-9]{4}$)|(^[0-9]{4}-[0-9]{2}$)|(^[0-9]{4}-[0-9]{2}-[0-9]{2}$)'),
         dateValidator()
       ]],
@@ -190,7 +178,7 @@ export class CreateEventComponent
       }) : null, []],
       'content': [this.eventData ? this.eventData.content : null, [Validators.required]],
       'images': [this.eventData ? this.eventData.images.map(function (image) {
-        return {path: image.path, description: image.description};
+        return Image.fromJson(image);
       }) : null, [imageValidator()]]
     });
   }
@@ -219,6 +207,7 @@ export class CreateEventComponent
       return;
     }
     const requestBody = this.createEventForm.value;
+
     if (requestBody.images === null) {
       requestBody.images = [];
     }
@@ -227,10 +216,6 @@ export class CreateEventComponent
         path: requestBody.images[i].path,
         description: requestBody.images[i].description
       };
-    }
-    requestBody['startDateFormatId'] = this.dateFormatKvMap[this.common.getFormatByDateStr(requestBody.startDate)];
-    if (requestBody['endDate'] !== null) {
-      requestBody['endDateFormatId'] = this.dateFormatKvMap[this.common.getFormatByDateStr(requestBody.endDate)];
     }
 
     if (this.eventData !== null && this.eventData['id']) {

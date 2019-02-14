@@ -2,6 +2,8 @@ import {Component} from '@angular/core';
 import {UserService} from './modules/core/shared/services/user.service';
 import * as moment from 'moment';
 import {environment} from '../environments/environment';
+import {ActivatedRoute, Router} from '@angular/router';
+import {AuthEmitter} from './modules/core/shared/events/authEmitter';
 
 @Component({
   selector: 'app-root',
@@ -13,11 +15,21 @@ export class AppComponent {
   public currentYear: string;
   public company: any;
 
-  constructor(private userService: UserService) {
+  constructor(private userService: UserService,
+              private router: Router) {
     this.userService.getCurrentUser().subscribe(
       user => {
       },
       error => {
+      }
+    );
+
+    AuthEmitter.emitter.subscribe(
+      authenticated => {
+        if (!authenticated) {
+          UserService.logout();
+          this.router.navigate(['/', 'account', 'login']);
+        }
       }
     );
 
@@ -27,6 +39,11 @@ export class AppComponent {
 
   getUser() {
     return UserService.getCurrentUser();
+  }
+
+  isRouteActive(path: string): boolean {
+    const mathes = this.router.url.match(/(.+?(?=\?)|^[/\d\w\-_]+$)/);
+    return mathes && mathes[1] === path;
   }
 
   public logout() {

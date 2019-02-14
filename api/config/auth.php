@@ -42,14 +42,14 @@ return [
         ],
 
         'api' => [
-            'driver' => 'passport',
+            'driver' => 'jwt',
             'provider' => 'users',
         ],
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | EloquentUser Providers
+    | User Providers
     |--------------------------------------------------------------------------
     |
     | All authentication drivers have a user provider. This defines how the
@@ -67,7 +67,7 @@ return [
     'providers' => [
         'users' => [
             'driver' => 'eloquent',
-            'model' => App\EloquentModels\EloquentUser::class,
+            'model' => \App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentUser::class,
         ],
 
         // 'users' => [

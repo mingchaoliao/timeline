@@ -5,38 +5,31 @@ import * as moment from 'moment';
 import {EventService} from '../../../core/shared/services/event.service';
 import {Notification} from '../../../core/shared/models/notification';
 import {NotificationEmitter} from '../../../core/shared/events/notificationEmitter';
+import {EventSearchResult} from '../../../core/shared/models/eventSearchResult';
+import {FacetLink} from '../../components/faceted-search-bar/faceted-search-bar.component';
 
 @Component({
   selector: 'app-search-event',
   templateUrl: './search-event.component.html',
   styleUrls: ['./search-event.component.css']
 })
-export class SearchEventComponent implements OnInit, AfterViewInit, OnDestroy {
-  public events: any = [];
+export class SearchEventComponent implements OnInit, AfterViewInit {
+  public result: EventSearchResult;
   public pageSize = 10;
   public total = 10;
   public page = 1;
-  public routerSubscriber = null;
 
   constructor(
     private common: CommonService,
-    private route: ActivatedRoute,
+    public route: ActivatedRoute,
     private router: Router,
     private eventService: EventService
   ) {
-    this.routerSubscriber = this.router.events.subscribe(event => {
-      if (event instanceof NavigationEnd && event.url.startsWith('/app/event/search')) {
-        const params = this.route.snapshot.queryParams;
-        this.page = params['page'] ? parseInt(params['page'], 10) : 1;
+    this.route.queryParams.subscribe(
+      params => {
         this.search(params);
       }
-    });
-  }
-
-  ngOnDestroy() {
-    if (this.routerSubscriber) {
-      this.routerSubscriber.unsubscribe();
-    }
+    );
   }
 
   public onPageChange(page) {
@@ -44,7 +37,7 @@ export class SearchEventComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    this.events = [];
+    this.result = null;
     const navigationExtras: NavigationExtras = {
       queryParams: {
         ...this.route.snapshot.queryParams,
@@ -62,61 +55,69 @@ export class SearchEventComponent implements OnInit, AfterViewInit, OnDestroy {
 
   }
 
+  onFacetChange(facetLink: FacetLink) {
+    const value = facetLink.value;
+    if (facetLink.facetIndex === 0) { // Year
+      this.router.navigate([], {
+        queryParams: {startDate: value, page: 1},
+        queryParamsHandling: 'merge'
+      });
+    } else if (facetLink.facetIndex === 1) { // Period
+      this.router.navigate([], {
+        queryParams: {period: value, page: 1},
+        queryParamsHandling: 'merge'
+      });
+    } else if (facetLink.facetIndex === 2) { // Catalog
+      this.router.navigate([], {
+        queryParams: {catalogs: this.mergeCatalogs(this.route.snapshot.queryParams['catalogs'], value), page: 1},
+        queryParamsHandling: 'merge'
+      });
+    }
+  }
+
+  mergeCatalogs(c1: string, c2: string): string {
+    if (!c1) {
+      return c2;
+    }
+    if (!c2) {
+      return c1;
+    }
+    return c1 + ',' + c2;
+  }
+
   private search(params: any) {
-    const startDateFrom = params['startDateFrom'];
-    const startDateTo = params['startDateTo'];
-    const endDateFrom = params['endDateFrom'];
-    const endDateTo = params['endDateTo'];
+    const startDate = params['startDate'];
     const period = params['period'];
     const catalogs = params['catalogs'];
     const content = params['content'];
     const page = params['page'] ? params['page'] : 1;
 
     try {
-      this.validateDate(startDateFrom);
-      this.validateDate(startDateTo);
-      this.validateDate(endDateFrom);
-      this.validateDate(endDateTo);
-      this.validatePeriod(period);
-      this.validateCatalogs(catalogs);
       this.validatePage(page);
 
       this.eventService.search(
-        startDateFrom,
-        startDateTo,
-        endDateFrom,
-        endDateTo,
+        startDate,
         period,
         catalogs,
         content,
         page
       ).subscribe(
-        events => {
-          this.total = events['total'];
-          this.events = events;
+        result => {
+          this.pageSize = 10;
+          this.page = this.route.snapshot.queryParams['page'];
+          if (!this.page) {
+            this.page = 1;
+          }
+          this.result = result;
+          this.total = result.total;
         },
         error => {
           NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to search events'));
         }
       );
     } catch (error) {
+      console.log(error);
       // TODO: handle error
-    }
-  }
-
-  private validateDate(str: string) {
-    if (str !== null && str !== undefined) {
-      if (str.match('^[0-9]{4}-[0-9]{2}-[0-9]{2}$').length === 0 || !moment(str).isValid()) {
-        throw new Error('Invalid date "' + str + '"');
-      }
-    }
-  }
-
-  private validatePeriod(str: string) {
-    if (str !== null && str !== undefined) {
-      if (isNaN(Number(str))) {
-        throw new Error('Invalid period id "' + str + '"');
-      }
     }
   }
 
@@ -128,16 +129,4 @@ export class SearchEventComponent implements OnInit, AfterViewInit, OnDestroy {
       }
     }
   }
-
-  private validateCatalogs(str: string) {
-    if (str !== null && str !== undefined) {
-      const arr = str.split(',');
-      for (const i of arr) {
-        if (isNaN(Number(i))) {
-          throw new Error('Invalid catalog id "' + i + '"');
-        }
-      }
-    }
-  }
-
 }

@@ -1,47 +1,7 @@
-<div [class]="displayMethod === 'timeline' ? 'container-fluid' : 'container'">
-  <div class="row" style="height: 35px;">
-    <div class="col">
-      <div class="btn-group btn-group-sm btn-group-toggle" ngbRadioGroup [(ngModel)]="displayMethod"
-           (change)="onDisplayMethodChange()">
-        <label ngbButtonLabel class="btn-outline-primary">
-          <input ngbButton type="radio" value="timeline">
-          <ng-container i18n>Timeline</ng-container>
-        </label>
-        <label ngbButtonLabel class="btn-outline-primary">
-          <input ngbButton type="radio" value="list">
-          <ng-container i18n>List</ng-container>
-        </label>
-      </div>
-    </div>
-  </div>
-  <div class="row" style="height: calc(100vh - 170px);">
-    <div class="col p-0" [hidden]="displayMethod === 'list'">
-      <div id="timeline" style="width: 100%; height: 100%;" [hidden]="displayMethod !== 'timeline'"></div>
-    </div>
-    <div class="col" [hidden]="displayMethod !== 'list'">
-      <div class="row">
-        <div class="col-12 mt-3" *ngIf="!events || !events.length">
-          There is no event.
-        </div>
-        <div class="col-12" *ngFor="let event of events">
-          <app-event-card
-            [data]="event"
-          ></app-event-card>
-        </div>
-        <div class="col-12" *ngIf="events && events.length">
-          <ngb-pagination
-            class="d-flex justify-content-center"
-            [collectionSize]="total"
-            [(page)]="page"
-            [maxSize]="5"
-            [boundaryLinks]="true"
-            [rotate]="true"
-            (pageChange)="onPageChange($event)"
-            [pageSize]="pageSize"
-            aria-label="Default pagination"
-          ></ngb-pagination>
-        </div>
-      </div>
+<div class="container-fluid">
+  <div class="row">
+    <div class="col p-0" style="height: calc(100vh - 135px);">
+      <div id="timeline" style="width: 100%; height: 100%;"></div>
     </div>
   </div>
 </div>

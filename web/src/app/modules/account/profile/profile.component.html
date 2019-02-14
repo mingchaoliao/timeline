@@ -1,0 +1,59 @@
+<div class="container">
+  <div class="row" *ngIf="user">
+    <div class="col-xl-6 col-md-8 offset-xl-3 offset-md-2">
+      <div class="row">
+        <div class="col-12">
+          <h2 style="font-size: 1.25rem;">Person Information: </h2>
+          <form class="pl-3" [formGroup]="updateProfileForm">
+            <div class="row">
+              <div class="col-12 mt-2">
+                Account ID: {{ user.id }}
+              </div>
+              <div class="col-12 mt-2">
+                Email: {{ user.email }}
+              </div>
+              <div class="col-12 mt-2">
+                <div class="form-group">
+                  <label for="name">Name:</label>
+                  <input type="text" class="form-control" id="name" formControlName="name" [value]="user.name">
+                </div>
+              </div>
+              <div class="col-12">
+                <button class="btn btn-outline-primary"
+                        (click)="updateProfile()"
+                        [class.disabled]="!updateProfileForm.dirty || !updateProfileForm.valid">Update Profile</button>
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div class="col-12 mt-3">
+          <h2 style="font-size: 1.25rem;">Change Password: </h2>
+          <form class="pl-3" [formGroup]="changePasswordForm">
+            <div class="row">
+              <div class="col-12">
+                <div class="form-group">
+                  <label for="oldPassword">Old Password:</label>
+                  <input type="text" class="form-control" id="oldPassword" formControlName="oldPassword">
+                </div>
+              </div>
+
+              <div class="col-12">
+                <div class="form-group">
+                  <label for="newPassword">New Password:</label>
+                  <input type="text" class="form-control" id="newPassword" formControlName="newPassword">
+                </div>
+              </div>
+
+              <div class="col-12">
+                <button class="btn btn-outline-primary"
+                        (click)="updatePassword()"
+                        [class.disabled]="!changePasswordForm.dirty || !changePasswordForm.valid">Update Password</button>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

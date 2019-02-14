@@ -4,24 +4,19 @@ import {Observable} from 'rxjs';
 import {Event} from '../models/event';
 import {Url} from '../classes/url';
 import {environment} from '../../../../../environments/environment';
+import {EventSearchResult} from '../models/eventSearchResult';
 
 @Injectable()
 export class EventService {
   constructor(private httpService: HttpService) {
   }
 
-  get(page: number = 1, pageSize: number = 10, order: string = 'startDate', direction: string = 'asc'): Observable<Array<Event>> {
-    const query = {};
-    if (page) {
-      query['offset'] = (page - 1) * pageSize;
-      query['limit'] = pageSize;
-    }
-    if (order) {
-      query['order'] = order;
-    }
-    if (direction) {
-      query['direction'] = direction;
-    }
+  get(page: number = 1, pageSize: number = 10): Observable<Array<Event>> {
+    const query = {
+      page: page,
+      pageSize: pageSize
+    };
+
     return new Observable<Array<Event>>(
       observer => {
         this.httpService.get(Url.getEvents(), query, {}, true)
@@ -61,31 +56,19 @@ export class EventService {
   }
 
   search(
-    startDateFrom: string,
-    startDateTo: string,
-    endDateFrom: string,
-    endDateTo: string,
+    startDate: string,
     period: string,
     catalogs: string,
     content: string,
     page: number = 1,
     pageSize: number = 10
-  ): Observable<Array<Event>> {
+  ): Observable<EventSearchResult> {
     const query = {
-      offset: (page - 1) * pageSize,
-      limit: pageSize
+      page: page,
+      pageSize: pageSize
     };
-    if (startDateFrom) {
-      query['startDateFrom'] = startDateFrom;
-    }
-    if (startDateTo) {
-      query['startDateTo'] = startDateTo;
-    }
-    if (endDateFrom) {
-      query['endDateFrom'] = endDateFrom;
-    }
-    if (endDateTo) {
-      query['endDateTo'] = endDateTo;
+    if (startDate) {
+      query['startDate'] = startDate;
     }
     if (period) {
       query['period'] = period;
@@ -97,13 +80,14 @@ export class EventService {
       query['content'] = content;
     }
 
-    return new Observable<Array<Event>>(
+    return new Observable<EventSearchResult>(
       observer => {
-        this.httpService.get(environment.wsRoot + '/event/search', query, {}, true).subscribe(
+        this.httpService.get(Url.searchEvent(), query, {}, true).subscribe(
           response => {
-            let arr: Array<Event> = Event.fromArray(response['body']);
-            arr['total'] = response['headers'].get('X-Total-Count');
-            observer.next(arr);
+            observer.next(EventSearchResult.fromJson(
+              response['body'],
+              response['headers'].get('X-Total-Count')
+            ));
           },
           error => {
             observer.error(error);
@@ -143,7 +127,9 @@ export class EventService {
   bulkCreate(events: Array<any>): Observable<boolean> {
     return new Observable<boolean>(
       observer => {
-        this.httpService.post(Url.bulkCreateEvents(), {}, {events: events}).subscribe(
+        this.httpService.post(Url.bulkCreateEvents(), {}, {
+            events: events
+        }).subscribe(
           responseBody => observer.next(true),
           error => observer.error(error),
           () => observer.complete()
@@ -155,7 +141,7 @@ export class EventService {
   deleteById(id: number): Observable<null> {
     return new Observable(
       observer => {
-        this.httpService.delete(environment.wsRoot + '/event/' + id).subscribe(
+        this.httpService.delete(Url.deleteEvent(id)).subscribe(
           success => observer.next(),
           error => observer.error(error),
           () => observer.complete()

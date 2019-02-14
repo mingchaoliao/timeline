@@ -10683,8 +10683,8 @@ TL.StorySlider = TL.Class.extend({
 				message_class: 		"tl-message-full",
 				message_icon_class: "tl-icon-swipe-left"
 			});
-			this._message.updateMessage(this._("swipe_to_navigate"));
-			this._message.addTo(this._el.container);
+			//this._message.updateMessage(this._("swipe_to_navigate"));
+			//this._message.addTo(this._el.container);
 		}
 
 	},
