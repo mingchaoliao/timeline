@@ -1,0 +1,79 @@
+[
+  {
+    "name": "queue",
+    "image": "redis:5.0.3-alpine"
+  },
+  {
+    "name": "mysql",
+    "image": "mysql:5.7.22",
+    "environment": [
+      {
+        "name": "MYSQL_PASSWORD",
+        "value": "asdlfj90wejlfkdsj"
+      },
+      {
+        "name": "MYSQL_RANDOM_ROOT_PASSWORD",
+        "value": "yes"
+      },
+      {
+        "name": "MYSQL_DATABASE",
+        "value": "timeline"
+      },
+      {
+        "name": "MYSQL_USER",
+        "value": "timeline_user"
+      }
+    ]
+  },
+  {
+    "name": "elasticsearch",
+    "image": "848847080839.dkr.ecr.us-east-1.amazonaws.com/timeline_elasticsearch",
+    "environment": [
+      {
+        "name": "discovery.type",
+        "value": "single-node"
+      }
+    ]
+  },
+  {
+    "name": "api",
+    "image": "848847080839.dkr.ecr.us-east-1.amazonaws.com/timeline_api",
+    "user": "1500:1500",
+    "mountPoints": [
+      {
+        "sourceVolume": "apistorage",
+        "containerPath": "/apidist/storage"
+      }
+    ]
+  },
+  {
+    "name": "nginx",
+    "image": "848847080839.dkr.ecr.us-east-1.amazonaws.com/timeline_nginx",
+    "portMappings": [
+      {
+        "containerPort": 80
+      },
+      {
+        "containerPort": 443
+      }
+    ],
+    "mountPoints": [
+      {
+        "sourceVolume": "apistorage",
+        "containerPath": "/apidist/storage",
+        "readOnly": true
+      }
+    ]
+  },
+  {
+    "name": "horizon",
+    "image": "848847080839.dkr.ecr.us-east-1.amazonaws.com/timeline_horizon",
+    "user": "1500:1500",
+    "mountPoints": [
+      {
+        "sourceVolume": "apistorage",
+        "containerPath": "/apidist/storage"
+      }
+    ]
+  }
+]

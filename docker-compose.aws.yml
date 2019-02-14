@@ -1,0 +1,37 @@
+version: '3.0'
+services:
+  nginx:
+    image: 848847080839.dkr.ecr.us-east-1.amazonaws.com/timeline_nginx
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - apistorage:/apidist/storage
+  api:
+    image: 848847080839.dkr.ecr.us-east-1.amazonaws.com/timeline_api
+    user: "1500:1500"
+    volumes:
+      - apistorage:/apidist/storage
+  horizon:
+    image: 848847080839.dkr.ecr.us-east-1.amazonaws.com/timeline_horizon
+    user: "1500:1500"
+    volumes:
+      - apistorage:/apidist/storage
+  queue:
+    image: redis:5.0.3-alpine
+  mysql:
+    image: mysql:5.7.22
+    command: --disable-partition-engine-check
+    env_file:
+      - ./etc/production/docker/mysql.env
+    environment:
+      MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
+      MYSQL_DATABASE: timeline
+      MYSQL_USER: timeline_user
+  elasticsearch:
+    image: 848847080839.dkr.ecr.us-east-1.amazonaws.com/timeline_elasticsearch
+    environment:
+      discovery.type: single-node
+volumes:
+  apistorage:
+  apidist:

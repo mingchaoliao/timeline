@@ -12,8 +12,6 @@ services:
       - api
       - web_build
     volumes:
-      - ./etc/production/nginx/conf.d:/etc/nginx/conf.d
-      - ./etc/production/nginx/ssl:/etc/nginx/ssl
       - apistorage:/apidist/storage
       - webdist:/webdist
     networks:
