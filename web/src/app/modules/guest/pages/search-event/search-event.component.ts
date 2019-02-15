@@ -1,7 +1,6 @@
-import {AfterViewInit, Component, OnDestroy, OnInit} from '@angular/core';
-import {ActivatedRoute, NavigationEnd, NavigationExtras, Router} from '@angular/router';
+import {AfterViewInit, Component, HostListener, OnInit} from '@angular/core';
+import {ActivatedRoute, NavigationExtras, Router} from '@angular/router';
 import {CommonService} from '../../../core/shared/services/common.service';
-import * as moment from 'moment';
 import {EventService} from '../../../core/shared/services/event.service';
 import {Notification} from '../../../core/shared/models/notification';
 import {NotificationEmitter} from '../../../core/shared/events/notificationEmitter';
@@ -18,18 +17,36 @@ export class SearchEventComponent implements OnInit, AfterViewInit {
   public pageSize = 10;
   public total = 10;
   public page = 1;
+  public maxSize = 3;
+  private windowResizeTimeoutId: number;
 
   constructor(
-    private common: CommonService,
-    public route: ActivatedRoute,
-    private router: Router,
-    private eventService: EventService
+      private common: CommonService,
+      public route: ActivatedRoute,
+      private router: Router,
+      private eventService: EventService
   ) {
     this.route.queryParams.subscribe(
-      params => {
-        this.search(params);
-      }
+        params => {
+          this.search(params);
+        }
     );
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event) {
+    clearTimeout(this.windowResizeTimeoutId);
+    this.windowResizeTimeoutId = setTimeout(() => this.maxSize = this.getMaxSize(event.target.innerWidth), 2501000);
+  }
+
+  getMaxSize(width: number): number {
+    if (width > 640) {
+      width = 640;
+    } else if (width < 479) {
+      width = 479;
+    }
+
+    return Math.floor((width * 7 - 2870) / 161);
   }
 
   public onPageChange(page) {
@@ -48,7 +65,7 @@ export class SearchEventComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit() {
-
+    this.maxSize = this.getMaxSize(window.innerWidth);
   }
 
   ngAfterViewInit() {
@@ -96,24 +113,24 @@ export class SearchEventComponent implements OnInit, AfterViewInit {
       this.validatePage(page);
 
       this.eventService.search(
-        startDate,
-        period,
-        catalogs,
-        content,
-        page
+          startDate,
+          period,
+          catalogs,
+          content,
+          page
       ).subscribe(
-        result => {
-          this.pageSize = 10;
-          this.page = this.route.snapshot.queryParams['page'];
-          if (!this.page) {
-            this.page = 1;
+          result => {
+            this.pageSize = 10;
+            this.page = this.route.snapshot.queryParams['page'];
+            if (!this.page) {
+              this.page = 1;
+            }
+            this.result = result;
+            this.total = result.total;
+          },
+          error => {
+            NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to search events'));
           }
-          this.result = result;
-          this.total = result.total;
-        },
-        error => {
-          NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to search events'));
-        }
       );
     } catch (error) {
       console.log(error);

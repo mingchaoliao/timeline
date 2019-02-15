@@ -32,6 +32,7 @@ export class HomeComponent implements OnInit, AfterViewInit {
       timeline => {
         new TL.Timeline('timeline', timeline, {
           language: 'en',
+          hash_bookmark: true,
           script_path: environment.apiHost + '/timeline'
         });
       },

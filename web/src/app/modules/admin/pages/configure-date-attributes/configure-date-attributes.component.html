@@ -1,30 +1,51 @@
-<div class="container">
+<div class="container pb-3">
   <div class="row">
     <div class="col-12">
-      <button class="btn btn-outline-primary" (click)="createModalRef = modalService.open(createModal)">Create New</button>
+      <button class="btn btn-outline-primary" (click)="createModalRef = modalService.open(createModal)">Create New
+      </button>
     </div>
   </div>
   <div class="row mt-3" *ngIf="dateAttributes && dateAttributes.length === 0">
     <div class="col-12">
-      There is no date attribute.
+      There is no dateAttribute.
     </div>
   </div>
   <div class="row" *ngIf="dateAttributes && dateAttributes.length !== 0">
-    <div class="col-6 mt-3" *ngFor="let dateAttribute of dateAttributes; let index = index">
+    <div class="col-md-6 mt-3" *ngFor="let dateAttribute of dateAttributes; let index = index">
       <div class="card">
         <div class="card-body">
           <div class="row">
             <div class="col-12">
-              <input type="text" #input (change)="dateAttribute['dirty'] = $event.srcElement.value !== dateAttribute.value" class="form-control" id="value_{{ dateAttribute.id }}" [value]="dateAttribute.value">
+              <input type="text" #input
+                     (change)="dateAttribute['dirty'] = $event.srcElement.value !== dateAttribute.value"
+                     class="form-control" id="value_{{ dateAttribute.id }}" [value]="dateAttribute.value">
             </div>
+          </div>
+          <div class="row mt-2">
             <div class="col-12">
-              Created At: {{ dateAttribute.createdAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }} by {{ dateAttribute.createUserName }}
+              <div class="row">
+                <div class="col-12">
+                  Create User: {{ dateAttribute.createUserName }}
+                </div>
+                <div class="col-12">
+                  Created At: {{ dateAttribute.createdAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-12">
+                  Update User: {{ dateAttribute.updateUserName }}
+                </div>
+                <div class="col-12" *ngIf="dateAttribute.createdAt != dateAttribute.updatedAt">
+                  Updated At: {{ dateAttribute.updatedAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }}
+                </div>
+              </div>
             </div>
-            <div class="col-12" *ngIf="dateAttribute.createdAt != dateAttribute.updatedAt">
-              Updated At: {{ dateAttribute.updatedAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }} by {{ dateAttribute.updateUserName }}
-            </div>
+          </div>
+          <div class="row mt-2">
             <div class="col-12">
-              <app-button [style]="'btn-outline-primary mr-2'" *ngIf="dateAttribute['dirty']" (onclick)="update($event, index, input.value)">Save</app-button>
+              <app-button [style]="'btn-outline-primary mr-2'" *ngIf="dateAttribute['dirty']"
+                          (onclick)="update($event, index, input.value)">Save
+              </app-button>
               <app-button [style]="'btn-outline-danger'" (onclick)="delete($event, index)">Delete</app-button>
             </div>
           </div>

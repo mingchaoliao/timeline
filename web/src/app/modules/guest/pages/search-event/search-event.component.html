@@ -2,7 +2,7 @@
   <app-search-event-form></app-search-event-form>
   <ng-container *ngIf="result">
     <div class="row mt-3">
-      <div class="col-md-3">
+      <div class="col-md-3" *ngIf="result && (result.dates.length || result.periods.length || result.catalogs.length)">
         <app-faceted-search-bar
           [facets]="[
             {
@@ -30,7 +30,7 @@
           (onFacetChange)="onFacetChange($event)"
         ></app-faceted-search-bar>
       </div>
-      <div class="col-md-9">
+      <div class="col">
         <div class="row" *ngIf="!result.hits.length">
           <div class="col-12 mt-3">
             No event found.
@@ -49,7 +49,7 @@
               class="d-flex justify-content-center"
               [collectionSize]="total"
               [(page)]="page"
-              [maxSize]="5"
+              [maxSize]="maxSize"
               [boundaryLinks]="true"
               [rotate]="true"
               (pageChange)="onPageChange($event)"

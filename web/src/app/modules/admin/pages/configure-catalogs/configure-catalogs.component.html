@@ -1,4 +1,4 @@
-<div class="container">
+<div class="container pb-3">
   <div class="row">
     <div class="col-12">
       <button class="btn btn-outline-primary" (click)="createModalRef = modalService.open(createModal)">Create New
@@ -11,7 +11,7 @@
     </div>
   </div>
   <div class="row" *ngIf="catalogs && catalogs.length !== 0">
-    <div class="col-6 mt-3" *ngFor="let catalog of catalogs; let index = index">
+    <div class="col-md-6 mt-3" *ngFor="let catalog of catalogs; let index = index">
       <div class="card">
         <div class="card-body">
           <div class="row">
@@ -19,15 +19,31 @@
               <input type="text" #input (change)="catalog['dirty'] = $event.srcElement.value !== catalog.value"
                      class="form-control" id="value_{{ catalog.id }}" [value]="catalog.value">
             </div>
+          </div>
+          <div class="row mt-2">
             <div class="col-12"># of associated events: <a routerLink="/app/event/search"
-                                                           [queryParams]="{catalogs: catalog.value}">{{ catalog.numberOfEvents }}</a>
-            </div>
+                                                           [queryParams]="{catalog: catalog.value}">{{
+              catalog.numberOfEvents }}</a></div>
             <div class="col-12">
-              Created At: {{ catalog.createdAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }} by {{ catalog.createUserName }}
+              <div class="row">
+                <div class="col-12">
+                  Create User: {{ catalog.createUserName }}
+                </div>
+                <div class="col-12">
+                  Created At: {{ catalog.createdAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }}
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-12">
+                  Update User: {{ catalog.updateUserName }}
+                </div>
+                <div class="col-12" *ngIf="catalog.createdAt != catalog.updatedAt">
+                  Updated At: {{ catalog.updatedAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }}
+                </div>
+              </div>
             </div>
-            <div class="col-12" *ngIf="catalog.createdAt != catalog.updatedAt">
-              Updated At: {{ catalog.updatedAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }} by {{ catalog.updateUserName }}
-            </div>
+          </div>
+          <div class="row mt-2">
             <div class="col-12">
               <app-button [style]="'btn-outline-primary mr-2'" *ngIf="catalog['dirty']"
                           (onclick)="update($event, index, input.value)">Save

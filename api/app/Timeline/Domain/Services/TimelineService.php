@@ -45,7 +45,7 @@ class TimelineService
                     'start_date' => [
                         'year' => Carbon::now()->year
                     ],
-                    'unique_id' => 1,
+                    'unique_id' => '0',
                     'text' => ['text' => '<p>Sign in as administrator to create the first event!</p>']
                 ]
             ];

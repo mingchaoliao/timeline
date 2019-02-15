@@ -267,7 +267,7 @@ class Event extends BaseModel
     {
         $eventsConfig = [
             'start_date' => $this->getStartDate()->toDateArray(),
-            'unique_id' => $this->getId()->getValue()
+            'unique_id' => (string)$this->getId()
         ];
 
         if ($this->getEndDate() !== null) {
@@ -290,9 +290,9 @@ class Event extends BaseModel
 
         $period = $this->getPeriod();
 
-        if ($period !== null) {
-            $eventsConfig['group'] = $period->getValue();
-        }
+//        if ($period !== null) {
+//            $eventsConfig['group'] = $period->getValue();
+//        }
 
         return $eventsConfig;
     }
