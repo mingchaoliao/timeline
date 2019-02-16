@@ -5,12 +5,8 @@ import {environment} from '../environments/environment';
 import {Router} from '@angular/router';
 import {AuthEmitter} from './modules/core/shared/events/authEmitter';
 import {TranslateService} from "@ngx-translate/core";
-
-export interface Language {
-  code: string;
-  name: string;
-  default: boolean;
-}
+import {Language} from "./modules/core/shared/models/language";
+import {LanguageEmitter} from "./modules/core/shared/events/languageEmitter";
 
 @Component({
   selector: 'app-root',
@@ -69,12 +65,27 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this._currentLanguage = this._languages.find((language: Language) => language.default);
-    this._translateService.setDefaultLang(this._currentLanguage.code);
+    const localStorageLanguageStr = localStorage.getItem('language');
+    const defaultLanguage = this._languages.find((language: Language) => language.default);
+    this._translateService.setDefaultLang(defaultLanguage.cultureLang);
+    if(localStorageLanguageStr) {
+      this._currentLanguage = JSON.parse(localStorageLanguageStr);
+    } else {
+      const browserCultureLang = this._translateService.getBrowserCultureLang().toLowerCase();
+      this._currentLanguage = this._languages.find((language: Language) => language.cultureLang === browserCultureLang);
+      if (this.currentLanguage) {
+        this._translateService.use(this._currentLanguage.cultureLang);
+      } else {
+        this._currentLanguage = defaultLanguage;
+      }
+    }
+    LanguageEmitter.emit(this._currentLanguage);
   }
 
   onLanguageChange(language: Language): void {
     this._currentLanguage = language;
-    this._translateService.use(this._currentLanguage.code);
+    this._translateService.use(this._currentLanguage.cultureLang);
+    localStorage.setItem('language', JSON.stringify(this._currentLanguage));
+    LanguageEmitter.emit(this._currentLanguage);
   }
 }

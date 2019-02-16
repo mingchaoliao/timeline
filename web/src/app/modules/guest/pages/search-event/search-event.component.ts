@@ -1,4 +1,4 @@
-import {AfterViewInit, Component, HostListener, OnInit} from '@angular/core';
+import {AfterViewInit, Component, HostListener, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, NavigationExtras, Router} from '@angular/router';
 import {CommonService} from '../../../core/shared/services/common.service';
 import {EventService} from '../../../core/shared/services/event.service';
@@ -6,26 +6,42 @@ import {Notification} from '../../../core/shared/models/notification';
 import {NotificationEmitter} from '../../../core/shared/events/notificationEmitter';
 import {EventSearchResult} from '../../../core/shared/models/eventSearchResult';
 import {FacetLink} from '../../components/faceted-search-bar/faceted-search-bar.component';
+import {TranslateService} from "@ngx-translate/core";
+import {Subscription} from "rxjs";
+import {LanguageEmitter} from "../../../core/shared/events/languageEmitter";
 
 @Component({
   selector: 'app-search-event',
   templateUrl: './search-event.component.html',
   styleUrls: ['./search-event.component.css']
 })
-export class SearchEventComponent implements OnInit, AfterViewInit {
+export class SearchEventComponent implements OnInit, AfterViewInit, OnDestroy {
   public result: EventSearchResult;
   public pageSize = 10;
   public total = 10;
   public page = 1;
   public maxSize = 3;
   private windowResizeTimeoutId: number;
+  private _yearLabelText: string;
+  private _periodLabelText: string;
+  private _catalogLabelText: string;
+  private _getYearLabelTranslationSubscription: Subscription;
+  private _getPeriodLabelTranslationSubscription: Subscription;
+  private _getCatalogLabelTranslationSubscription: Subscription;
 
   constructor(
       private common: CommonService,
       public route: ActivatedRoute,
       private router: Router,
-      private eventService: EventService
+      private eventService: EventService,
+      private _translate: TranslateService
   ) {
+    this.getTranslation();
+
+    LanguageEmitter.emitter.subscribe((language) => {
+      this.getTranslation();
+    });
+
     this.route.queryParams.subscribe(
         params => {
           this.search(params);
@@ -145,5 +161,48 @@ export class SearchEventComponent implements OnInit, AfterViewInit {
         throw new Error('Invalid limit "' + str + '"');
       }
     }
+  }
+
+  get yearLabelText(): string {
+    return this._yearLabelText;
+  }
+
+  get periodLabelText(): string {
+    return this._periodLabelText;
+  }
+
+  get catalogLabelText(): string {
+    return this._catalogLabelText;
+  }
+
+  private getTranslation() {
+    this.unsubscribeTranslation();
+    this._getYearLabelTranslationSubscription = this._translate.get('year').subscribe((res: string) => {
+      this._yearLabelText = res;
+    });
+
+    this._getPeriodLabelTranslationSubscription = this._translate.get('period').subscribe((res: string) => {
+      this._periodLabelText = res;
+    });
+
+    this._getCatalogLabelTranslationSubscription = this._translate.get('catalogs').subscribe((res: string) => {
+      this._catalogLabelText = res;
+    });
+  }
+
+  private unsubscribeTranslation() {
+    if (this._getYearLabelTranslationSubscription) {
+      this._getYearLabelTranslationSubscription.unsubscribe();
+    }
+    if (this._getPeriodLabelTranslationSubscription) {
+      this._getPeriodLabelTranslationSubscription.unsubscribe();
+    }
+    if (this._getCatalogLabelTranslationSubscription) {
+      this._getCatalogLabelTranslationSubscription.unsubscribe();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.unsubscribeTranslation();
   }
 }

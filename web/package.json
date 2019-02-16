@@ -8,7 +8,9 @@
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e",
-    "extract": "ngx-translate-extract --input ./src --output ./src/assets/i18n/ --clean --sort --format namespaced-json"
+    "extract-en": "ngx-translate-extract -i ./src -o ./src/assets/i18n/en-us.json --sort",
+    "extract-zh-cn": "ngx-translate-extract -i ./src -o ./src/assets/i18n/zh-cn.json --sort",
+    "extract": "npm run extract-en && npm run extract-zh-cn"
   },
   "private": true,
   "dependencies": {

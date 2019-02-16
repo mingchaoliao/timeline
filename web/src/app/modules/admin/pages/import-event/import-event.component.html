@@ -1,10 +1,10 @@
 <div class="container">
   <div class="row">
     <div class="col-12">
-      <p>Drag/Select a excel/csv file and multiple photos</p>
+      <p [translate]="'importEventInstruction'">Drag/Select a excel/csv file and multiple photos</p>
       <form [formGroup]="importEventForm">
         <div class="form-group">
-          <label for="files" class="sr-only" i18n="file">Files</label>
+          <label for="files" class="sr-only" [translate]="'files'">Files</label>
           <input #files
                  type="file"
                  multiple="multiple"
@@ -16,16 +16,15 @@
         </div>
       </form>
       <p *ngIf="errorMessage !== null" style="color: red;">
-        <ng-container i18n="error">Error</ng-container>
+        <span [translate]="'error'">Error</span>
         : {{errorMessage}}
       </p>
     </div>
     <div class="col-12" *ngIf="eventsData.length > 0">
-      <p>Total {{eventsData.length}} events will be uploaded.</p>
+      <p [translate]="'numberOfEventWillBeUploaded'" [translateParams]="{size: eventsData.length}">Total # events will be uploaded.</p>
       <button class="btn btn-outline-primary"
               (click)="onSubmit()"
-              *ngIf="!isUploading"
-              i18n="save">Save
+              *ngIf="!isUploading">Save
       </button>
       <ngb-progressbar *ngIf="isUploading" type="success" [value]="percentage" [striped]="true"
                        [animated]="true"></ngb-progressbar>

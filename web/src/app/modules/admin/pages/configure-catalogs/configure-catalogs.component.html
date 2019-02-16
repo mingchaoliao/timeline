@@ -1,12 +1,12 @@
 <div class="container pb-3">
   <div class="row">
     <div class="col-12">
-      <button class="btn btn-outline-primary" (click)="createModalRef = modalService.open(createModal)">Create New
+      <button class="btn btn-outline-primary" (click)="createModalRef = modalService.open(createModal)"><span [translate]="'createNew'">Create New</span>
       </button>
     </div>
   </div>
   <div class="row mt-3" *ngIf="catalogs && catalogs.length === 0">
-    <div class="col-12">
+    <div class="col-12" [translate]="'thereIsNoCatalog'">
       There is no catalog.
     </div>
   </div>
@@ -21,24 +21,24 @@
             </div>
           </div>
           <div class="row mt-2">
-            <div class="col-12"># of associated events: <a routerLink="/app/event/search"
+            <div class="col-12"><span [translate]="'numOfAssociatedEvents'"># of associated events</span>: <a routerLink="/app/event/search"
                                                            [queryParams]="{catalog: catalog.value}">{{
               catalog.numberOfEvents }}</a></div>
             <div class="col-12">
               <div class="row">
                 <div class="col-12">
-                  Create User: {{ catalog.createUserName }}
+                  <span [translate]="'createUser'">Create User</span>: {{ catalog.createUserName }}
                 </div>
                 <div class="col-12">
-                  Created At: {{ catalog.createdAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }}
+                  <span [translate]="'createdAt'">Created At</span>: {{ catalog.createdAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }}
                 </div>
               </div>
               <div class="row">
                 <div class="col-12">
-                  Update User: {{ catalog.updateUserName }}
+                  <span [translate]="'updateUser'">Update User</span>: {{ catalog.updateUserName }}
                 </div>
                 <div class="col-12" *ngIf="catalog.createdAt != catalog.updatedAt">
-                  Updated At: {{ catalog.updatedAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }}
+                  <span [translate]="'updatedAt'">Updated At</span>: {{ catalog.updatedAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }}
                 </div>
               </div>
             </div>
@@ -46,9 +46,9 @@
           <div class="row mt-2">
             <div class="col-12">
               <app-button [style]="'btn-outline-primary mr-2'" *ngIf="catalog['dirty']"
-                          (onclick)="update($event, index, input.value)">Save
+                          (onclick)="update($event, index, input.value)"><span [translate]="'save'">Save</span>
               </app-button>
-              <app-button [style]="'btn-outline-danger'" (onclick)="delete($event, index)">Delete</app-button>
+              <app-button [style]="'btn-outline-danger'" (onclick)="delete($event, index)"><span [translate]="'delete'">Delete</span></app-button>
             </div>
           </div>
         </div>
@@ -63,15 +63,15 @@
       <div class="row">
         <div class="col-12">
           <div class="form-group">
-            <label for="value">Value:</label>
+            <label for="value"><span [translate]="'value'">Value</span>:</label>
             <input #input formControlName="value" type="text" id="value" class="form-control" appAutofocus>
           </div>
         </div>
         <div class="col-12 text-right">
-          <button class="btn btn-outline-secondary" (click)="d('close')">Cancel</button>
+          <button class="btn btn-outline-secondary" (click)="d('close')" [translate]="'cancel'">Cancel</button>
           <app-button [style]="'btn-outline-primary ml-2'"
                       [disabled]="!createCatalogForm.dirty || !createCatalogForm.valid"
-                      (onclick)="createNew($event, input.value)">Create
+                      (onclick)="createNew($event, input.value)"><span [translate]="'create'">Create</span>
           </app-button>
         </div>
       </div>

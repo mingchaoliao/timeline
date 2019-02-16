@@ -12,11 +12,12 @@ import {CoreModule} from '../core/core.module';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import {UserManagementComponent} from './pages/user-management/user-management.component';
 import {MomentModule} from "ngx-moment";
-import { ConfigurePeriodsComponent } from './pages/configure-periods/configure-periods.component';
-import { ConfigureCatalogsComponent } from './pages/configure-catalogs/configure-catalogs.component';
-import { ConfigureDateAttributesComponent } from './pages/configure-date-attributes/configure-date-attributes.component';
-import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
-import { ResetPasswordModalComponent } from './components/reset-password-modal/reset-password-modal.component';
+import {ConfigurePeriodsComponent} from './pages/configure-periods/configure-periods.component';
+import {ConfigureCatalogsComponent} from './pages/configure-catalogs/configure-catalogs.component';
+import {ConfigureDateAttributesComponent} from './pages/configure-date-attributes/configure-date-attributes.component';
+import {ConfirmationModalComponent} from './components/confirmation-modal/confirmation-modal.component';
+import {ResetPasswordModalComponent} from './components/reset-password-modal/reset-password-modal.component';
+import {TranslateModule} from "@ngx-translate/core";
 
 @NgModule({
     imports: [
@@ -27,7 +28,8 @@ import { ResetPasswordModalComponent } from './components/reset-password-modal/r
         NgSelectModule,
         CoreModule,
         MomentModule,
-        NgbModule
+        NgbModule,
+        TranslateModule.forChild()
     ],
     declarations: [
         CreateEventComponent,

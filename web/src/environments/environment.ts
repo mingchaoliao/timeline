@@ -9,14 +9,16 @@ export const environment = {
     apiPrefix: 'api',
     languages: [
         {
-            code: 'en',
+            lang: 'en',
+            cultureLang: 'en-us',
             name: 'English',
-            default: true,
+            default: false,
         },
         {
-            code: 'zh-cn',
+            lang: 'zh',
+            cultureLang: 'zh-cn',
             name: '简体中文',
-            default: false
+            default: true
         },
     ],
     whitelistedDomains: ['api.timeline.localhost'],

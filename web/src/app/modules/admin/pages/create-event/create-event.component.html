@@ -6,7 +6,7 @@
           <div class="col">
             <div class="form-group">
               <label for="startDate">
-                <ng-container i18n="start date">Start Date</ng-container>
+                <span [translate]="'startDate'">Start Date</span>
                 <span class="form-field-required-indicator">*</span></label>
               <input class="form-control"
                      type="text"
@@ -15,15 +15,17 @@
                      formControlName="startDate"
               >
               <div class="error-container" *ngIf="(isSubmitted || createEventForm.controls.startDate.dirty) && !createEventForm.controls.startDate.valid">
-                <div *ngIf="!createEventForm.controls.startDate.errors.required && (createEventForm.controls.startDate.errors.invalidDate || createEventForm.controls.startDate.errors.pattern)">Start date is invalid</div>
-                <div *ngIf="createEventForm.controls.startDate.errors.required">Start date is required</div>
+                <div *ngIf="!createEventForm.controls.startDate.errors.required && (createEventForm.controls.startDate.errors.invalidDate || createEventForm.controls.startDate.errors.pattern)"
+                     [translate]="'startDateIsInvalid'">Start date is invalid</div>
+                <div *ngIf="createEventForm.controls.startDate.errors.required"
+                     [translate]="'startDateIsRequired'">Start date is required</div>
               </div>
             </div>
           </div>
           <div class="col-3"
                [hidden]="createEventForm.value.startDate == null || createEventForm.value.startDate.length != 4 || !createEventForm.controls.startDate.valid">
             <div class="form-group">
-              <label for="startDateAttributeId" i18n="attribute">Attribute</label>
+              <label for="startDateAttributeId" [translate]="'attribute'">Attribute</label>
               <ng-select [items]="dateAttributeOptions"
                          bindLabel="value"
                          bindValue="id"
@@ -31,9 +33,7 @@
                          [hideSelected]="true"
                          [addTag]="addDateAttribute"
                          notFoundText="No items found. Type to create a new one."
-                         i18n-notFoundText
                          addTagText="Add Item"
-                         i18n-addTagText
                          formControlName="startDateAttributeId"
                          id="startDateAttributeId">
               </ng-select>
@@ -43,7 +43,7 @@
         <div class="row">
           <div class="col">
             <div class="form-group">
-              <label for="endDate" i18n="end date">End Date</label>
+              <label for="endDate" [translate]="'endDate'">End Date</label>
               <input class="form-control"
                      type="text"
                      (change)="onEndDateChange()"
@@ -51,13 +51,13 @@
                      formControlName="endDate">
             </div>
             <div class="error-container" *ngIf="(isSubmitted || createEventForm.controls.endDate.dirty) && !createEventForm.controls.endDate.valid">
-              <div>End date is invalid</div>
+              <div [translate]="'endDateIsInvalid'">End date is invalid</div>
             </div>
           </div>
           <div class="col-3"
                [hidden]="createEventForm.value.endDate == null || createEventForm.value.endDate.length != 4 || !createEventForm.controls.endDate.valid">
             <div class="form-group">
-              <label for="endDateAttributeId" i18n="attribute">Attribute</label>
+              <label for="endDateAttributeId" [translate]="'attribute'">Attribute</label>
               <ng-select [items]="dateAttributeOptions"
                          bindLabel="value"
                          bindValue="id"
@@ -65,9 +65,7 @@
                          [hideSelected]="true"
                          [addTag]="addDateAttribute"
                          notFoundText="No items found. Type to create a new one."
-                         i18n-notFoundText
                          addTagText="Add Item"
-                         i18n-addTagText
                          formControlName="endDateAttributeId"
                          id="endDateAttributeId">
               </ng-select>
@@ -76,7 +74,7 @@
         </div>
 
         <div class="form-group">
-          <label for="periodId" i18n="period">Period</label>
+          <label for="periodId" [translate]="'period'">Period</label>
           <ng-select [items]="periodOptions"
                      bindLabel="value"
                      bindValue="id"
@@ -85,15 +83,13 @@
                      [addTag]="addPeriod"
                      formControlName="periodId"
                      notFoundText="No items found. Type to create a new one."
-                     i18n-notFoundText
                      addTagText="Add Item"
-                     i18n-addTagText
                      id="periodId">
           </ng-select>
         </div>
 
         <div class="form-group">
-          <label for="catalogs" i18n="catalog">Catalogs</label>
+          <label for="catalogs" [translate]="'catalogs'">Catalogs</label>
           <ng-select [items]="catalogOptions"
                      bindLabel="value"
                      bindValue="id"
@@ -103,38 +99,36 @@
                      [loading]="addCatalogLoading"
                      formControlName="catalogs"
                      notFoundText="No items found. Type to create a new one."
-                     i18n-notFoundText
                      addTagText="Add Item"
-                     i18n-addTagText
                      id="catalogs">
           </ng-select>
         </div>
 
         <div class="form-group">
           <label for="content">
-            <ng-container i18n="content">Content</ng-container>
+            <span [translate]="'content'">Content</span>
             <span class="form-field-required-indicator">*</span></label>
           <app-rich-text-editor id="content" formControlName="content"></app-rich-text-editor>
           <div class="error-container" *ngIf="(isSubmitted || createEventForm.controls.content.dirty) && !createEventForm.controls.content.valid">
-            <div>Content is required</div>
+            <div [translate]="'contentIsRequired'">Content is required</div>
           </div>
         </div>
 
         <div class="form-group">
-          <label for="images" i18n="image">Images</label>
+          <label for="images" [translate]="'images'">Images</label>
           <app-event-image-input
             id="images"
             formControlName="images"
           ></app-event-image-input>
           <div class="error-container" *ngIf="(isSubmitted || createEventForm.controls.images.dirty) && !createEventForm.controls.images.valid">
-            <div>Image file is required</div>
+            <div [translate]="'imageFileIsRequired'">Image file is required</div>
           </div>
         </div>
 
         <div class="form-group" style="margin-top: 15px;">
-          <button class="btn btn-outline-primary" (click)="onPreview(previewModal)" i18n="preview">Preview</button>
-          <label for="submit" class="sr-only" i18n="submit">Submit</label>
-          <app-button [style]="'btn-outline-primary m-2'" id="submit" (onclick)="onSubmit($event)" i18n>Submit</app-button>
+          <button class="btn btn-outline-primary" (click)="onPreview(previewModal)" [translate]="'preview'">Preview</button>
+          <label for="submit" class="sr-only" [translate]="'submit'">Submit</label>
+          <app-button [style]="'btn-outline-primary m-2'" id="submit" (onclick)="onSubmit($event)"><span [translate]="'submit'">Submit</span></app-button>
         </div>
       </form>
     </div>
@@ -142,7 +136,7 @@
 
   <ng-template #previewModal let-c="close" let-d="dismiss">
     <div class="modal-header">
-      <h4 class="modal-title" i18n>Event Preview</h4>
+      <h4 class="modal-title" [translate]="'eventPreview'">Event Preview</h4>
       <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
         <span aria-hidden="true">&times;</span>
       </button>

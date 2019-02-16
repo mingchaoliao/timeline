@@ -1,7 +1,6 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {SearchEventFormComponent} from './components/search-event-form/search-event-form.component';
-import {AboutComponent} from './pages/about/about.component';
 import {SearchEventComponent} from './pages/search-event/search-event.component';
 import {GUEST_ROUTING} from './guest.route';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
@@ -9,8 +8,8 @@ import {CoreModule} from '../core/core.module';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {NgSelectModule} from '@ng-select/ng-select';
 import {FacetedSearchBarComponent} from './components/faceted-search-bar/faceted-search-bar.component';
-import {EventsComponent} from './pages/events/events.component';
-import { EventDatepickerComponent } from './components/event-datepicker/event-datepicker.component';
+import {EventDatepickerComponent} from './components/event-datepicker/event-datepicker.component';
+import {TranslateModule} from "@ngx-translate/core";
 
 @NgModule({
   imports: [
@@ -20,14 +19,13 @@ import { EventDatepickerComponent } from './components/event-datepicker/event-da
     FormsModule,
     ReactiveFormsModule,
     NgbModule,
-    NgSelectModule
+    NgSelectModule,
+    TranslateModule.forChild()
   ],
   declarations: [
     SearchEventFormComponent,
-    AboutComponent,
     SearchEventComponent,
     FacetedSearchBarComponent,
-    EventsComponent,
     EventDatepickerComponent
   ]
 })

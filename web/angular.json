@@ -28,7 +28,8 @@
               "node_modules/@ng-select/ng-select/themes/default.theme.css",
               "src/assets/css/fontawesome.min.css",
               "src/assets/timeline/css/timeline.css",
-              "src/styles.css"
+              "src/styles.css",
+              "src/assets/css/font/NotoSansSC.css"
             ],
             "scripts": [
               "node_modules/jquery/dist/jquery.min.js",

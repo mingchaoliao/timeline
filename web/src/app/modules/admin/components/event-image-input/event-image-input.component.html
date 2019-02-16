@@ -6,7 +6,7 @@
         <div class="col">
           <div class="form-group mb-1">
             <label for="image{{index}}">
-              <ng-container i18n="image">Image</ng-container>
+              <span [translate]="'image'">Image</span>
               {{index+1}}</label>
             <input class="form-control p-0"
                    type="file"
@@ -15,13 +15,11 @@
                    (change)="changeFile($event, index)">
           </div>
           <div class="form-group">
-            <label for="imageDescription{{index}}">
-              <ng-container i18n="description">Description</ng-container>
-            </label>
+            <label for="imageDescription{{index}}" [translate]="'imageDescription'">Description</label>
             <input class="form-control" type="text" id="imageDescription{{index}}"
                    (change)="changeDescription($event, index)" value="{{image ? image.description : ''}}">
           </div>
-          <button class="btn btn-outline-danger btn-sm" (click)="onDelete(index)">Delete</button>
+          <button class="btn btn-outline-danger btn-sm" (click)="onDelete(index)" [translate]="'delete'">Delete</button>
           <span class='ml-2' style="color: #3c763d;" *ngIf="imageUploadStatus[index]">{{ imageUploadStatus[index] }}</span>
         </div>
         <div class="col" *ngIf="image">
@@ -30,7 +28,7 @@
       </div>
     </div>
 
-    <button class="btn btn-outline-primary mt-3" (click)="addImage()" i18n>
+    <button class="btn btn-outline-primary mt-3" (click)="addImage()" [translate]="'addNewImage'">
       Add New Image
     </button>
   </div>

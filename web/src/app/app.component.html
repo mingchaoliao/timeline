@@ -11,18 +11,15 @@
         </a>
       </div>
       <div class="col-xs-6 col-sm-4 d-flex justify-content-end align-items-center px-0">
-        <a class="btn btn-link pr-0 nav-item" routerLink="/" [class.nav-item-active]="isRouteActive('/')">
+        <a [translate]="'home'" class="btn btn-link pr-0 nav-item" routerLink="/" [class.nav-item-active]="isRouteActive('/')">
           Home
         </a>
-        <a class="btn btn-link pr-0 nav-item" routerLink="/app/event/search"
-           [class.nav-item-active]="isRouteActive('/app/event/search')">
-          Events
-        </a>
-        <a class="btn btn-link pr-0 nav-item"
+        <a [translate]="'events'" class="btn btn-link pr-0 nav-item" routerLink="/app/event/search"
+           [class.nav-item-active]="isRouteActive('/app/event/search')">Events</a>
+        <a [translate]="'signIn'" class="btn btn-link pr-0 nav-item"
            routerLink="/account/login"
            [style.opacity]="isRouteActive('/account/login') ? 1 : 0.5"
-           *ngIf="getUser() === null"
-           i18n="sign in button text@@signInBtn">Sign
+           *ngIf="getUser() === null">Sign
           in</a>
         <div class="dropdown btn btn-link pr-0" *ngIf="getUser() !== null">
           <a class="btn-link dropdown-toggle nav-item" href="#" role="button" id="dropdownMenuLink"
@@ -33,30 +30,34 @@
           </a>
 
           <div class="dropdown-menu" aria-labelledby="dropdownMenuLink">
-            <a class="dropdown-item" routerLink="/account/profile"
-               i18n="create event navigation link@@createEventNavLink">Profile</a>
-            <a class="dropdown-item" routerLink="/admin/create-event" *ngIf="getUser().isAdmin || getUser().isEditor"
-               i18n="create event navigation link@@createEventNavLink">Create
+            <a [translate]="'profile'" class="dropdown-item" routerLink="/account/profile">Profile</a>
+            <a [translate]="'createEvent'" class="dropdown-item"
+               routerLink="/admin/create-event"
+               *ngIf="getUser().isAdmin || getUser().isEditor">Create
               Event</a>
-            <a class="dropdown-item" routerLink="/admin/import-event" *ngIf="getUser().isAdmin || getUser().isEditor"
-               i18n="import events navigation link@@importEventNavLink">Import
+            <a [translate]="'importEvents'" class="dropdown-item"
+               routerLink="/admin/import-event"
+               *ngIf="getUser().isAdmin || getUser().isEditor">Import
               Events</a>
-            <a class="dropdown-item" routerLink="/admin/user-management" *ngIf="getUser().isAdmin"
-               i18n="user management navigation link@@userManagementNavLink">User
+            <a [translate]="'userManagement'" class="dropdown-item"
+               routerLink="/admin/user-management"
+               *ngIf="getUser().isAdmin">User
               Management</a>
-            <a class="dropdown-item" routerLink="/admin/configure-periods"
-               *ngIf="getUser().isAdmin || getUser().isEditor"
-               i18n="periods configuration navigation link@@configurePeriodsEventNavLink">Configure
+            <a [translate]="'configurePeriods'" class="dropdown-item"
+               routerLink="/admin/configure-periods"
+               *ngIf="getUser().isAdmin || getUser().isEditor">Configure
               Periods</a>
-            <a class="dropdown-item" routerLink="/admin/configure-catalogs"
-               *ngIf="getUser().isAdmin || getUser().isEditor"
-               i18n="catalogs configuration navigation link@@configureCatalogsNavLink">Configure
+            <a [translate]="'configureCatalogs'" class="dropdown-item"
+               routerLink="/admin/configure-catalogs"
+               *ngIf="getUser().isAdmin || getUser().isEditor">Configure
               Catalogs</a>
-            <a class="dropdown-item" routerLink="/admin/configure-date-attributes"
-               *ngIf="getUser().isAdmin || getUser().isEditor"
-               i18n="date attributes configuration navigation link@@configureDateAttributesEventNavLink">Configure Date
+            <a [translate]="'configureDateAttributes'" class="dropdown-item"
+               routerLink="/admin/configure-date-attributes"
+               *ngIf="getUser().isAdmin || getUser().isEditor">Configure Date
               Attributes</a>
-            <a class="dropdown-item" (click)="logout()" routerLink="/" i18n="logout navigation link@@logoutNavLink">Logout</a>
+            <a [translate]="'logout'" class="dropdown-item"
+               (click)="logout()"
+               routerLink="/">Logout</a>
           </div>
         </div>
       </div>
@@ -78,14 +79,13 @@
           <a href="{{company.url}}" class="text-muted">{{company.name}}</a>
         </span>
         <div class="d-inline-block" placement="top-right" ngbDropdown>
-          <button class="btn btn-link" id="languageDropdown" ngbDropdownToggle>Language: <span *ngIf="currentLanguage">{{ currentLanguage.name }}</span></button>
+          <button class="btn btn-link" id="languageDropdown" ngbDropdownToggle><span [translate]="'language'">Language</span>: <span
+            *ngIf="currentLanguage">{{ currentLanguage.name }}</span></button>
           <div ngbDropdownMenu aria-labelledby="languageDropdown">
-            <button class="dropdown-item" (click)="onLanguageChange(language)" *ngFor="let language of languages">{{ language.name }}</button>
+            <button class="dropdown-item" (click)="onLanguageChange(language)"
+                    *ngFor="let language of languages">{{ language.name }}</button>
           </div>
         </div>
-        <!--<span class="mx-2 mx-sm-3">-->
-        <!--<a routerLink="/app/about" class="text-muted" i18n="about">About</a>-->
-        <!--</span>-->
       </div>
     </div>
   </div>

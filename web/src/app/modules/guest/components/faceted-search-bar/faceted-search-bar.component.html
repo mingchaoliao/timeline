@@ -13,13 +13,13 @@
         </button>
       </div>
       <div class="col-12">
-        <button *ngIf="status[facetIndex] < facet.buckets.length"
+        <button [translate]="'more'" *ngIf="status[facetIndex] < facet.buckets.length"
                 class="btn btn-link text-left p-0 pl-2"
                 style="white-space: normal; font-size: 0.85rem;"
                 (click)="more(facetIndex, facet)">
           More
         </button>
-        <button *ngIf="status[facetIndex] >= facet.buckets.length && status[facetIndex]-facet.increment>0"
+        <button [translate]="'less'" *ngIf="status[facetIndex] >= facet.buckets.length && status[facetIndex]-facet.increment>0"
                 class="btn btn-link text-left p-0 pl-2"
                 style="white-space: normal; font-size: 0.85rem;"
                 (click)="less(facetIndex, facet)">
