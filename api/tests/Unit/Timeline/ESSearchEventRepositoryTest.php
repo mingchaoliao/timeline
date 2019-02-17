@@ -49,7 +49,7 @@ class ESSearchEventRepositoryTest extends TestCase
         $eventId = new EventId(3);
         $this->es->method('delete')
             ->with($this->equalTo([
-                'index' => 'timelines',
+                'index' => 'event',
                 'type' => 'event',
                 'id' => 3
             ]))
@@ -69,7 +69,7 @@ class ESSearchEventRepositoryTest extends TestCase
                 'body' => [
                     'attr1' => 1
                 ],
-                'index' => 'timelines',
+                'index' => 'event',
                 'type' => 'event',
                 'id' => 1,
             ]))
@@ -95,7 +95,7 @@ class ESSearchEventRepositoryTest extends TestCase
                 'body' => [
                     [
                         'index' => [
-                            '_index' => 'timelines',
+                            '_index' => 'event',
                             '_type' => 'event',
                             '_id' => 1
                         ]
@@ -105,7 +105,7 @@ class ESSearchEventRepositoryTest extends TestCase
                     ],
                     [
                         'index' => [
-                            '_index' => 'timelines',
+                            '_index' => 'event',
                             '_type' => 'event',
                             '_id' => 2
                         ]

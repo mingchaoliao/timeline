@@ -99,7 +99,7 @@ return [
     |
     */
 
-    'memory_limit' => 64,
+    'memory_limit' => 256,
 
     /*
     |--------------------------------------------------------------------------
@@ -124,9 +124,30 @@ return [
         ],
 
         'local' => [
-            'supervisor-1' => [
+            'default' => [
                 'connection' => 'redis',
                 'queue' => ['default'],
+                'balance' => 'simple',
+                'processes' => 1,
+                'tries' => 3,
+            ],
+            'timeline' => [
+                'connection' => 'redis',
+                'queue' => ['timeline'],
+                'balance' => 'simple',
+                'processes' => 1,
+                'tries' => 3,
+            ],
+            'search-engine' => [
+                'connection' => 'redis',
+                'queue' => ['search-engine'],
+                'balance' => 'simple',
+                'processes' => 1,
+                'tries' => 3,
+            ],
+            'image' => [
+                'connection' => 'redis',
+                'queue' => ['image'],
                 'balance' => 'simple',
                 'processes' => 1,
                 'tries' => 3,

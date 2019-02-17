@@ -43,6 +43,9 @@
                routerLink="/admin/user-management"
                *ngIf="getUser().isAdmin">User
               Management</a>
+            <a [translate]="'backup'" class="dropdown-item"
+               routerLink="/admin/backup"
+               *ngIf="getUser().isAdmin">Backup</a>
             <a [translate]="'configurePeriods'" class="dropdown-item"
                routerLink="/admin/configure-periods"
                *ngIf="getUser().isAdmin || getUser().isEditor">Configure

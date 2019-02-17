@@ -88,7 +88,7 @@ class UserService
     public function getCurrentUser(): ?User
     {
         try {
-            if(static::$currentUser === null) {
+            if (static::$currentUser === null) {
                 static::$currentUser = $this->userRepository->getCurrentUser();
             }
 
@@ -113,7 +113,7 @@ class UserService
                 throw TimelineException::ofUnauthenticated();
             }
 
-            if(!$currentUser->isAdmin()) {
+            if (!$currentUser->isAdmin()) {
                 throw TimelineException::ofUnAuthorizedToViewOtherUser();
             }
 
@@ -163,8 +163,8 @@ class UserService
                 }
             }
 
-            if(!$currentUser->isAdmin() || $id->equalsWith($currentUser->getId())) {
-                if(!$this->userRepository->validatePassword($id, $oldPassword)) {
+            if (!$currentUser->isAdmin() || $id->equalsWith($currentUser->getId())) {
+                if (!$this->userRepository->validatePassword($id, $oldPassword)) {
                     throw TimelineException::ofOldPasswordIsNotCorrect();
                 }
             }
@@ -182,5 +182,11 @@ class UserService
         } catch (\Exception $e) {
             throw TimelineException::ofUnableToUpdateUserProfile($e);
         }
+    }
+
+    public function validateCurrentUserPassword(string $password): bool
+    {
+        $currentUser = $this->getCurrentUser();
+        return $this->userRepository->validatePassword($currentUser->getId(), $password);
     }
 }

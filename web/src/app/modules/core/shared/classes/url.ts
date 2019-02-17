@@ -159,4 +159,8 @@ export class Url {
   static updateImageDescription(id: number): string {
     return Url.getUrl('/image/' + id);
   }
+
+  static getAllBackup() {
+    return Url.getUrl('/backup');
+  }
 }

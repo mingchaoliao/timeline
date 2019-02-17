@@ -20,6 +20,7 @@ use App\Timeline\Domain\Models\EventSearchResult;
 use App\Timeline\Domain\Repositories\SearchEventRepository as SearchEventRepositoryInterface;
 use App\Timeline\Domain\Requests\SearchEventRequest;
 use App\Timeline\Domain\ValueObjects\EventId;
+use Illuminate\Support\Facades\Log;
 
 class SearchEventRepository implements SearchEventRepositoryInterface
 {
@@ -116,11 +117,17 @@ class SearchEventRepository implements SearchEventRepositoryInterface
 
     public function index(Event $event): void
     {
-        $this->es->index([
+        $response = $this->es->index([
             'body' => $event->toEsBody(),
-            'index' => 'timelines',
+            'index' => 'event',
             'type' => 'event',
             'id' => $event->getId()->getValue(),
+        ]);
+
+        Log::info('index document completed', [
+            'index' => 'event',
+            'event_id' => $event->getId()->getValue(),
+            'elasticsearch_response' => $response
         ]);
     }
 
@@ -136,7 +143,7 @@ class SearchEventRepository implements SearchEventRepositoryInterface
         foreach ($events as $event) {
             $params['body'][] = [
                 'index' => [
-                    '_index' => 'timelines',
+                    '_index' => 'event',
                     '_type' => 'event',
                     '_id' => $event->getId()->getValue()
                 ]
@@ -146,14 +153,102 @@ class SearchEventRepository implements SearchEventRepositoryInterface
         }
 
         $this->es->bulk($params);
+
+        Log::info('bulk index documents completed', [
+            'index' => 'event',
+            'num_of_events' => count($events)
+        ]);
     }
 
     public function deleteDocument(EventId $id): void
     {
-        $this->es->delete([
-            'index' => 'timelines',
+        $response = $this->es->delete([
+            'index' => 'event',
             'type' => 'event',
             'id' => $id->getValue()
+        ]);
+
+        Log::info('document deleted', [
+            'index' => 'event',
+            'event_id' => $id->getValue(),
+            'elasticsearch_response' => $response
+        ]);
+    }
+
+    public function createEventIndex(): void
+    {
+        $response = $this->es->indices()->create([
+            'index' => 'event',
+            'body' => [
+                'mappings' => [
+                    'event' => [
+                        'properties' => [
+                            'id' => [
+                                'type' => 'long',
+                            ],
+                            'startDateFrom' => [
+                                'type' => 'date',
+                                'format' => 'yyyy-MM-dd'
+                            ],
+                            'startDateTo' => [
+                                'type' => 'date',
+                                'format' => 'yyyy-MM-dd'
+                            ],
+                            'startDateStr' => [
+                                'type' => 'keyword',
+                            ],
+                            'startDateAttribute' => [
+                                'type' => 'keyword',
+                            ],
+                            'endDateFrom' => [
+                                'type' => 'date',
+                                'format' => 'yyyy-MM-dd'
+                            ],
+                            'endDateTo' => [
+                                'type' => 'date',
+                                'format' => 'yyyy-MM-dd'
+                            ],
+                            'endDateStr' => [
+                                'type' => 'keyword',
+                            ],
+                            'endDateAttribute' => [
+                                'type' => 'keyword',
+                            ],
+                            'period' => [
+                                'type' => 'keyword'
+                            ],
+                            'catalogs' => [
+                                'type' => 'keyword'
+                            ],
+                            'content' => [
+                                'type' => 'text',
+                                'analyzer' => 'ik_max_word',
+                                'search_analyzer' => 'ik_smart'
+                            ],
+                        ]
+                    ]
+                ]
+            ]
+        ]);
+
+        Log::notice('index "event" created', ['elasticsearch_response' => $response]);
+    }
+
+    public function hasEventIndex(): bool
+    {
+        return $this->es->indices()->exists([
+            'index' => 'event'
+        ]);
+    }
+
+    public function deleteEventIndex(): void
+    {
+        $response = $this->es->indices()->delete([
+            'index' => 'event'
+        ]);
+
+        Log::notice('index "event" deleted', [
+            'elasticsearch_response' => $response
         ]);
     }
 }

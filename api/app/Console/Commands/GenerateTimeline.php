@@ -3,11 +3,9 @@
 namespace App\Console\Commands;
 
 use App\Timeline\Domain\Services\TimelineService;
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
-class TimelineGenerateCommand extends Command
+class GenerateTimeline extends Command
 {
     /**
      * @var TimelineService
@@ -46,8 +44,18 @@ class TimelineGenerateCommand extends Command
      */
     public function handle()
     {
-        $timelineData = json_encode($this->timelineService->getTimelineArray());
+        try {
+            $this->timelineService->generateTimeline();
+        } catch (\Exception $e) {
+            $message = sprintf(
+                'failed to generate timeline. Reason: %s',
+                $e->getMessage()
+            );
+            $this->error($message);
+            Log::error($message);
+            return 1;
+        }
 
-        File::put(Storage::path('public/timeline.json'), $timelineData);
+        return 0;
     }
 }

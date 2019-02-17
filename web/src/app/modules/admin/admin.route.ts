@@ -7,12 +7,14 @@ import {ConfigurePeriodsComponent} from './pages/configure-periods/configure-per
 import {ConfigureCatalogsComponent} from './pages/configure-catalogs/configure-catalogs.component';
 import {ConfigureDateAttributesComponent} from './pages/configure-date-attributes/configure-date-attributes.component';
 import {AdminGuard} from '../../admin-guard';
+import {BackupComponent} from "./pages/backup/backup.component";
 
 const ADMIN_ROUTES: Routes = [
   {path: 'create-event', component: CreateEventComponent},
   {path: 'event/:id/update', component: UpdateEventComponent},
   {path: 'import-event', component: ImportEventComponent},
   {path: 'user-management', component: UserManagementComponent, canActivate: [AdminGuard]},
+  {path: 'backup', component: BackupComponent, canActivate: [AdminGuard]},
   {path: 'configure-periods', component: ConfigurePeriodsComponent},
   {path: 'configure-catalogs', component: ConfigureCatalogsComponent},
   {path: 'configure-date-attributes', component: ConfigureDateAttributesComponent}

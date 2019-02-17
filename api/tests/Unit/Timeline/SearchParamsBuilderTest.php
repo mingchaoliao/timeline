@@ -268,7 +268,7 @@ class SearchParamsBuilderTest extends TestCase
     private function createParams(int $offset, int $pageSize, array $query = null, array $sort = null): array
     {
         $params = [
-            'index' => 'timelines',
+            'index' => 'event',
             'type' => 'event',
             'from' => $offset,
             'size' => $pageSize,

@@ -43,14 +43,30 @@ services:
     networks:
       - queue
   horizon:
-    build:
-      context: api
-      dockerfile: horizon/Dockerfile
+    image: timeline_api
     user: "1500:1500"
     restart: always
+    command: php artisan horizon
     volumes:
       - apistorage:/apidist/storage
       - ./api/.env:/apidist/.env
+    depends_on:
+      - mysql
+      - elasticsearch
+      - queue
+    networks:
+      - db
+      - es
+      - queue
+  scheduler:
+    image: timeline_api
+    user: "1500:1500"
+    restart: always
+    command: /usr/sbin/crond -f
+    volumes:
+      - apistorage:/apidist/storage
+      - ./api/.env:/apidist/.env
+      - backup:/backup
     depends_on:
       - mysql
       - elasticsearch
@@ -89,6 +105,8 @@ services:
     volumes:
       - webdist:/webdist
 volumes:
+  backup:
+    driver: local
   esdata1:
     driver: local
   dbdata1:

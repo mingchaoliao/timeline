@@ -19,6 +19,8 @@ interface UserRepository
 {
     public function getCurrentUser(): ?User;
 
+    public function getByEmail(Email $email): ?User;
+
     public function login(Email $email, string $password): UserToken;
 
     public function validatePassword(UserId $id, string $password): bool;

@@ -19,6 +19,7 @@ services:
     working_dir: /apidist
     volumes:
       - ./api:/apidist
+      - backup:/backup
     depends_on:
       - mysql
       - elasticsearch
@@ -36,12 +37,23 @@ services:
     volumes:
       - queuedata1:/data
   horizon:
-    build:
-      context: api
-      dockerfile: horizon/Dockerfile.dev
+    image: timeline_api
     volumes:
       - ./api:/apidist
+    command: php artisan horizon
     depends_on:
+      - api
+      - mysql
+      - elasticsearch
+      - queue
+  scheduler:
+    image: timeline_api
+    volumes:
+      - ./api:/apidist
+      - backup:/backup
+    command: /usr/sbin/crond -f
+    depends_on:
+      - api
       - mysql
       - elasticsearch
       - queue
@@ -90,6 +102,8 @@ services:
     volumes:
       - ./web:/webdist
 volumes:
+  backup:
+    driver: local
   esdata1:
     driver: local
   dbdata1:

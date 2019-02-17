@@ -26,6 +26,7 @@ class LinkImages implements ShouldQueue
     public function __construct(ImageCollection $images)
     {
         $this->images = $images;
+        $this->queue = 'image';
     }
 
     /**

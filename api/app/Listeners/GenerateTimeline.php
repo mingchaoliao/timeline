@@ -9,6 +9,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 
 class GenerateTimeline implements ShouldQueue
 {
+    public $queue = 'timeline';
+
     /**
      * @var TimelineService
      */

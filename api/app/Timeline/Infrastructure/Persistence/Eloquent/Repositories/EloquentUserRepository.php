@@ -64,6 +64,17 @@ class EloquentUserRepository implements UserRepository
         return $this->constructUser($eloquentUser);
     }
 
+    public function getByEmail(Email $email): ?User
+    {
+        $eloquentUser = $this->userModel->where('email', (string)$email)->first();
+
+        if ($eloquentUser === null) {
+            return null;
+        }
+
+        return $this->constructUser($eloquentUser);
+    }
+
     /**
      * @param Email $email
      * @param string $password
@@ -75,11 +86,11 @@ class EloquentUserRepository implements UserRepository
         /** @var EloquentUser|null $user */
         $user = $this->userModel->where('email', $email->getValue())->first();
 
-        if($user === null) {
+        if ($user === null) {
             throw TimelineException::ofUserWithEmailDoesNotFound($email);
         }
 
-        if(!$user->isActive()) {
+        if (!$user->isActive()) {
             throw TimelineException::ofUserAccountIsLocked();
         }
 

@@ -18,6 +18,8 @@ import {ConfigureDateAttributesComponent} from './pages/configure-date-attribute
 import {ConfirmationModalComponent} from './components/confirmation-modal/confirmation-modal.component';
 import {ResetPasswordModalComponent} from './components/reset-password-modal/reset-password-modal.component';
 import {TranslateModule} from "@ngx-translate/core";
+import { BackupComponent } from './pages/backup/backup.component';
+import {BackupService} from "./services/backup.service";
 
 @NgModule({
     imports: [
@@ -42,9 +44,12 @@ import {TranslateModule} from "@ngx-translate/core";
         ConfigureCatalogsComponent,
         ConfigureDateAttributesComponent,
         ConfirmationModalComponent,
-        ResetPasswordModalComponent
+        ResetPasswordModalComponent,
+        BackupComponent
     ],
-    exports: []
+    providers: [
+        BackupService
+    ]
 })
 export class AdminModule {
 }
