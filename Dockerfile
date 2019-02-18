@@ -4,7 +4,7 @@ RUN npm install -g @angular/cli
 WORKDIR /web
 COPY web /web
 RUN mkdir -p /webdist
-RUN npm install --production && rm -f /webdist/* && ng build --aot --prod --output-path=/webdist
+RUN npm install && rm -f /webdist/* && ng build --aot --prod --output-path=/webdist
 
 FROM nginx:1.15.1-alpine
 COPY --from=build-web /webdist /webdist
