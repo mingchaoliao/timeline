@@ -7,6 +7,20 @@ export const environment = {
     title: 'Timeline',
     apiHost: 'https://api.timeline.localhost',
     apiPrefix: 'api',
+    languages: [
+        {
+            lang: 'en',
+            cultureLang: 'en-us',
+            name: 'English',
+            default: false,
+        },
+        {
+            lang: 'zh',
+            cultureLang: 'zh-cn',
+            name: '简体中文',
+            default: true
+        },
+    ],
     whitelistedDomains: ['api.timeline.localhost'],
     company: {
         name: 'Mingchao Liao',

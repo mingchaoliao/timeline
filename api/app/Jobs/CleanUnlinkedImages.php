@@ -26,6 +26,7 @@ class CleanUnlinkedImages implements ShouldQueue
     public function __construct(ImageCollection $images = null)
     {
         $this->images = $images;
+        $this->queue = 'image';
     }
 
     /**

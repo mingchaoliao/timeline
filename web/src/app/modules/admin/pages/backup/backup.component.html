@@ -1,0 +1,66 @@
+<app-backup-delete-confirmation-modal #deleteConfirmationModal (onDelete)="delete($event)"></app-backup-delete-confirmation-modal>
+<app-backup-download-modal #downloadModal></app-backup-download-modal>
+<div class="container">
+  <div class="row">
+    <div class="col-12">
+      <h2 [translate]="'backupStatus'" style="font-size: 1.25rem">Backup Status</h2>
+    </div>
+    <div class="col-12 mt-2">
+      <pre>{{ backupStatus | async }}</pre>
+    </div>
+  </div>
+  <div class="row mt-3">
+    <div class="col-12">
+      <h2 [translate]="'backupSummary'" style="font-size: 1.25rem">Backup Summary</h2>
+    </div>
+    <div class="col-12 mt-2">
+      <pre>{{ backupSummary | async }}</pre>
+    </div>
+  </div>
+  <div class="row mt-3">
+    <div class="col-12">
+      <h2 [translate]="'backupFiles'" style="font-size: 1.25rem">Backup Files</h2>
+    </div>
+    <div class="col-12 mt-2">
+      <div class="row">
+        <div class="col-12">
+          <app-button [style]="'btn-outline-primary'" (onclick)="backupNow($event)"><span [translate]="'backupNow'">Backup Now</span></app-button>
+        </div>
+      </div>
+      <div class="row mt-1" *ngIf="backupCreationLog">
+        <div class="col-12">
+          <pre>{{ backupCreationLog }}</pre>
+        </div>
+      </div>
+    </div>
+    <div class="col-12 mt-2 table-responsive">
+      <table class="table table-striped">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th [translate]="'backupName'">Name</th>
+            <th [translate]="'backupSize'">Size</th>
+            <th [translate]="'date'">Date</th>
+            <th [translate]="'actions'">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let backup of backups; let i = index">
+            <td>{{ i + 1 }}</td>
+            <td>{{ backup.name }}</td>
+            <td>{{ backup.size / 1024 / 1024 | number: '1.0-0' }}M</td>
+            <td>{{ backup.date | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }}</td>
+            <td>
+              <button class="btn btn-outline-primary btn-sm"
+                      (click)="downloadModal.open(backup)"
+                      [translate]="'download'">Download</button>
+              <button class="btn btn-outline-danger btn-sm ml-2"
+                      (click)="deleteConfirmationModal.open(backup)"
+                      [translate]="'delete'">Delete</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

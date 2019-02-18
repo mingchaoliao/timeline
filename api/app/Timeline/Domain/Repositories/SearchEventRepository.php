@@ -22,4 +22,7 @@ interface SearchEventRepository
     public function index(Event $event): void;
     public function bulkIndex(EventCollection $events): void;
     public function deleteDocument(EventId $id): void;
+    public function createEventIndex(): void;
+    public function hasEventIndex(): bool;
+    public function deleteEventIndex(): void;
 }

@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Elasticsearch;
-use Illuminate\Console\Command;
+use App\Timeline\Domain\Repositories\SearchEventRepository;
+use Illuminate\Support\Facades\Log;
 
 class FreshElasticsearchIndexes extends Command
 {
@@ -19,7 +19,7 @@ class FreshElasticsearchIndexes extends Command
      *
      * @var string
      */
-    protected $description = 'Command description';
+    protected $description = 'Recreate Elasticsearch index';
 
     /**
      * Create a new command instance.
@@ -34,78 +34,32 @@ class FreshElasticsearchIndexes extends Command
     /**
      * Execute the console command.
      *
+     * @param SearchEventRepository $eventRepository
      * @return mixed
      */
-    public function handle()
+    public function handle(SearchEventRepository $eventRepository)
     {
-        if (Elasticsearch::indices()->exists([
-            'index' => 'timelines'
-        ])) {
-            Elasticsearch::indices()->delete([
-                'index' => 'timelines'
-            ]);
+        try {
+            if ($eventRepository->hasEventIndex()) {
+                $eventRepository->deleteEventIndex();
 
-            $this->info('Index dropped: timelines');
+                $this->info('Index dropped: event');
+                Log::notice('Index "event" dropped (CLI)');
+            }
+
+            $eventRepository->createEventIndex();
+
+            $this->info(sprintf('Index created: event'));
+            Log::notice('Index "event" created (CLI)');
+        } catch (\Exception $e) {
+            $message = sprintf(
+                'failed to create index "event". Reason: %s',
+                $e->getMessage()
+            );
+            $this->error($message);
+            Log::error($message .' (CLI)');
+            return 1;
         }
-
-        $response = Elasticsearch::indices()->create([
-            'index' => 'timelines',
-            'body' => [
-                'mappings' => [
-                    'event' => [
-                        'properties' => [
-                            'id' => [
-                                'type' => 'long',
-                            ],
-                            'startDateFrom' => [
-                                'type' => 'date',
-                                'format' => 'yyyy-MM-dd'
-                            ],
-                            'startDateTo' => [
-                                'type' => 'date',
-                                'format' => 'yyyy-MM-dd'
-                            ],
-                            'startDateStr' => [
-                                'type' => 'keyword',
-                            ],
-                            'startDateAttribute' => [
-                                'type' => 'keyword',
-                            ],
-                            'endDateFrom' => [
-                                'type' => 'date',
-                                'format' => 'yyyy-MM-dd'
-                            ],
-                            'endDateTo' => [
-                                'type' => 'date',
-                                'format' => 'yyyy-MM-dd'
-                            ],
-                            'endDateStr' => [
-                                'type' => 'keyword',
-                            ],
-                            'endDateAttribute' => [
-                                'type' => 'keyword',
-                            ],
-                            'period' => [
-                                'type' => 'keyword'
-                            ],
-                            'catalogs' => [
-                                'type' => 'keyword'
-                            ],
-                            'content' => [
-                                'type' => 'text',
-                                'analyzer' => 'ik_max_word',
-                                'search_analyzer' => 'ik_smart'
-                            ],
-                        ]
-                    ]
-                ]
-            ]
-        ]);
-
-        $this->info(sprintf(
-            'Index created: %s',
-            $response['index']
-        ));
 
         return 0;
     }

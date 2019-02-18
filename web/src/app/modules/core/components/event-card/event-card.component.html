@@ -1,8 +1,8 @@
 <div class="row" *ngIf="!isDeleted">
   <div class="col-12" *ngIf="hit && !isDetailView">
-    {{ hit.startDate.date }}
-    <div [innerHTML]="sanitizer.bypassSecurityTrustHtml(hit.content)"></div>
-    <app-button [style]="'btn-link'" (onclick)="loadDetailView($event, hit.id)">[see more]</app-button>
+    <p>{{ hit.startDate.date }}</p>
+    <div [innerHTML]="sanitizer.bypassSecurityTrustHtml(hit.content)" class="d-inline"></div>
+    <app-button [style]="'btn-link'" (onclick)="loadDetailView($event, hit.id)">[<span [translate]="'seeMore'">see more</span>]</app-button>
   </div>
 
   <div class="col-12" *ngIf="event && isDetailView">
@@ -26,9 +26,6 @@
       </div>
       <div class="card-body">
         <div class="row">
-          <div class="col-12" *ngIf="!event.content" i18n="empty event content@@emptyEventContent">
-            There is no content for this event.
-          </div>
           <div class="col-12" [innerHtml]="sanitizer.bypassSecurityTrustHtml(event.content)" *ngIf="event.content">
             loading ...
           </div>
@@ -49,17 +46,16 @@
         </div>
         <div class="row">
           <div class="col-12">
-            <button class="btn btn-link" (click)="isDetailView = false" *ngIf="hit">[see less]</button>
+            <button class="btn btn-link" (click)="isDetailView = false" *ngIf="hit">[<span [translate]="'seeLess'">see less</span>]</button>
           </div>
         </div>
         <hr>
         <div class="row">
           <div class="col-12">
-            <span><ng-container
-              i18n="period">Period</ng-container>: {{event.period ? event.period.value : 'N/A'}}</span>
+            <span [translate]="'period'">Period</span><span>: {{event.period ? event.period.value : 'N/A'}}</span>
           </div>
           <div class="col-12">
-            <span><ng-container i18n="catalog">Catalogs</ng-container>: {{!event.catalogs || !event.catalogs.length ? 'N/A' : ''}}</span>
+            <span [translate]="'catalogs'">Catalogs</span><span>: {{!event.catalogs || !event.catalogs.length ? 'N/A' : ''}}</span>
             <span style="margin-right: 5px;" class="badge badge-secondary"
                   *ngFor="let i of event.catalogs">{{i.value}}</span>
           </div>

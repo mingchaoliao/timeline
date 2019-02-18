@@ -1,6 +1,6 @@
 <ng-template #modal let-c="close" let-d="dismiss">
   <div class="modal-header">
-    <h4 class="modal-title" i18n>Confirmation</h4>
+    <h4 class="modal-title" [translate]="'confirmation'">Confirmation</h4>
     <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
       <span aria-hidden="true">&times;</span>
     </button>
@@ -11,7 +11,7 @@
         {{ content }}
       </div>
       <div class="col-12 text-right">
-        <button class="btn btn-outline-secondary" (click)="c('cancel')">Cancel</button>
+        <button class="btn btn-outline-secondary" (click)="c('cancel')" [translate]="'cancel'">Cancel</button>
         <ng-container *ngFor="let button of buttons">
           <button [class]="['btn', button['style']]" (click)="button.action">{{ button.text }}</button>
         </ng-container>

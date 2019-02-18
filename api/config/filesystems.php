@@ -42,6 +42,10 @@ return [
     */
 
     'disks' => [
+        'local-backup-disk' => [
+            'driver' => 'local',
+            'root' => '/backup',
+        ],
 
         'local' => [
             'driver' => 'local',

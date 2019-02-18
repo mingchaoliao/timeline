@@ -10,12 +10,10 @@ services:
     restart: always
     depends_on:
       - api
-      - web_build
     volumes:
       - ./etc/production/nginx/conf.d:/etc/nginx/conf.d
       - ./etc/production/nginx/ssl:/etc/nginx/ssl
       - apistorage:/apidist/storage
-      - webdist:/webdist
     networks:
       - api
   api:
@@ -26,6 +24,7 @@ services:
     restart: always
     volumes:
       - apistorage:/apidist/storage
+      - backup:/backup
     depends_on:
       - mysql
       - elasticsearch
@@ -36,21 +35,36 @@ services:
       - es
       - queue
   queue:
-    image: redis:5.0.3-alpine
+    image: redis:5.0.3-alpine3.9
     restart: always
     volumes:
       - queuedata1:/data
     networks:
       - queue
   horizon:
-    build:
-      context: api
-      dockerfile: horizon/Dockerfile
+    image: timeline_api
     user: "1500:1500"
     restart: always
+    command: php artisan horizon
     volumes:
       - apistorage:/apidist/storage
-      - ./api/.env:/apidist/.env
+      - backup:/backup
+    depends_on:
+      - mysql
+      - elasticsearch
+      - queue
+    networks:
+      - db
+      - es
+      - queue
+  scheduler:
+    image: timeline_api
+    user: "1500:1500"
+    restart: always
+    command: /usr/sbin/crond -f
+    volumes:
+      - apistorage:/apidist/storage
+      - backup:/backup
     depends_on:
       - mysql
       - elasticsearch
@@ -60,7 +74,7 @@ services:
       - es
       - queue
   mysql:
-    image: mysql:5.7.22
+    image: mysql:5.7.25
     command: --disable-partition-engine-check
     restart: always
     volumes:
@@ -82,18 +96,12 @@ services:
       discovery.type: single-node
     networks:
       - es
-  web_build:
-    build:
-      context: web
-      dockerfile: Dockerfile
-    volumes:
-      - webdist:/webdist
 volumes:
+  backup:
+    driver: local
   esdata1:
     driver: local
   dbdata1:
-    driver: local
-  webdist:
     driver: local
   apistorage:
     driver: local

@@ -64,4 +64,10 @@ Route::group(['middleware' => ['auth:api', 'editor']], function () {
 
 Route::group(['middleware' => ['auth:api', 'admin']], function () {
     Route::get('/user', 'UserController@getAllUser');
+    Route::get('/backup', 'BackupController@getAll');
+    Route::get('/backup/summary', 'BackupController@getSummary');
+    Route::get('/backup/status', 'BackupController@getStatus');
+    Route::post('/backup', 'BackupController@backupNow');
+    Route::delete('/backup/{name}', 'BackupController@delete');
+    Route::post('/backup/download/{name}', 'BackupController@download');
 });

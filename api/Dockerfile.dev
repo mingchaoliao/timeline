@@ -10,11 +10,12 @@ RUN apk update && apk add build-base \
   freetype-dev \
   libjpeg-turbo-dev \
   libpng-dev \
+  mysql-client \
   sudo \
   bash \
   autoconf
 
-RUN docker-php-ext-install mysqli mbstring pdo pdo_mysql tokenizer pcntl
+RUN docker-php-ext-install mysqli mbstring pdo pdo_mysql tokenizer pcntl zip
 RUN docker-php-ext-configure gd --with-gd --with-jpeg-dir=/usr/include/ --with-png-dir=/usr/include/
 RUN docker-php-ext-install gd
 
@@ -52,6 +53,8 @@ esac\n\
 # allow to execute composer installed executable package without specifying
 # absolute/relative path
 ENV PATH="/apidist/vendor/bin:${PATH}"
+
+RUN echo '* * * * * cd /apidist && php artisan schedule:run >> /dev/null 2>&1' | crontab -
 
 WORKDIR /apidist
 COPY . /apidist

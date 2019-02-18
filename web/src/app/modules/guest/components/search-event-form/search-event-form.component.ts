@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import * as moment from 'moment';
 import {AbstractControl, FormBuilder, FormGroup, ValidatorFn} from '@angular/forms';
 import {CommonService} from '../../../core/shared/services/common.service';
@@ -7,6 +7,9 @@ import {PeriodService} from '../../../core/shared/services/period.service';
 import {CatalogService} from '../../../core/shared/services/catalog.service';
 import {Notification} from '../../../core/shared/models/notification';
 import {NotificationEmitter} from '../../../core/shared/events/notificationEmitter';
+import {TranslateService} from "@ngx-translate/core";
+import {Subscription} from "rxjs";
+import {LanguageEmitter} from "../../../core/shared/events/languageEmitter";
 
 export function dateValidator(): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {
@@ -28,7 +31,7 @@ export function dateValidator(): ValidatorFn {
   templateUrl: './search-event-form.component.html',
   styleUrls: ['./search-event-form.component.css']
 })
-export class SearchEventFormComponent implements OnInit {
+export class SearchEventFormComponent implements OnInit, OnDestroy {
 
   @ViewChild('periodNgSelect') periodNgSelect;
   @ViewChild('catalogNgSelect') catalogNgSelect;
@@ -37,6 +40,8 @@ export class SearchEventFormComponent implements OnInit {
   public periodOptions: any = [];
   public catalogOptions: any = [];
   public isAdvancedSearchCollapsed = true;
+  private _contentSearchPlaceholder: string;
+  private _getSearchQueryTranslationSubscription: Subscription;
 
   constructor(
       private formBuilder: FormBuilder,
@@ -44,8 +49,17 @@ export class SearchEventFormComponent implements OnInit {
       private router: Router,
       private periodService: PeriodService,
       private catalogService: CatalogService,
-      private route: ActivatedRoute
+      private route: ActivatedRoute,
+      private _translate: TranslateService
   ) {
+    this.getSearchQueryTranslation();
+    LanguageEmitter.emitter.subscribe((language) => {
+      if (this._getSearchQueryTranslationSubscription) {
+        this._getSearchQueryTranslationSubscription.unsubscribe();
+      }
+      this.getSearchQueryTranslation();
+    });
+
     this.route.queryParams.subscribe(query => {
       if (query['startDate'] || query['endDate'] || query['period'] || query['catalogs']) {
         this.isAdvancedSearchCollapsed = false;
@@ -123,6 +137,11 @@ export class SearchEventFormComponent implements OnInit {
     }, 10);
   }
 
+
+  get contentSearchPlaceholder(): string {
+    return this._contentSearchPlaceholder;
+  }
+
   ngOnInit() {
   }
 
@@ -158,5 +177,17 @@ export class SearchEventFormComponent implements OnInit {
       };
       this.router.navigate(['/app/event/search'], navigationExtras);
     }
+  }
+
+  ngOnDestroy(): void {
+    if (this._getSearchQueryTranslationSubscription) {
+      this._getSearchQueryTranslationSubscription.unsubscribe();
+    }
+  }
+
+  private getSearchQueryTranslation() {
+    this._getSearchQueryTranslationSubscription = this._translate.get('enterSearchQuery').subscribe((res: string) => {
+      this._contentSearchPlaceholder = res;
+    });
   }
 }

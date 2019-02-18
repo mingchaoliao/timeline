@@ -143,7 +143,7 @@ class SearchParamsBuilder
         }
 
         $params = [
-            'index' => 'timelines',
+            'index' => 'event',
             'type' => 'event',
             'from' => $offset,
             'size' => $pageSize,

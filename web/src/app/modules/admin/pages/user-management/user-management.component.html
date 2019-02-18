@@ -2,15 +2,15 @@
   <table class="table table-striped table-responsive">
     <thead>
     <tr>
-      <th scope="col">ID</th>
-      <th scope="col">Name</th>
-      <th scope="col">Email</th>
-      <th scope="col">Admin</th>
-      <th scope="col">Editor</th>
-      <th scope="col">Active</th>
-      <th scope="col">Action</th>
-      <th scope="col">Created At</th>
-      <th scope="col">Updated At</th>
+      <th scope="col" [translate]="'accountId'">ID</th>
+      <th scope="col" [translate]="'name'">Name</th>
+      <th scope="col" [translate]="'email'">Email</th>
+      <th scope="col" [translate]="'admin'">Admin</th>
+      <th scope="col" [translate]="'editor'">Editor</th>
+      <th scope="col" [translate]="'active'">Active</th>
+      <th scope="col" [translate]="'action'">Action</th>
+      <th scope="col" [translate]="'createdAt'">Created At</th>
+      <th scope="col" [translate]="'updatedAt'">Updated At</th>
     </tr>
     </thead>
     <tbody>
@@ -52,7 +52,7 @@
         <button
           class="btn btn-outline-danger btn-sm"
           [disabled]="user.id === getCurrentUserId()"
-          (click)="resetPasswordModal.init(user.id)">Reset Password</button>
+          (click)="resetPasswordModal.init(user.id)" [translate]="'resetPassword'">Reset Password</button>
       </td>
       <td>{{ user.createdAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}}</td>
       <td>{{ user.updatedAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss'}}</td>

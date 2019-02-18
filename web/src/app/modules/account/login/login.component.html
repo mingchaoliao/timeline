@@ -5,34 +5,30 @@
         <div class="col">
           <form [formGroup]="loginForm">
             <div class="form-group">
-              <label for="email" i18n="email label@@emailLabel">Email</label>
+              <label for="email" [translate]="'email'">Email</label>
               <input type="text"
                      class="form-control"
                      id="email"
                      appAutofocus
-                     formControlName="email"
-                     i18n-placeholder="email placeholder@@emailInputPlaceholder"
-                     placeholder="Enter email">
+                     formControlName="email">
             </div>
             <div class="form-group">
-              <label for="password" i18n="password label@@passwordLabel">Password</label>
+              <label for="password" [translate]="'password'">Password</label>
               <input type="password"
                      class="form-control"
                      id="password"
-                     i18n-placeholder="password placeholder@@passwordPlaceholder"
-                     formControlName="password"
-                     placeholder="Enter password">
+                     formControlName="password">
             </div>
-            <app-button [style]="'btn-primary'" (onclick)="onSubmit($event)" i18n="sign in button text@@signInBtn">
-              Sign in
+            <app-button [style]="'btn-primary'" (onclick)="onSubmit($event)">
+              <span [translate]="'signIn'">Sign in</span>
             </app-button>
           </form>
         </div>
       </div>
       <div class="row mt-3">
         <div class="col">
-          <ng-container i18n>Don't have an account yet? </ng-container>
-          <a routerLink="/account/signup" i18n>Create one</a>
+          <span [translate]="'dontHaveAnAccountYet'">Don't have an account yet?</span>&nbsp;
+          <a [translate]="'createOne'" routerLink="/account/signup">Create one</a>
         </div>
       </div>
     </div>

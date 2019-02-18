@@ -12,6 +12,8 @@ namespace App\Timeline\Domain\Services;
 use App\Timeline\Domain\Models\Event;
 use App\Timeline\Domain\Repositories\EventRepository;
 use Carbon\Carbon;
+use Illuminate\Contracts\Filesystem\Factory;
+use Illuminate\Contracts\Filesystem\Filesystem;
 
 class TimelineService
 {
@@ -19,14 +21,26 @@ class TimelineService
      * @var EventRepository
      */
     private $eventRepository;
+    /**
+     * @var Filesystem
+     */
+    private $fs;
 
     /**
      * TimelineService constructor.
      * @param EventRepository $eventRepository
+     * @param Filesystem $fs
      */
-    public function __construct(EventRepository $eventRepository)
+    public function __construct(EventRepository $eventRepository, Filesystem $fs)
     {
         $this->eventRepository = $eventRepository;
+        $this->fs = $fs;
+    }
+
+    public function generateTimeline(): void
+    {
+        $timelineData = json_encode($this->getTimelineArray());
+        $this->fs->put('public/timeline.json', $timelineData);
     }
 
     public function getTimelineArray(): array

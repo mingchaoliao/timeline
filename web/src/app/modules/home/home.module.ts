@@ -5,6 +5,7 @@ import {HomeComponent} from './home.component';
 import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import {FormsModule} from '@angular/forms';
 import {RouterModule} from '@angular/router';
+import {TranslateModule} from "@ngx-translate/core";
 
 @NgModule({
   imports: [
@@ -12,7 +13,8 @@ import {RouterModule} from '@angular/router';
     CoreModule,
     NgbModule,
     FormsModule,
-    RouterModule
+    RouterModule,
+    TranslateModule.forChild()
   ],
   declarations: [HomeComponent]
 })

@@ -4,23 +4,25 @@
       <div class="row">
         <div [class]="isAdvancedSearchCollapsed ? 'col-lg-9 col-md-8 col-sm-12' : 'col-12'">
           <div class="form-group">
-            <label for="content" i18n="content" class="sr-only">Content</label>
+            <label for="content" class="sr-only">Content</label>
             <input type="text"
                    class="form-control"
                    id="content"
                    appAutofocus
-                   placeholder="Enter search query"
+                   [translate]="'content'"
+                   [placeholder]="contentSearchPlaceholder"
                    formControlName="content">
           </div>
         </div>
         <div class="col" *ngIf="isAdvancedSearchCollapsed">
-          <button type="submit" class="btn btn-outline-primary" (click)="onSearch()" i18n="search">Search
+          <button [translate]="'search'" type="submit" class="btn btn-outline-primary" (click)="onSearch()">Search
           </button>
 
           <button type="button" class="btn btn-link"
                   (click)="isAdvancedSearchCollapsed = !isAdvancedSearchCollapsed"
                   [attr.aria-expanded]="!isAdvancedSearchCollapsed"
                   aria-controls="advancedSearch"
+                  [translate]="'advancedSearch'"
                   style="font-size: 0.75rem;"
           >Advanced Search
           </button>
@@ -31,19 +33,18 @@
           <div class="row">
             <div class="col-md-6">
               <div class="form-group">
-                <label i18n="start date" for="startDate">Start Date</label>
+                <label for="startDate" [translate]="'startDate'">Start Date</label>
                 <app-event-datepicker id="startDate" formControlName="startDate"></app-event-datepicker>
               </div>
             </div>
             <div class="col-md-6">
               <div class="form-group">
-                <label for="period" i18n="period">Period</label>
+                <label for="period" [translate]="'period'">Period</label>
                 <ng-select [items]="periodOptions"
                            bindLabel="value"
                            bindValue="value"
                            formControlName="period"
                            notFoundText="No items found."
-                           i18n-notFoundText
                            id="period"
                            #periodNgSelect
                 >
@@ -52,14 +53,13 @@
             </div>
             <div class="col-md-6">
               <div class="form-group">
-                <label for="catalogs" i18n="catalog">Catalogs</label>
+                <label for="catalogs" [translate]="'catalogs'">Catalogs</label>
                 <ng-select [items]="catalogOptions"
                            bindLabel="value"
                            bindValue="value"
                            [multiple]="true"
                            formControlName="catalogs"
                            notFoundText="No items found."
-                           i18n-notFoundText
                            id="catalogs"
                            #catalogNgSelect
                 >
@@ -68,14 +68,15 @@
             </div>
             <div class="col-md-6 text-right mt-auto mb-3">
               <button type="submit"
+                      [translate]="'search'"
                       class="btn btn-outline-primary mt-auto"
-                      (click)="onSearch()"
-                      i18n="search">Search
+                      (click)="onSearch()">Search
               </button>
 
               <button type="button" class="btn btn-link"
                       (click)="isAdvancedSearchCollapsed = !isAdvancedSearchCollapsed"
                       [attr.aria-expanded]="!isAdvancedSearchCollapsed"
+                      [translate]="'basicSearch'"
                       aria-controls="advancedSearch"
                       style="font-size: 0.75rem;"
               >Basic Search

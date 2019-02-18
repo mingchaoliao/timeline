@@ -6,7 +6,8 @@ import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 import {LoginComponent} from './login/login.component';
 import {SignupComponent} from './signup/signup.component';
 import {ACCOUNT_ROUTING} from './account.route';
-import { ProfileComponent } from './profile/profile.component';
+import {ProfileComponent} from './profile/profile.component';
+import {TranslateModule} from "@ngx-translate/core";
 
 @NgModule({
   imports: [
@@ -15,7 +16,8 @@ import { ProfileComponent } from './profile/profile.component';
     FormsModule,
     ReactiveFormsModule,
     NgbModule,
-    ACCOUNT_ROUTING
+    ACCOUNT_ROUTING,
+    TranslateModule.forChild()
   ],
   declarations: [
     LoginComponent,

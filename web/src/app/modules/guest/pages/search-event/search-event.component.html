@@ -7,21 +7,21 @@
           [facets]="[
             {
               buckets: result.dates.reverse(),
-              name: 'Year',
+              name: yearLabelText,
               numDisplayed: 5,
               increment: 5,
               disable: route.snapshot.queryParams['startDate'] ? [route.snapshot.queryParams['startDate']] : []
             },
             {
               buckets: result.periods,
-              name: 'Period',
+              name: periodLabelText,
               numDisplayed: 5,
               increment: 5,
               disable: route.snapshot.queryParams['period'] ? [route.snapshot.queryParams['period']] : []
             },
             {
               buckets: result.catalogs,
-              name: 'Catalog',
+              name: catalogLabelText,
               numDisplayed: 5,
               increment: 5,
               disable: route.snapshot.queryParams['catalogs'] ? route.snapshot.queryParams['catalogs'].split(',') : []
@@ -32,7 +32,7 @@
       </div>
       <div class="col">
         <div class="row" *ngIf="!result.hits.length">
-          <div class="col-12 mt-3">
+          <div class="col-12 mt-3" [translate]="'noEventFound'">
             No event found.
           </div>
         </div>

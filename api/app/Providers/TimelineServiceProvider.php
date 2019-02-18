@@ -11,6 +11,7 @@ use App\Timeline\Domain\Repositories\ImageRepository;
 use App\Timeline\Domain\Repositories\PeriodRepository;
 use App\Timeline\Domain\Repositories\SearchEventRepository as SearchEventRepositoryInterface;
 use App\Timeline\Domain\Repositories\UserRepository;
+use App\Timeline\Domain\Services\BackupService;
 use App\Timeline\Domain\Services\CatalogService;
 use App\Timeline\Domain\Services\DateAttributeService;
 use App\Timeline\Domain\Services\EventService;
@@ -33,6 +34,7 @@ use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentImageR
 use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentPeriodRepository;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentUserRepository;
 use App\Timeline\Infrastructure\Persistence\Filesystem\FSImageFileRepository;
+use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Contracts\Validation\Factory;
@@ -203,7 +205,8 @@ class TimelineServiceProvider extends ServiceProvider
 
         $this->app->singleton(TimelineService::class, function () {
             return new TimelineService(
-                resolve(EventRepository::class)
+                resolve(EventRepository::class),
+                resolve(Filesystem::class)
             );
         });
 
@@ -217,6 +220,14 @@ class TimelineServiceProvider extends ServiceProvider
 
         $this->app->singleton(ValidatorFactory::class, function () {
             return new ValidatorFactory(resolve(Factory::class));
+        });
+
+        $this->app->singleton(BackupService::class, function () {
+            return new BackupService(
+                resolve(\Illuminate\Contracts\Filesystem\Factory::class),
+                resolve(Kernel::class),
+                resolve(UserService::class)
+            );
         });
     }
 }

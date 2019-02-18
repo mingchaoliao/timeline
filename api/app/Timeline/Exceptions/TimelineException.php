@@ -98,6 +98,9 @@ class TimelineException extends \Exception implements HttpExceptionInterface
     public const OLD_PASSWORD_IS_NOT_CORRECT = 10077;
     public const USER_WITH_EMAIL_DOES_NOT_FOUND = 10078;
     public const USER_ACCOUNT_IS_LOCKED = 10079;
+    public const FAILED_TO_BACKUP = 10080;
+    public const BACKUP_FILE_WITH_NAME_DOES_NOT_EXIST = 10081;
+    public const UNAUTHORIZED_TO_DOWNLOAD_BACKUP_FILE = 10082;
 
     /**
      * @var int
@@ -684,5 +687,36 @@ class TimelineException extends \Exception implements HttpExceptionInterface
         return new static(
             'user account has been inactivated, please contact system administrator.'
             , static::USER_ACCOUNT_IS_LOCKED, 400, [], $previous);
+    }
+
+    public static function ofFailedToBackup(\Throwable $previous = null): self
+    {
+        return new static(
+            'failed to backup application.'
+            , static::FAILED_TO_BACKUP, 500, [], $previous);
+    }
+
+    public static function ofBackupFileWithNameDoesNotExist(string $name, \Throwable $previous = null): self
+    {
+        return new static(sprintf(
+            'backup file with name "%s" does not exist',
+            $name
+        ), static::BACKUP_FILE_WITH_NAME_DOES_NOT_EXIST, 404, [], $previous);
+    }
+
+    public static function ofUnableToDeleteBackupWithName(string $name, \Throwable $previous = null): self
+    {
+        return new static(sprintf(
+            'unable to delete bakcup file with name "%s"',
+            $name
+        ), static::BACKUP_FILE_WITH_NAME_DOES_NOT_EXIST, 404, [], $previous);
+    }
+
+    public static function ofUnauthorizedToDownloadBackupFile(string $name, \Throwable $previous = null): self
+    {
+        return new static(sprintf(
+            'unauthorized to download backup file "%s"',
+            $name
+        ), static::UNAUTHORIZED_TO_DOWNLOAD_BACKUP_FILE, 403, [], $previous);
     }
 }
