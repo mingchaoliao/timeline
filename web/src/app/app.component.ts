@@ -4,9 +4,9 @@ import * as moment from 'moment';
 import {environment} from '../environments/environment';
 import {Router} from '@angular/router';
 import {AuthEmitter} from './modules/core/shared/events/authEmitter';
-import {TranslateService} from "@ngx-translate/core";
-import {Language} from "./modules/core/shared/models/language";
-import {LanguageEmitter} from "./modules/core/shared/events/languageEmitter";
+import {TranslateService} from '@ngx-translate/core';
+import {Language} from './modules/core/shared/models/language';
+import {LanguageEmitter} from './modules/core/shared/events/languageEmitter';
 
 @Component({
   selector: 'app-root',
@@ -68,12 +68,13 @@ export class AppComponent implements OnInit {
     const localStorageLanguageStr = localStorage.getItem('language');
     const defaultLanguage = this._languages.find((language: Language) => language.default);
     this._translateService.setDefaultLang(defaultLanguage.cultureLang);
-    if(localStorageLanguageStr) {
+    if (localStorageLanguageStr) {
       this._currentLanguage = JSON.parse(localStorageLanguageStr);
+      this._translateService.use(this._currentLanguage.cultureLang);
     } else {
       const browserCultureLang = this._translateService.getBrowserCultureLang().toLowerCase();
       this._currentLanguage = this._languages.find((language: Language) => language.cultureLang === browserCultureLang);
-      if (this.currentLanguage) {
+      if (this._currentLanguage) {
         this._translateService.use(this._currentLanguage.cultureLang);
       } else {
         this._currentLanguage = defaultLanguage;
