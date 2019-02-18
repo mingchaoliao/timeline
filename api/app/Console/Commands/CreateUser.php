@@ -13,7 +13,7 @@ class CreateUser extends Command
      *
      * @var string
      */
-    protected $signature = 'make:user {--name= : Full name} {--email= : Email address} {--password= : Password} {--access=user : Account access level, either admin, editor or user}';
+    protected $signature = 'make:user {--name= : Full name} {--email= : Email address} {--password= : Password} {--access= : Account access level, either admin, editor or user}';
 
     /**
      * The console command description.

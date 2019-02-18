@@ -104,15 +104,16 @@ class SearchEventRepository implements SearchEventRepositoryInterface
                 $hit['endDateStr'] === null ? null : new EventDate($hit['endDateStr']),
                 $hit['startDateAttribute'],
                 $hit['endDateAttribute'],
-                !$highlight ? $this->truncateContent($hit['content'], 0.5) : implode(' ... ', $highlight['content']) . ' ...'
+                !$highlight ? $this->truncateContent($hit['content']) : implode(' ... ', $highlight['content']) . ' ...'
             );
         }, $hits));
     }
 
-    private function truncateContent(string $content, float $ratio): string
+    private function truncateContent(string $content): string
     {
         $len = mb_strlen($content, 'UTF-8');
-        return mb_substr($content, 0, floor($len * $ratio), 'UTF-8') . ' ...';
+        $len = min($len, 80);
+        return mb_substr($content, 0, $len, 'UTF-8') . ' ...';
     }
 
     public function index(Event $event): void

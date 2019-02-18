@@ -163,4 +163,24 @@ export class Url {
   static getAllBackup() {
     return Url.getUrl('/backup');
   }
+
+  static downloadBackup(name: string) {
+    return Url.getUrl('/backup/download/' + name);
+  }
+
+  static deleteBackup(name: string) {
+    return Url.getUrl('/backup/' + name);
+  }
+
+  static getBackupSummary() {
+    return Url.getUrl('/backup/summary');
+  }
+
+  static getBackupStatus() {
+    return Url.getUrl('/backup/status');
+  }
+
+  static createBackup() {
+    return Url.getUrl('/backup');
+  }
 }

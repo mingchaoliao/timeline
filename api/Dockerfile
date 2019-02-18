@@ -28,6 +28,7 @@ USER root
 WORKDIR /apidist
 COPY --chown=tlmgr:tlmgr . /apidist
 RUN chown tlmgr:tlmgr /apidist
+RUN mkdir -p /backup && chown tlmgr:tlmgr /backup
 
 USER tlmgr
 RUN mkdir -p /apidist/storage/app/images

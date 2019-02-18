@@ -1,0 +1,32 @@
+<ng-template #downloadModal let-c="close" let-d="dismiss">
+  <div class="modal-header">
+    <h4 class="modal-title" [translate]="'downloadBackup'">Download Backup</h4>
+    <button type="button" class="close" aria-label="Close" (click)="d('Cross click')">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="accountVerificationForm">
+      <div class="row">
+        <div class="col-12" [translate]="'verifyAccountText'">
+          Backup file may contains confidential data. Answer the following to verify this account is yours.
+        </div>
+        <div class="col-12 mt-3">
+          <div class="form-group">
+            <label for="password"><span [translate]="'password'">Password</span>:</label>
+            <input type="password" id="password" appAutofocus formControlName="password" class="form-control">
+            <div class="error-container">{{ errorMessage }}</div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button class="btn btn-outline-secondary" (click)="c('cancel')" [translate]="'cancel'">Cancel</button>
+    <app-button [style]="'btn-outline-primary'"
+                (onclick)="download($event)"
+                [disabled]="!_accountVerificationForm.dirty || !_accountVerificationForm.valid">
+      <span [translate]="'download'">Download</span>
+    </app-button>
+  </div>
+</ng-template>

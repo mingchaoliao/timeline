@@ -43,9 +43,6 @@ services:
     command: php artisan horizon
     depends_on:
       - api
-      - mysql
-      - elasticsearch
-      - queue
   scheduler:
     image: timeline_api
     volumes:

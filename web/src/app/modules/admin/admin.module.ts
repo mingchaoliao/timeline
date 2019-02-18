@@ -20,6 +20,8 @@ import {ResetPasswordModalComponent} from './components/reset-password-modal/res
 import {TranslateModule} from "@ngx-translate/core";
 import { BackupComponent } from './pages/backup/backup.component';
 import {BackupService} from "./services/backup.service";
+import { BackupDownloadModalComponent } from './components/backup-download-modal/backup-download-modal.component';
+import { BackupDeleteConfirmationModalComponent } from './components/backup-delete-confirmation-modal/backup-delete-confirmation-modal.component';
 
 @NgModule({
     imports: [
@@ -45,7 +47,9 @@ import {BackupService} from "./services/backup.service";
         ConfigureDateAttributesComponent,
         ConfirmationModalComponent,
         ResetPasswordModalComponent,
-        BackupComponent
+        BackupComponent,
+        BackupDownloadModalComponent,
+        BackupDeleteConfirmationModalComponent
     ],
     providers: [
         BackupService

@@ -33,7 +33,7 @@ class BackupController extends Controller
     {
         $output = new BufferedOutput();
         $backup = $this->backupService->backupNow($output)->toValueArray();
-        $backup['message'] = $output->fetch();
+        $backup['log'] = $output->fetch();
         return response()->json($backup);
     }
 
