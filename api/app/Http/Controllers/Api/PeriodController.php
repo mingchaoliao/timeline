@@ -106,20 +106,15 @@ class PeriodController extends Controller
      * @param ValidatorFactory $validatorFactory
      * @return \Illuminate\Http\JsonResponse
      * @throws \App\Timeline\Exceptions\TimelineException
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function bulkCreate(Request $request, ValidatorFactory $validatorFactory)
     {
         $validatorFactory->validate($request->all(), [
-            'values' => 'required|array|filled',
+            'values' => 'array',
             'values.*' => 'string',
         ]);
 
-        $this->validate($request, [
-            'values' => 'array'
-        ]);
-
-        $values = $request->get('values');
+        $values = $request->get('values') ?? [];
 
         $response = $this->periodService->bulkCreate($values);
 

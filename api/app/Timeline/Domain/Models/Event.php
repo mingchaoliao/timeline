@@ -270,8 +270,16 @@ class Event extends BaseModel
             'unique_id' => (string)$this->getId()
         ];
 
+        if($this->getStartDateAttribute() !== null) {
+            $eventsConfig['start_date']['attribute'] = $this->getStartDateAttribute()->getValue();
+        }
+
         if ($this->getEndDate() !== null) {
             $eventsConfig['end_date'] = $this->getEndDate()->toDateArray();
+
+            if($this->getEndDateAttribute() !== null) {
+                $eventsConfig['end_date']['attribute'] = $this->getEndDateAttribute()->getValue();
+            }
         }
 
         $text = $this->getContent();

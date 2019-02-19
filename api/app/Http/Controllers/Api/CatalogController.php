@@ -110,11 +110,11 @@ class CatalogController extends Controller
     public function bulkCreate(Request $request, ValidatorFactory $validatorFactory)
     {
         $validatorFactory->validate($request->all(), [
-            'values' => 'required|array|filled',
+            'values' => 'array',
             'values.*' => 'string',
         ]);
 
-        $values = $request->get('values');
+        $values = $request->get('values') ?? [];
 
         $response = $this->catalogService->bulkCreate($values);
 

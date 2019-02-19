@@ -103,6 +103,10 @@ class PeriodService
      */
     public function bulkCreate(array $values): PeriodCollection
     {
+        if (empty($values)) {
+            return new PeriodCollection();
+        }
+
         try {
             $currentUser = $this->userService->getCurrentUser();
 

@@ -71,10 +71,10 @@ class EventController extends Controller
     public function bulkCreate(Request $request, ValidatorFactory $validatorFactory)
     {
         $validatorFactory->validate($request->all(), [
-            'events' => 'required|array|filled'
+            'events' => 'array'
         ]);
 
-        $createEventRequestCollection = CreateEventRequestCollection::createFromValueArray($request->all()['events']);
+        $createEventRequestCollection = CreateEventRequestCollection::createFromValueArray($request->all()['events'] ?? []);
 
         $event = $this->eventService->bulkCreate($createEventRequestCollection);
 
