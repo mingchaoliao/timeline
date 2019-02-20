@@ -43,7 +43,7 @@
               [isDetailView]="false"></app-event-card>
           </div>
         </div>
-        <div class="row" style="margin-top: 15px;" *ngIf="result.hits.length">
+        <div class="row mt-3" *ngIf="result.hits.length">
           <div class="col-12">
             <ngb-pagination
               class="d-flex justify-content-center"
@@ -51,6 +51,7 @@
               [(page)]="page"
               [maxSize]="maxSize"
               [boundaryLinks]="true"
+              [size]="maxSize === 3 ? 'sm' : ''"
               [rotate]="true"
               (pageChange)="onPageChange($event)"
               [pageSize]="pageSize"

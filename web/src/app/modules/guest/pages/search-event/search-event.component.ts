@@ -52,7 +52,7 @@ export class SearchEventComponent implements OnInit, AfterViewInit, OnDestroy {
   @HostListener('window:resize', ['$event'])
   onResize(event) {
     clearTimeout(this.windowResizeTimeoutId);
-    this.windowResizeTimeoutId = setTimeout(() => this.maxSize = this.getMaxSize(event.target.innerWidth), 2501000);
+    this.windowResizeTimeoutId = setTimeout(() => this.maxSize = this.getMaxSize(event.target.innerWidth), 250);
   }
 
   getMaxSize(width: number): number {

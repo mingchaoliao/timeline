@@ -193,8 +193,10 @@ export class UserService {
                 }).subscribe(
                     responseBody => {
                         try {
-                            UserService.currentUser = User.fromJson(responseBody);
-                            localStorage.setItem('access_token', responseBody['accessToken']);
+                            localStorage.setItem('access_token', responseBody['token']);
+                            this.getCurrentUser(true).subscribe(
+                                user => UserService.currentUser = User.fromJson(user)
+                            );
                             observer.next(UserService.currentUser);
                         } catch (e) {
                             observer.error(e);
