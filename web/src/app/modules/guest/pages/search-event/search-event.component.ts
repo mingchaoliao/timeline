@@ -4,11 +4,12 @@ import {CommonService} from '../../../core/shared/services/common.service';
 import {EventService} from '../../../core/shared/services/event.service';
 import {Notification} from '../../../core/shared/models/notification';
 import {NotificationEmitter} from '../../../core/shared/events/notificationEmitter';
-import {EventSearchResult} from '../../../core/shared/models/eventSearchResult';
-import {FacetLink} from '../../components/faceted-search-bar/faceted-search-bar.component';
+import {Bucket, EventSearchResult} from '../../../core/shared/models/eventSearchResult';
+import {Facet, FacetLink} from '../../components/faceted-search-bar/faceted-search-bar.component';
 import {TranslateService} from "@ngx-translate/core";
 import {Subscription} from "rxjs";
 import {LanguageEmitter} from "../../../core/shared/events/languageEmitter";
+import {PeriodService} from "../../../core/shared/services/period.service";
 
 @Component({
   selector: 'app-search-event',
@@ -28,13 +29,15 @@ export class SearchEventComponent implements OnInit, AfterViewInit, OnDestroy {
   private _getYearLabelTranslationSubscription: Subscription;
   private _getPeriodLabelTranslationSubscription: Subscription;
   private _getCatalogLabelTranslationSubscription: Subscription;
+  private _facets: Array<Facet>;
 
   constructor(
       private common: CommonService,
       public route: ActivatedRoute,
       private router: Router,
       private eventService: EventService,
-      private _translate: TranslateService
+      private _translate: TranslateService,
+      private _periodService: PeriodService
   ) {
     this.getTranslation();
 
@@ -143,6 +146,49 @@ export class SearchEventComponent implements OnInit, AfterViewInit, OnDestroy {
             }
             this.result = result;
             this.total = result.total;
+            this._facets = <Array<Facet>>[
+              {
+                buckets: result.dates.reverse(),
+                name: this._yearLabelText,
+                numDisplayed: 5,
+                increment: 5,
+                disable: this.route.snapshot.queryParams['startDate'] ? [this.route.snapshot.queryParams['startDate']] : []
+              },
+              {
+                buckets: result.periods,
+                name: this._periodLabelText,
+                numDisplayed: 15,
+                increment: 10,
+                disable: this.route.snapshot.queryParams['period'] ? [this.route.snapshot.queryParams['period']] : []
+              },
+              {
+                buckets: result.catalogs,
+                name: this._catalogLabelText,
+                numDisplayed: 15,
+                increment: 10,
+                disable: this.route.snapshot.queryParams['catalogs'] ? this.route.snapshot.queryParams['catalogs'].split(',') : []
+              }
+            ];
+
+            this._periodService.getTypeahead().subscribe(
+                typeahead => {
+                  const map = {};
+                  let i;
+                  for (i = 0; i < typeahead.length; i++) {
+                    map[typeahead[i].value] = i;
+                  }
+                  this._facets[1].buckets = this._facets[1].buckets.sort((a: Bucket, b: Bucket) => {
+                    const indexA = map[a.value] === undefined ? -1 : map[a.value];
+                    const indexB = map[b.value] === undefined ? -1 : map[b.value];
+                    if (indexA > indexB) {
+                      return 1;
+                    } else if (indexA < indexB) {
+                      return -1;
+                    }
+                    return 0;
+                  });
+                }
+            );
           },
           error => {
             NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to search events'));
@@ -204,5 +250,9 @@ export class SearchEventComponent implements OnInit, AfterViewInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.unsubscribeTranslation();
+  }
+
+  get facets(): Array<Facet> {
+    return this._facets;
   }
 }

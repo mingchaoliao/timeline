@@ -23,6 +23,10 @@ class Period extends BaseModel
      */
     private $value;
     /**
+     * @var Carbon|null
+     */
+    private $startDate;
+    /**
      * @var int
      */
     private $numberOfEvents;
@@ -55,6 +59,7 @@ class Period extends BaseModel
      * Period constructor.
      * @param PeriodId $id
      * @param string $value
+     * @param Carbon|null $startDate
      * @param int $numberOfEvents
      * @param UserId $createUserId
      * @param string $createUserName
@@ -63,10 +68,11 @@ class Period extends BaseModel
      * @param Carbon $createdAt
      * @param Carbon $updatedAt
      */
-    public function __construct(PeriodId $id, string $value, int $numberOfEvents, UserId $createUserId, string $createUserName, UserId $updateUserId, string $updateUserName, Carbon $createdAt, Carbon $updatedAt)
+    public function __construct(PeriodId $id, string $value, ?Carbon $startDate, int $numberOfEvents, UserId $createUserId, string $createUserName, UserId $updateUserId, string $updateUserName, Carbon $createdAt, Carbon $updatedAt)
     {
         $this->id = $id;
         $this->value = $value;
+        $this->startDate = $startDate;
         $this->numberOfEvents = $numberOfEvents;
         $this->createUserId = $createUserId;
         $this->createUserName = $createUserName;
@@ -90,6 +96,14 @@ class Period extends BaseModel
     public function getValue(): string
     {
         return $this->value;
+    }
+
+    /**
+     * @return Carbon|null
+     */
+    public function getStartDate(): ?Carbon
+    {
+        return $this->startDate;
     }
 
     /**
@@ -153,6 +167,7 @@ class Period extends BaseModel
         return [
             'id' => $this->getId()->getValue(),
             'value' => $this->getValue(),
+            'startDate' => $this->getStartDate() === null ? null : $this->getStartDate()->toIso8601String(),
             'numberOfEvents' => $this->getNumberOfEvents(),
             'createUserId' => $this->getCreateUserId()->getValue(),
             'createUserName' => $this->getCreateUserName(),

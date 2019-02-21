@@ -35,11 +35,15 @@ export class PeriodService {
         );
     }
 
-    public update(id: number, value: string): Observable<Period> {
+    public update(id: number, value: string, startDate: string): Observable<Period> {
+        if (!startDate) {
+            startDate = null;
+        }
         return new Observable<Period>(
             observer => {
                 this.httpService.put(Url.updatePeriod(id), {}, {
-                    value: value
+                    value: value,
+                    startDate: startDate
                 }).subscribe(
                     responseBody => observer.next(Period.fromJson(responseBody)),
                     error => observer.error(error),

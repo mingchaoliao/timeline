@@ -1,7 +1,8 @@
 <div class="container pb-3">
   <div class="row">
     <div class="col-12">
-      <button class="btn btn-outline-primary" (click)="createModalRef = modalService.open(createModal)"><span [translate]="'createNew'">Create New</span>
+      <button class="btn btn-outline-primary" (click)="createModalRef = modalService.open(createModal)"><span
+        [translate]="'createNew'">Create New</span>
       </button>
     </div>
   </div>
@@ -12,47 +13,65 @@
   </div>
   <div class="row" *ngIf="periods && periods.length !== 0">
     <div class="col-md-6 mt-3" *ngFor="let period of periods; let index = index">
-      <div class="card">
-        <div class="card-body">
-          <div class="row">
-            <div class="col-12">
-              <input type="text" #input (change)="period['dirty'] = $event.srcElement.value !== period.value"
-                     class="form-control" id="value_{{ period.id }}" [value]="period.value">
-            </div>
-          </div>
-          <div class="row mt-2">
-            <div class="col-12"><span [translate]="'numOfAssociatedEvents'"># of associated events</span>: <a routerLink="/app/event/search"
-                                                                                                              [queryParams]="{period: period.value}">{{
-              period.numberOfEvents }}</a></div>
-            <div class="col-12">
-              <div class="row">
-                <div class="col-12">
-                  <span [translate]="'createUser'">Create User</span>: {{ period.createUserName }}
-                </div>
-                <div class="col-12">
-                  <span [translate]="'createdAt'">Created At</span>: {{ period.createdAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }}
-                </div>
+      <form [formGroup]="updatePeriodFormMap.get(period.id)">
+        <div class="card">
+          <div class="card-body">
+            <div class="row">
+              <div class="col-12 form-group">
+                <label for="value_{{ period.id }}"><span [translate]="'period'">Period</span>:</label>
+
+                <input type="text"
+                       formControlName="value"
+                       class="form-control"
+                       id="value_{{ period.id }}">
               </div>
-              <div class="row">
-                <div class="col-12">
-                  <span [translate]="'updateUser'">Update User</span>: {{ period.updateUserName }}
-                </div>
-                <div class="col-12" *ngIf="period.createdAt != period.updatedAt">
-                  <span [translate]="'updatedAt'">Updated At</span>: {{ period.updatedAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }}
-                </div>
+              <div class="col-12 form-group">
+                <label for="startDate_{{ period.id }}"><span [translate]="'startDate'">Start Date</span>:</label>
+                <input type="text"
+                       formControlName="startDate"
+                       class="form-control"
+                       id="startDate_{{ period.id }}">
               </div>
             </div>
-          </div>
-          <div class="row mt-2">
-            <div class="col-12">
-              <app-button [style]="'btn-outline-primary mr-2'" *ngIf="period['dirty']"
-                          (onclick)="update($event, index, input.value)"><span [translate]="'save'">Save</span>
-              </app-button>
-              <app-button [style]="'btn-outline-danger'" (onclick)="delete($event, index)"><span [translate]="'delete'">Delete</span></app-button>
+            <div class="row mt-2">
+              <div class="col-12"><span [translate]="'numOfAssociatedEvents'"># of associated events</span>: <a
+                routerLink="/app/event/search"
+                [queryParams]="{period: period.value}">{{
+                period.numberOfEvents }}</a></div>
+              <div class="col-12">
+                <div class="row">
+                  <div class="col-12">
+                    <span [translate]="'createUser'">Create User</span>: {{ period.createUserName }}
+                  </div>
+                  <div class="col-12">
+                    <span
+                      [translate]="'createdAt'">Created At</span>: {{ period.createdAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }}
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-12">
+                    <span [translate]="'updateUser'">Update User</span>: {{ period.updateUserName }}
+                  </div>
+                  <div class="col-12" *ngIf="period.createdAt != period.updatedAt">
+                    <span
+                      [translate]="'updatedAt'">Updated At</span>: {{ period.updatedAt | amDateFormat: 'YYYY-MM-DD HH:mm:ss' }}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="row mt-2">
+              <div class="col-12">
+                <app-button [style]="'btn-outline-primary mr-2'"
+                            *ngIf="updatePeriodFormMap.get(period.id).dirty && updatePeriodFormMap.get(period.id).valid"
+                            (onclick)="update($event, index)"><span [translate]="'save'">Save</span>
+                </app-button>
+                <app-button [style]="'btn-outline-danger'" (onclick)="delete($event, index)"><span
+                  [translate]="'delete'">Delete</span></app-button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   </div>
 </div>

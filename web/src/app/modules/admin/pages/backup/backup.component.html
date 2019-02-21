@@ -61,6 +61,7 @@
           </tr>
         </tbody>
       </table>
+      <span *ngIf="backups && backups.length === 0" [translate]="'thereIsNoBackupFile'">There is no backup file.</span>
     </div>
   </div>
 </div>

@@ -58,8 +58,6 @@ Route::group(['middleware' => ['auth:api', 'editor']], function () {
 
     Route::post('/image', 'ImageController@upload');
     Route::put('/image/{id}', 'ImageController@update');
-
-
 });
 
 Route::group(['middleware' => ['auth:api', 'admin']], function () {

@@ -17,6 +17,7 @@ use App\Timeline\Domain\ValueObjects\PeriodId;
 use App\Timeline\Domain\ValueObjects\UserId;
 use App\Timeline\Exceptions\TimelineException;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Models\EloquentPeriod;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Facades\DB;
@@ -44,7 +45,7 @@ class EloquentPeriodRepository implements PeriodRepository
     {
         $payload = $this->periodModel
             ->select(['id', 'value'])
-            ->orderBy('id')
+            ->orderBy('start_date', 'asc')
             ->get()
             ->map(function (EloquentPeriod $period) {
                 return new Typeahead($period->getId(), $period->getValue());
@@ -60,7 +61,7 @@ class EloquentPeriodRepository implements PeriodRepository
     {
         $eloquentCollection = $this->periodModel
             ->with(['create_user', 'update_user'])
-            ->orderBy('id')
+            ->orderBy('start_date', 'asc')
             ->get();
 
         return $this->constructPeriodCollection($eloquentCollection);
@@ -129,11 +130,12 @@ class EloquentPeriodRepository implements PeriodRepository
     /**
      * @param PeriodId $id
      * @param string $value
+     * @param Carbon|null $startDate
      * @param UserId $updateUserId
      * @return Period
      * @throws TimelineException
      */
-    public function update(PeriodId $id, string $value, UserId $updateUserId): Period
+    public function update(PeriodId $id, string $value, ?Carbon $startDate, UserId $updateUserId): Period
     {
         try {
             $period = $this->periodModel->find($id->getValue());
@@ -144,7 +146,8 @@ class EloquentPeriodRepository implements PeriodRepository
 
             $period->update([
                 'value' => $value,
-                'update_user_id' => $updateUserId->getValue()
+                'update_user_id' => $updateUserId->getValue(),
+                'start_date' => $startDate
             ]);
 
             return $this->constructPeriod($this->periodModel->find($id->getValue()));
@@ -191,6 +194,7 @@ class EloquentPeriodRepository implements PeriodRepository
         return new Period(
             new PeriodId($eloquentPeriod->getId()),
             $eloquentPeriod->getValue(),
+            $eloquentPeriod->getStartDate(),
             $eloquentPeriod->getNumberOfEvents(),
             new UserId($eloquentPeriod->getCreateUserId()),
             $eloquentPeriod->getCreateUser()->getName(),
