@@ -163,7 +163,7 @@ class UserService
                 }
             }
 
-            if (!$currentUser->isAdmin() || $id->equalsWith($currentUser->getId())) {
+            if ($newPassword !== null & (!$currentUser->isAdmin() || $id->equalsWith($currentUser->getId()))) {
                 if (!$this->userRepository->validatePassword($id, $oldPassword)) {
                     throw TimelineException::ofOldPasswordIsNotCorrect();
                 }

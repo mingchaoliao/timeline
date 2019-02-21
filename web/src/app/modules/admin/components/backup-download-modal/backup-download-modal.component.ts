@@ -46,8 +46,8 @@ export class BackupDownloadModalComponent implements OnInit {
   download(loading: EventEmitter<boolean>) {
     loading.emit(true);
     this._backupService.download(this._backup.name, this._accountVerificationForm.value.password).subscribe(
-        (data: Response) => {
-          const blob = new Blob([data], {type: 'application/zip'});
+        data => {
+          const blob = new Blob([<BlobPart>data], {type: 'application/zip'});
           saveAs(blob, this._backup.name);
           loading.emit(false);
           this._downloadModalRef.close();
