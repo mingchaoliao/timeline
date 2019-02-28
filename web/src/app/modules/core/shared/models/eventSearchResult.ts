@@ -44,17 +44,19 @@ export class EventHit {
   private readonly _endDate: EventDate;
   private readonly _endDateAttribute: string;
   private readonly _content: string;
+  private readonly _highlight: string;
   private readonly _period: string;
   private readonly _catalogs: Array<string>;
   private readonly _images: Array<string>;
 
-  constructor(id: number, startDate: EventDate, startDateAttribute: string, endDate: EventDate, endDateAttribute: string, content: string, period: string, catalogs: Array<string>, images: Array<string>) {
+  constructor(id: number, startDate: EventDate, startDateAttribute: string, endDate: EventDate, endDateAttribute: string, content: string, highlight: string, period: string, catalogs: Array<string>, images: Array<string>) {
     this._id = id;
     this._startDate = startDate;
     this._startDateAttribute = startDateAttribute;
     this._endDate = endDate;
     this._endDateAttribute = endDateAttribute;
     this._content = content;
+    this._highlight = highlight;
     this._period = period;
     this._catalogs = catalogs;
     this._images = images;
@@ -84,6 +86,10 @@ export class EventHit {
     return this._content;
   }
 
+  get highlight(): string {
+    return this._highlight;
+  }
+
   get period(): string {
     return this._period;
   }
@@ -107,6 +113,7 @@ export class EventHit {
         EventDate.createFromString(json['endDate']),
         json['endDateAttribute'],
         json['content'],
+        json['highlight'],
         json['period'],
         json['catalogs'],
         json['images']

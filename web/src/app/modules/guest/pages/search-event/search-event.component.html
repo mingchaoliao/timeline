@@ -16,9 +16,7 @@
         </div>
         <div class="row">
           <div class="col-12" style="margin-top: 15px" *ngFor="let hit of result.hits">
-            <app-event-card
-              [hit]="hit"
-              [isDetailView]="false"></app-event-card>
+            <app-event-card [hit]="hit"></app-event-card>
           </div>
         </div>
         <div class="row mt-3" *ngIf="result.hits.length">

@@ -104,7 +104,8 @@ class SearchEventRepository implements SearchEventRepositoryInterface
                 $hit['endDateStr'] === null ? null : new EventDate($hit['endDateStr']),
                 $hit['startDateAttribute'],
                 $hit['endDateAttribute'],
-                !$highlight ? $hit['content'] : implode(' ... ', $highlight['content']) . ' ...',
+                $hit['content'],
+                $highlight ? implode(' ... ', $highlight['content']) . ' ...' : null,
                 $hit['period'],
                 $hit['catalogs'],
                 $hit['images']

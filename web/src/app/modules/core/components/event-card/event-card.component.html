@@ -21,10 +21,17 @@
       </div>
       <div class="card-body">
         <div class="row">
-          <div class="col-12" [innerHtml]="sanitizer.bypassSecurityTrustHtml(hit.content)"
+          <div class="col-12"
+               [innerHtml]="sanitizer.bypassSecurityTrustHtml(!hit.highlight || isDetailView ? hit.content : hit.highlight)"
                *ngIf="hit.content">
             loading ...
           </div>
+          <button class="btn btn-link"
+                  (click)="isDetailView = !isDetailView"
+                  *ngIf="hit.highlight && !isDetailView">[<span [translate]="seeMore">see more</span>]</button>
+          <button class="btn btn-link"
+                  (click)="isDetailView = !isDetailView"
+                  *ngIf="hit.highlight && isDetailView">[<span [translate]="seeLess">see less</span>]</button>
         </div>
         <div class="row">
           <div class="col-lg-6 col-xs-12 text-center" *ngFor="let image of hit.images">

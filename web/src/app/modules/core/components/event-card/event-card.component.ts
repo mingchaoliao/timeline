@@ -32,7 +32,7 @@ export class EventCardComponent implements OnInit {
 
   @Input() hit;
   @Input() isPreview = false;
-  @Input() isDetailView = true;
+  private _isDetailView = false;
   public isDeleted = false;
   private _language: Language;
 
@@ -63,6 +63,14 @@ export class EventCardComponent implements OnInit {
 
   get language(): Language {
     return this._language;
+  }
+
+  get isDetailView(): boolean {
+    return this._isDetailView;
+  }
+
+  set isDetailView(value: boolean) {
+    this._isDetailView = value;
   }
 
   public onDelete(id: number) {
