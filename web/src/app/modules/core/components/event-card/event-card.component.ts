@@ -18,6 +18,8 @@ import {NotificationEmitter} from '../../shared/events/notificationEmitter';
 import * as moment from 'moment';
 import {EventDate} from '../../shared/models/event';
 import {Image} from '../../shared/models/image';
+import {LanguageEmitter} from "../../shared/events/languageEmitter";
+import {Language} from "../../shared/models/language";
 
 @Component({
   selector: 'app-event-card',
@@ -29,10 +31,10 @@ import {Image} from '../../shared/models/image';
 export class EventCardComponent implements OnInit {
 
   @Input() hit;
-  @Input() event;
   @Input() isPreview = false;
   @Input() isDetailView = true;
   public isDeleted = false;
+  private _language: Language;
 
   constructor(
     public sanitizer: DomSanitizer,
@@ -55,26 +57,12 @@ export class EventCardComponent implements OnInit {
   }
 
   ngOnInit() {
+    this._language = LanguageEmitter.currentLanguage;
+    LanguageEmitter.emitter.subscribe((language: Language) => this._language = language);
   }
 
-  loadDetailView(loading: EventEmitter<boolean>, id: number) {
-    if (!this.event) {
-      loading.emit(true);
-      this.cdr.detectChanges();
-      this.eventService.getById(id).subscribe(
-        event => {
-          this.event = event;
-          loading.emit(false);
-          this.cdr.detectChanges();
-        },
-        e => {
-          loading.emit(false);
-          this.cdr.detectChanges();
-          // TODO: error
-        }
-      );
-    }
-    this.isDetailView = true;
+  get language(): Language {
+    return this._language;
   }
 
   public onDelete(id: number) {

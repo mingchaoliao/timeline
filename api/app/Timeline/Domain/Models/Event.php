@@ -257,7 +257,10 @@ class Event extends BaseModel
                 ->map(function (Catalog $catalog) {
                     return $catalog->getValue();
                 })->toArray(),
-            'content' => $this->getContent()
+            'content' => $this->getContent(),
+            'images' => $this->getImageCollection()->map(function (Image $image) {
+                return $image->getPath();
+            })->toArray()
         ];
 
         return $body;
@@ -270,14 +273,14 @@ class Event extends BaseModel
             'unique_id' => (string)$this->getId()
         ];
 
-        if($this->getStartDateAttribute() !== null) {
+        if ($this->getStartDateAttribute() !== null) {
             $eventsConfig['start_date']['attribute'] = $this->getStartDateAttribute()->getValue();
         }
 
         if ($this->getEndDate() !== null) {
             $eventsConfig['end_date'] = $this->getEndDate()->toDateArray();
 
-            if($this->getEndDateAttribute() !== null) {
+            if ($this->getEndDateAttribute() !== null) {
                 $eventsConfig['end_date']['attribute'] = $this->getEndDateAttribute()->getValue();
             }
         }

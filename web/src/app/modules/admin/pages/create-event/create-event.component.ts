@@ -173,7 +173,7 @@ export class CreateEventComponent
       ]],
       'endDateAttributeId': [this.eventData ? (this.eventData.endDateAttribute ? this.eventData.endDateAttribute.id : null) : null, []],
       'periodId': [this.eventData ? (this.eventData.period ? this.eventData.period.id : null) : null, []],
-      'catalogs': [this.eventData ? this.eventData.catalogs.map(function (catalog) {
+      'catalogIds': [this.eventData ? this.eventData.catalogs.map(function (catalog) {
         return catalog.id;
       }) : null, []],
       'content': [this.eventData ? this.eventData.content : null, [Validators.required]],
@@ -254,14 +254,16 @@ export class CreateEventComponent
     }
     this.previewData = this.createEventForm.value;
 
-    this.previewData.period = {
-      value: this.periodOptionsKvMap[this.previewData.periodId]
-    };
+    this.previewData.period = this.periodOptionsKvMap[this.previewData.periodId];
+    this.previewData.startDate = EventDate.createFromString(this.previewData.startDate);
+    if(this.previewData.endDate) {
+      this.previewData.endDate = EventDate.createFromString(this.previewData.endDate);
+    }
 
-    if (this.previewData.catalogs) {
+    if (this.previewData.catalogIds) {
       const catalogs = [];
-      for (const i of this.previewData.catalogs) {
-        catalogs.push({value: this.catalogOptionsKvMap[i]});
+      for (const i of this.previewData.catalogIds) {
+        catalogs.push(this.catalogOptionsKvMap[i]);
       }
       this.previewData.catalogs = catalogs;
     }

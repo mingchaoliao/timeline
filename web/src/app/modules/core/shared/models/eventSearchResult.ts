@@ -22,8 +22,8 @@ export class Bucket {
       return null;
     }
     return new Bucket(
-      json['value'],
-      json['count']
+        json['value'],
+        json['count']
     );
   }
 
@@ -44,14 +44,20 @@ export class EventHit {
   private readonly _endDate: EventDate;
   private readonly _endDateAttribute: string;
   private readonly _content: string;
+  private readonly _period: string;
+  private readonly _catalogs: Array<string>;
+  private readonly _images: Array<string>;
 
-  constructor(id: number, startDate: EventDate, startDateAttribute: string, endDate: EventDate, endDateAttribute: string, content: string) {
+  constructor(id: number, startDate: EventDate, startDateAttribute: string, endDate: EventDate, endDateAttribute: string, content: string, period: string, catalogs: Array<string>, images: Array<string>) {
     this._id = id;
     this._startDate = startDate;
     this._startDateAttribute = startDateAttribute;
     this._endDate = endDate;
     this._endDateAttribute = endDateAttribute;
     this._content = content;
+    this._period = period;
+    this._catalogs = catalogs;
+    this._images = images;
   }
 
   get id(): number {
@@ -78,17 +84,32 @@ export class EventHit {
     return this._content;
   }
 
+  get period(): string {
+    return this._period;
+  }
+
+  get catalogs(): Array<string> {
+    return this._catalogs;
+  }
+
+  get images(): Array<string> {
+    return this._images;
+  }
+
   static fromJson(json: any): EventHit {
     if (json === null) {
       return null;
     }
     return new EventHit(
-      json['id'],
-      EventDate.createFromString(json['startDate']),
-      json['startDateAttribute'],
-      EventDate.createFromString(json['endDate']),
-      json['endDateAttribute'],
-      json['content']
+        json['id'],
+        EventDate.createFromString(json['startDate']),
+        json['startDateAttribute'],
+        EventDate.createFromString(json['endDate']),
+        json['endDateAttribute'],
+        json['content'],
+        json['period'],
+        json['catalogs'],
+        json['images']
     );
   }
 
@@ -142,11 +163,11 @@ export class EventSearchResult {
       return null;
     }
     return new EventSearchResult(
-      EventHit.fromArray(json['hits']),
-      Bucket.fromArray(json['periods']),
-      Bucket.fromArray(json['catalogs']),
-      Bucket.fromArray(json['dates']),
-      total
+        EventHit.fromArray(json['hits']),
+        Bucket.fromArray(json['periods']),
+        Bucket.fromArray(json['catalogs']),
+        Bucket.fromArray(json['dates']),
+        total
     );
   }
 }
