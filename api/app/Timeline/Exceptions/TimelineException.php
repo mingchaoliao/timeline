@@ -216,7 +216,7 @@ class TimelineException extends \Exception implements HttpExceptionInterface
 
     public static function ofUnableToRetrievePeriods(\Throwable $previous = null): self
     {
-        return new static('unable to retrieve periods', static::UNABLE_TO_RETRIEVE_PERIODS, 500, [], self::UNABLE_TO_RETRIEVE_PERIODS, $previous);
+        return new static('unable to retrieve periods', static::UNABLE_TO_RETRIEVE_PERIODS, 500, [], $previous);
     }
 
     public static function ofDuplicatedDateAttributeValue(string $value, \Throwable $previous = null): self
