@@ -36,13 +36,10 @@
         <div class="row">
           <div class="col-lg-6 col-xs-12 text-center" *ngFor="let image of hit.images">
             <div class="row">
-              <div class="col-12 hit-image-container">
+              <div class="col-12 event-image-container">
                 <img class="hit-image"
                      src="{{getImageUrl(image)}}"
-                     alt="Image {{ image.id }}">
-              </div>
-              <div class="col-12 event-image-container">
-                {{ image.description }}
+                     alt="Image {{ image }}">
               </div>
             </div>
           </div>
