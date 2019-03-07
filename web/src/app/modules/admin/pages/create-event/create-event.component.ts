@@ -252,7 +252,7 @@ export class CreateEventComponent
     if (!this.createEventForm.valid) {
       return;
     }
-    this.previewData = this.createEventForm.value;
+    this.previewData = JSON.parse(JSON.stringify(this.createEventForm.value));
 
     this.previewData.period = this.periodOptionsKvMap[this.previewData.periodId];
     this.previewData.startDate = EventDate.createFromString(this.previewData.startDate);
