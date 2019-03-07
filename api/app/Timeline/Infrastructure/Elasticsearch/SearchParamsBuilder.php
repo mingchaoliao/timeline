@@ -158,12 +158,14 @@ class SearchParamsBuilder
                 'aggregations' => [
                     'period' => [
                         'terms' => [
-                            'field' => 'period'
+                            'field' => 'period',
+                            'size' => '30' // TODO: refactor to use pagination in the future
                         ]
                     ],
                     'catalogs' => [
                         'terms' => [
-                            'field' => 'catalogs'
+                            'field' => 'catalogs',
+                            'size' => '200' // TODO: refactor to use pagination in the future
                         ]
                     ],
                     'startDate' => [
