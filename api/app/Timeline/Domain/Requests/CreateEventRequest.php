@@ -80,7 +80,7 @@ class CreateEventRequest implements JsonSerializable
      * @return CreateEventRequest
      * @throws TimelineException
      */
-    public static function ecreateFromValueArray(?array $data): ?self
+    public static function createFromValueArray(?array $data): ?self
     {
         if($data === null) {
             return null;
@@ -89,7 +89,7 @@ class CreateEventRequest implements JsonSerializable
         resolve(ValidatorFactory::class)->validate($data, [
             'startDate' => 'required|event_date',
             'startDateAttributeId' => 'nullable|date_attribute:startDate|id',
-            'endDate' => 'nullable|event_date',
+            'endDate' => 'nullable|event_date|after:startDate',
             'endDateAttributeId' => 'nullable|date_attribute:endDate|id',
             'content' => 'required|string',
             'periodId' => 'nullable|id',

@@ -14,7 +14,7 @@ import {Image} from '../../../core/shared/models/image';
 
 export function dateValidator(): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {
-    return control.value == null || EventDate.validate(control.value) ? null : {'invalidDate': {value: control.value}};
+    return !control.value || EventDate.validate(control.value) ? null : {'invalidDate': {value: control.value}};
   };
 }
 
@@ -178,7 +178,7 @@ export class CreateEventComponent
       'content': [this.eventData ? this.eventData.content : null, [Validators.required]],
       'images': [this.eventData ? this.eventData.images.map(function (image) {
         return Image.fromJson(image);
-      }) : null, [imageValidator()]]
+      }) : [], [imageValidator()]]
     });
   }
 
