@@ -80,7 +80,7 @@ class CreateEventRequest implements JsonSerializable
      * @return CreateEventRequest
      * @throws TimelineException
      */
-    public static function createFromValueArray(?array $data): ?self
+    public static function ecreateFromValueArray(?array $data): ?self
     {
         if($data === null) {
             return null;
