@@ -322,7 +322,7 @@ class EloquentEventRepository implements EventRepository
                 })->toArray();
 
                 $linkImageIds = array_diff($request->getImageIds()->toValueArray(), $existingImageIds);
-                $linkImages = $this->imageRepository->getRawByIds(new ImageIdCollection($linkImageIds));
+                $linkImages = $this->imageRepository->getRawByIds(ImageIdCollection::createFromArray($linkImageIds));
                 $eloquentEvent->images()->saveMany($linkImages);
                 $eloquentEvent->catalogs()->sync($request->getCatalogIds()->toValueArray());
 

@@ -19,6 +19,9 @@ class EloquentPeriod extends Model
 {
     protected $table = 'periods';
     protected $guarded = [];
+    protected $dates = [
+        'start_date'
+    ];
 
     public function getId(): int
     {
@@ -28,6 +31,10 @@ class EloquentPeriod extends Model
     public function getValue(): string
     {
         return $this->value;
+    }
+
+    public function getStartDate(): ?Carbon {
+        return $this->start_date;
     }
 
     public function getCreateUserId(): int

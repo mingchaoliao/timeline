@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Timeline\App\Validators\ValidatorFactory;
 use App\Timeline\Domain\Services\PeriodService;
 use App\Timeline\Domain\ValueObjects\PeriodId;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class PeriodController extends Controller
@@ -73,12 +74,14 @@ class PeriodController extends Controller
 
         $validatorFactory->validate($params, [
             'id' => 'required|id',
-            'value' => 'required|string'
+            'value' => 'required|string',
+            'startDate' => 'nullable|date_format:Y-m-d'
         ]);
 
         $period = $this->periodService->update(
             PeriodId::createFromString($id),
-            $request->get('value')
+            $request->get('value'),
+            $request->get('startDate') === null ? null : Carbon::createFromFormat('Y-m-d', $request->get('startDate'))
         );
 
         return response()->json($period);
@@ -106,20 +109,15 @@ class PeriodController extends Controller
      * @param ValidatorFactory $validatorFactory
      * @return \Illuminate\Http\JsonResponse
      * @throws \App\Timeline\Exceptions\TimelineException
-     * @throws \Illuminate\Validation\ValidationException
      */
     public function bulkCreate(Request $request, ValidatorFactory $validatorFactory)
     {
         $validatorFactory->validate($request->all(), [
-            'values' => 'required|array|filled',
+            'values' => 'array',
             'values.*' => 'string',
         ]);
 
-        $this->validate($request, [
-            'values' => 'array'
-        ]);
-
-        $values = $request->get('values');
+        $values = $request->get('values') ?? [];
 
         $response = $this->periodService->bulkCreate($values);
 

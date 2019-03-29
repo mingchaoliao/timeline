@@ -4,29 +4,7 @@
     <div class="row mt-3">
       <div class="col-md-3" *ngIf="result && (result.dates.length || result.periods.length || result.catalogs.length)">
         <app-faceted-search-bar
-          [facets]="[
-            {
-              buckets: result.dates.reverse(),
-              name: yearLabelText,
-              numDisplayed: 5,
-              increment: 5,
-              disable: route.snapshot.queryParams['startDate'] ? [route.snapshot.queryParams['startDate']] : []
-            },
-            {
-              buckets: result.periods,
-              name: periodLabelText,
-              numDisplayed: 5,
-              increment: 5,
-              disable: route.snapshot.queryParams['period'] ? [route.snapshot.queryParams['period']] : []
-            },
-            {
-              buckets: result.catalogs,
-              name: catalogLabelText,
-              numDisplayed: 5,
-              increment: 5,
-              disable: route.snapshot.queryParams['catalogs'] ? route.snapshot.queryParams['catalogs'].split(',') : []
-            }
-          ]"
+          [facets]="facets"
           (onFacetChange)="onFacetChange($event)"
         ></app-faceted-search-bar>
       </div>
@@ -38,12 +16,10 @@
         </div>
         <div class="row">
           <div class="col-12" style="margin-top: 15px" *ngFor="let hit of result.hits">
-            <app-event-card
-              [hit]="hit"
-              [isDetailView]="false"></app-event-card>
+            <app-event-card [hit]="hit"></app-event-card>
           </div>
         </div>
-        <div class="row" style="margin-top: 15px;" *ngIf="result.hits.length">
+        <div class="row mt-3" *ngIf="result.hits.length">
           <div class="col-12">
             <ngb-pagination
               class="d-flex justify-content-center"
@@ -51,6 +27,7 @@
               [(page)]="page"
               [maxSize]="maxSize"
               [boundaryLinks]="true"
+              [size]="maxSize === 3 ? 'sm' : ''"
               [rotate]="true"
               (pageChange)="onPageChange($event)"
               [pageSize]="pageSize"

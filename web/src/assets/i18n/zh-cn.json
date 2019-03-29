@@ -85,6 +85,7 @@
 	"startDateIsInvalid": "无效的开始日期",
 	"startDateIsRequired": "开始日期不能为空",
 	"submit": "提交",
+	"thereIsNoBackupFile": "没有备份文件",
 	"thereIsNoCatalog": "没有标签。",
 	"thereIsNoDateAttribute": "没有日期属性。",
 	"thereIsNoPeriod": "没有时期。",

@@ -1,6 +1,7 @@
 export class Period {
     private readonly _id: number;
     private readonly _value: string;
+    private readonly _startDate: Date;
     private readonly _numberOfEvents: number;
     private readonly _createUserId: number;
     private readonly _createUserName: string;
@@ -9,9 +10,10 @@ export class Period {
     private readonly _createdAt: Date;
     private readonly _updatedAt: Date;
 
-    constructor(id: number, value: string, numberOfEvents: number, createUserId: number, createUserName: string, updateUserId: number, updateUserName: string, createdAt: Date, updatedAt: Date) {
+    constructor(id: number, value: string, startDate: Date, numberOfEvents: number, createUserId: number, createUserName: string, updateUserId: number, updateUserName: string, createdAt: Date, updatedAt: Date) {
         this._id = id;
         this._value = value;
+        this._startDate = startDate;
         this._numberOfEvents = numberOfEvents;
         this._createUserId = createUserId;
         this._createUserName = createUserName;
@@ -27,6 +29,10 @@ export class Period {
 
     get value(): string {
         return this._value;
+    }
+
+    get startDate(): Date {
+        return this._startDate;
     }
 
     get numberOfEvents(): number {
@@ -64,6 +70,7 @@ export class Period {
         return new Period(
             json['id'],
             json['value'],
+            json['startDate'],
             json['numberOfEvents'],
             json['createUserId'],
             json['createUserName'],

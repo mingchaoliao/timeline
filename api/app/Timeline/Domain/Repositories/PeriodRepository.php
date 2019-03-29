@@ -14,6 +14,7 @@ use App\Timeline\Domain\Collections\TypeaheadCollection;
 use App\Timeline\Domain\Models\Period;
 use App\Timeline\Domain\ValueObjects\PeriodId;
 use App\Timeline\Domain\ValueObjects\UserId;
+use Carbon\Carbon;
 
 interface PeriodRepository
 {
@@ -25,7 +26,7 @@ interface PeriodRepository
 
     public function bulkCreate(array $values, UserId $createUserId): PeriodCollection;
 
-    public function update(PeriodId $id, string $value, UserId $updateUserId): Period;
+    public function update(PeriodId $id, string $value, ?Carbon $startDate, UserId $updateUserId): Period;
 
     public function delete(PeriodId $id): bool;
 }

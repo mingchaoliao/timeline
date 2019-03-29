@@ -1,6 +1,5 @@
 import {Component, EventEmitter, Input, OnInit} from '@angular/core';
 import {AbstractControl, FormBuilder, FormGroup, ValidatorFn, Validators} from '@angular/forms';
-import * as moment from 'moment';
 import {NgbModal} from '@ng-bootstrap/ng-bootstrap';
 import {CommonService} from '../../../core/shared/services/common.service';
 import {Router} from '@angular/router';
@@ -15,7 +14,7 @@ import {Image} from '../../../core/shared/models/image';
 
 export function dateValidator(): ValidatorFn {
   return (control: AbstractControl): { [key: string]: any } | null => {
-    return control.value == null || EventDate.validate(control.value) ? null : {'invalidDate': {value: control.value}};
+    return !control.value || EventDate.validate(control.value) ? null : {'invalidDate': {value: control.value}};
   };
 }
 
@@ -43,7 +42,7 @@ export function imageValidator(): ValidatorFn {
   styleUrls: ['./create-event.component.css']
 })
 export class CreateEventComponent
-  implements OnInit {
+    implements OnInit {
 
   @Input() eventData = null;
 
@@ -67,14 +66,14 @@ export class CreateEventComponent
       this.addPeriodLoading = true;
       setTimeout(() => {
         this.periodService.create(name).subscribe(
-          period => {
-            resolve({id: period.id, value: period.value});
-            this.addPeriodLoading = false;
-            NotificationEmitter.emit(Notification.success('Create successfully'));
-          },
-          error => {
-            NotificationEmitter.emit(Notification.error(error.error.message, `Unable to create period "${name}"`));
-          }
+            period => {
+              resolve({id: period.id, value: period.value});
+              this.addPeriodLoading = false;
+              NotificationEmitter.emit(Notification.success('Create successfully'));
+            },
+            error => {
+              NotificationEmitter.emit(Notification.error(error.error.message, `Unable to create period "${name}"`));
+            }
         );
       }, 100);
     });
@@ -85,14 +84,14 @@ export class CreateEventComponent
       this.addDateAttributeLoading = true;
       setTimeout(() => {
         this.dateAttributeService.create(name).subscribe(
-          dateAttribute => {
-            resolve({id: dateAttribute.id, value: dateAttribute.value});
-            this.addDateAttributeLoading = false;
-            NotificationEmitter.emit(Notification.success('Create successfully'));
-          },
-          error => {
-            NotificationEmitter.emit(Notification.error(error.error.message, `Unable to create date attribute "${name}"`));
-          }
+            dateAttribute => {
+              resolve({id: dateAttribute.id, value: dateAttribute.value});
+              this.addDateAttributeLoading = false;
+              NotificationEmitter.emit(Notification.success('Create successfully'));
+            },
+            error => {
+              NotificationEmitter.emit(Notification.error(error.error.message, `Unable to create date attribute "${name}"`));
+            }
         );
       }, 100);
     });
@@ -103,57 +102,57 @@ export class CreateEventComponent
       this.addCatalogLoading = true;
       setTimeout(() => {
         this.catalogService.create(name).subscribe(
-          catalog => {
-            resolve({id: catalog.id, value: catalog.value});
-            this.addCatalogLoading = false;
-            NotificationEmitter.emit(Notification.success('Create successfully'));
-          },
-          error => {
-            NotificationEmitter.emit(Notification.error(error.error.message, `Unable to create catalog "${name}"`));
-          }
+            catalog => {
+              resolve({id: catalog.id, value: catalog.value});
+              this.addCatalogLoading = false;
+              NotificationEmitter.emit(Notification.success('Create successfully'));
+            },
+            error => {
+              NotificationEmitter.emit(Notification.error(error.error.message, `Unable to create catalog "${name}"`));
+            }
         );
       }, 100);
     });
   };
 
   constructor(
-    public formBuilder: FormBuilder,
-    private modalService: NgbModal,
-    private common: CommonService,
-    private router: Router,
-    private periodService: PeriodService,
-    private catalogService: CatalogService,
-    private dateAttributeService: DateAttributeService,
-    private eventService: EventService
+      public formBuilder: FormBuilder,
+      private modalService: NgbModal,
+      private common: CommonService,
+      private router: Router,
+      private periodService: PeriodService,
+      private catalogService: CatalogService,
+      private dateAttributeService: DateAttributeService,
+      private eventService: EventService
   ) {
     this.dateAttributeService.get().subscribe(
-      dateAttributes => {
-        this.dateAttributeOptions = dateAttributes;
-        this.dateAttributeOptionsKvMap = this.common.kvArrToMap(this.dateAttributeOptions);
-      },
-      error => {
-        NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve date attributes'));
-      }
+        dateAttributes => {
+          this.dateAttributeOptions = dateAttributes;
+          this.dateAttributeOptionsKvMap = this.common.kvArrToMap(this.dateAttributeOptions);
+        },
+        error => {
+          NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve date attributes'));
+        }
     );
 
     this.periodService.getTypeahead().subscribe(
-      periods => {
-        this.periodOptions = periods;
-        this.periodOptionsKvMap = this.common.kvArrToMap(this.periodOptions);
-      },
-      error => {
-        NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve periods'));
-      }
+        periods => {
+          this.periodOptions = periods;
+          this.periodOptionsKvMap = this.common.kvArrToMap(this.periodOptions);
+        },
+        error => {
+          NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve periods'));
+        }
     );
 
     this.catalogService.get().subscribe(
-      catalogs => {
-        this.catalogOptions = catalogs;
-        this.catalogOptionsKvMap = this.common.kvArrToMap(this.catalogOptions);
-      },
-      error => {
-        NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve catalogs'));
-      }
+        catalogs => {
+          this.catalogOptions = catalogs;
+          this.catalogOptionsKvMap = this.common.kvArrToMap(this.catalogOptions);
+        },
+        error => {
+          NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve catalogs'));
+        }
     );
   }
 
@@ -173,13 +172,13 @@ export class CreateEventComponent
       ]],
       'endDateAttributeId': [this.eventData ? (this.eventData.endDateAttribute ? this.eventData.endDateAttribute.id : null) : null, []],
       'periodId': [this.eventData ? (this.eventData.period ? this.eventData.period.id : null) : null, []],
-      'catalogs': [this.eventData ? this.eventData.catalogs.map(function (catalog) {
+      'catalogIds': [this.eventData ? this.eventData.catalogs.map(function (catalog) {
         return catalog.id;
       }) : null, []],
       'content': [this.eventData ? this.eventData.content : null, [Validators.required]],
       'images': [this.eventData ? this.eventData.images.map(function (image) {
         return Image.fromJson(image);
-      }) : null, [imageValidator()]]
+      }) : [], [imageValidator()]]
     });
   }
 
@@ -206,43 +205,45 @@ export class CreateEventComponent
     if (!this.createEventForm.valid) {
       return;
     }
-    const requestBody = this.createEventForm.value;
-
-    if (requestBody.images === null) {
-      requestBody.images = [];
-    }
-    for (let i = 0; i < requestBody.images; i++) {
-      requestBody.images[i] = {
-        path: requestBody.images[i].path,
-        description: requestBody.images[i].description
-      };
-    }
+    const formValues = this.createEventForm.value;
+    const requestBody = {
+      startDate: formValues['startDate'],
+      startDateAttributeId: formValues['startDateAttributeId'],
+      endDate: formValues.endDate,
+      endDateAttributeId: formValues.endDateAttributeId,
+      content: formValues.content,
+      periodId: formValues.periodId,
+      catalogIds: formValues.catalogIds,
+      imageIds: formValues.images.map((image: Image) => {
+        return image.id;
+      })
+    };
 
     if (this.eventData !== null && this.eventData['id']) {
       loading.emit(true);
       this.eventService.update(Number(this.eventData['id']), requestBody).subscribe(
-        event => {
-          this.router.navigate(['/']);
-          loading.emit(false);
-          NotificationEmitter.emit(Notification.success('Update successfully'));
-        },
-        error => {
-          loading.emit(false);
-          NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to update event'));
-        }
+          event => {
+            this.router.navigate(['/']);
+            loading.emit(false);
+            NotificationEmitter.emit(Notification.success('Update successfully'));
+          },
+          error => {
+            loading.emit(false);
+            NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to update event'));
+          }
       );
     } else {
       loading.emit(true);
       this.eventService.create(requestBody).subscribe(
-        event => {
-          this.router.navigate(['/']);
-          loading.emit(false);
-          NotificationEmitter.emit(Notification.success('Create successfully'));
-        },
-        error => {
-          loading.emit(false);
-          NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to create event'));
-        }
+          event => {
+            this.router.navigate(['/']);
+            loading.emit(false);
+            NotificationEmitter.emit(Notification.success('Create successfully'));
+          },
+          error => {
+            loading.emit(false);
+            NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to create event'));
+          }
       );
     }
   }
@@ -252,16 +253,18 @@ export class CreateEventComponent
     if (!this.createEventForm.valid) {
       return;
     }
-    this.previewData = this.createEventForm.value;
+    this.previewData = JSON.parse(JSON.stringify(this.createEventForm.value));
 
-    this.previewData.period = {
-      value: this.periodOptionsKvMap[this.previewData.periodId]
-    };
+    this.previewData.period = this.periodOptionsKvMap[this.previewData.periodId];
+    this.previewData.startDate = EventDate.createFromString(this.previewData.startDate);
+    if (this.previewData.endDate) {
+      this.previewData.endDate = EventDate.createFromString(this.previewData.endDate);
+    }
 
-    if (this.previewData.catalogs) {
+    if (this.previewData.catalogIds) {
       const catalogs = [];
-      for (const i of this.previewData.catalogs) {
-        catalogs.push({value: this.catalogOptionsKvMap[i]});
+      for (const i of this.previewData.catalogIds) {
+        catalogs.push(this.catalogOptionsKvMap[i]);
       }
       this.previewData.catalogs = catalogs;
     }

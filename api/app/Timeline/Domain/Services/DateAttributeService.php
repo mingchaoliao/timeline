@@ -100,6 +100,10 @@ class DateAttributeService
      */
     public function bulkCreate(array $values): DateAttributeCollection
     {
+        if (empty($values)) {
+            return new DateAttributeCollection();
+        }
+
         try {
             $currentUser = $this->userService->getCurrentUser();
 

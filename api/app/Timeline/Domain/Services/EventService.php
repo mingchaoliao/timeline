@@ -28,7 +28,6 @@ use App\Timeline\Domain\ValueObjects\CatalogId;
 use App\Timeline\Domain\ValueObjects\EventId;
 use App\Timeline\Domain\ValueObjects\PeriodId;
 use App\Timeline\Exceptions\TimelineException;
-use Illuminate\Support\Facades\Log;
 
 class EventService
 {
@@ -171,6 +170,10 @@ class EventService
      */
     public function bulkCreate(CreateEventRequestCollection $requests): EventCollection
     {
+        if (empty($requests)) {
+            return new EventCollection();
+        }
+
         try {
             $currentUser = $this->userService->getCurrentUser();
 

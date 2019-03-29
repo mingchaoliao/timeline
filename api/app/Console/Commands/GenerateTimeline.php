@@ -46,6 +46,7 @@ class GenerateTimeline extends Command
     {
         try {
             $this->timelineService->generateTimeline();
+            $this->info('Timeline data file generated');
         } catch (\Exception $e) {
             $message = sprintf(
                 'failed to generate timeline. Reason: %s',

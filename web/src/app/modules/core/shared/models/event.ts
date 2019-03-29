@@ -2,7 +2,6 @@ import {DateAttribute} from './dateAttribute';
 import {Period} from './period';
 import {Catalog} from './catalog';
 import {Image} from './image';
-import {NgbDateStruct} from '@ng-bootstrap/ng-bootstrap';
 import * as moment from 'moment';
 
 export class EventDate {
@@ -40,6 +39,19 @@ export class EventDate {
     }
     this._format = format;
     this._moment = moment(date, format);
+  }
+
+  getDisplayedDate(locale: string = 'en-us'): string {
+    if(locale === 'zh-cn') {
+      if(this._format === EventDate.FORMAT_YEAR) {
+        return this._moment.format('YYYY年');
+      } else if(this._format === EventDate.FORMAT_YEAR_MONTH) {
+        return this._moment.format('YYYY年M月');
+      }
+      return this._moment.format('YYYY年MM月D日');
+    }
+
+    return this._date;
   }
 
   get date(): string {
@@ -165,19 +177,19 @@ export class Event {
       return null;
     }
     return new Event(
-      json['id'],
-      EventDate.createFromString(json['startDate']),
-      EventDate.createFromString(json['endDate']),
-      DateAttribute.fromJson(json['startDateAttribute']),
-      DateAttribute.fromJson(json['endDateAttribute']),
-      Period.fromJson(json['period']),
-      Catalog.fromArray(json['catalogCollection']),
-      json['content'],
-      Image.fromArray(json['imageCollection']),
-      json['createUserId'],
-      json['updateUserId'],
-      json['createdAt'],
-      json['updatedAt']
+        json['id'],
+        EventDate.createFromString(json['startDate']),
+        EventDate.createFromString(json['endDate']),
+        DateAttribute.fromJson(json['startDateAttribute']),
+        DateAttribute.fromJson(json['endDateAttribute']),
+        Period.fromJson(json['period']),
+        Catalog.fromArray(json['catalogCollection']),
+        json['content'],
+        Image.fromArray(json['imageCollection']),
+        json['createUserId'],
+        json['updateUserId'],
+        json['createdAt'],
+        json['updatedAt']
     );
   }
 

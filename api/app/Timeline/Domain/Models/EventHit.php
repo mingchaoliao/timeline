@@ -37,17 +37,37 @@ class EventHit extends BaseModel
      * @var string
      */
     private $content;
+    /**
+     * @var string|null
+     */
+    private $highlight;
+    /**
+     * @var string|null
+     */
+    private $period;
+    /**
+     * @var array
+     */
+    private $catalogs;
+    /**
+     * @var array
+     */
+    private $images;
 
     /**
-     * EventSearchResult constructor.
+     * EventHit constructor.
      * @param EventId $id
      * @param EventDate $startDate
      * @param EventDate|null $endDate
-     * @param null|string $startDateAttribute
-     * @param null|string $endDateAttribute
+     * @param string|null $startDateAttribute
+     * @param string|null $endDateAttribute
      * @param string $content
+     * @param string|null $highlight
+     * @param string|null $period
+     * @param array $catalogs
+     * @param array $images
      */
-    public function __construct(EventId $id, EventDate $startDate, ?EventDate $endDate, ?string $startDateAttribute, ?string $endDateAttribute, string $content)
+    public function __construct(EventId $id, EventDate $startDate, ?EventDate $endDate, ?string $startDateAttribute, ?string $endDateAttribute, string $content, ?string $highlight, ?string $period, array $catalogs, array $images)
     {
         $this->id = $id;
         $this->startDate = $startDate;
@@ -55,6 +75,10 @@ class EventHit extends BaseModel
         $this->startDateAttribute = $startDateAttribute;
         $this->endDateAttribute = $endDateAttribute;
         $this->content = $content;
+        $this->highlight = $highlight;
+        $this->period = $period;
+        $this->catalogs = $catalogs;
+        $this->images = $images;
     }
 
     /**
@@ -105,6 +129,38 @@ class EventHit extends BaseModel
         return $this->content;
     }
 
+    /**
+     * @return string|null
+     */
+    public function getHighlight(): ?string
+    {
+        return $this->highlight;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPeriod(): ?string
+    {
+        return $this->period;
+    }
+
+    /**
+     * @return array
+     */
+    public function getCatalogs(): array
+    {
+        return $this->catalogs;
+    }
+
+    /**
+     * @return array
+     */
+    public function getImages(): array
+    {
+        return $this->images;
+    }
+
     public function toValueArray(): array
     {
         return [
@@ -113,7 +169,11 @@ class EventHit extends BaseModel
             'endDate' => $this->getEndDate() === null ? null : (string)$this->getEndDate(),
             'startDateAttribute' => $this->getStartDateAttribute(),
             'endDateAttribute' => $this->getEndDateAttribute(),
-            'content' => $this->getContent()
+            'highlight' => $this->getHighlight(),
+            'content' => $this->getContent(),
+            'period' => $this->getPeriod(),
+            'catalogs' => $this->getCatalogs(),
+            'images' => $this->getImages()
         ];
     }
 }

@@ -17,6 +17,7 @@ use App\Timeline\Domain\Models\Period;
 use App\Timeline\Domain\Repositories\PeriodRepository;
 use App\Timeline\Domain\ValueObjects\PeriodId;
 use App\Timeline\Exceptions\TimelineException;
+use Carbon\Carbon;
 
 class PeriodService
 {
@@ -103,6 +104,10 @@ class PeriodService
      */
     public function bulkCreate(array $values): PeriodCollection
     {
+        if (empty($values)) {
+            return new PeriodCollection();
+        }
+
         try {
             $currentUser = $this->userService->getCurrentUser();
 
@@ -125,10 +130,11 @@ class PeriodService
     /**
      * @param PeriodId $id
      * @param string $value
+     * @param Carbon|null $startDate
      * @return Period
      * @throws TimelineException
      */
-    public function update(PeriodId $id, string $value): Period
+    public function update(PeriodId $id, string $value, ?Carbon $startDate): Period
     {
         try {
             $currentUser = $this->userService->getCurrentUser();
@@ -141,7 +147,7 @@ class PeriodService
                 throw TimelineException::ofUnauthorizedToUpdatePeriod($id);
             }
 
-            $period = $this->periodRepository->update($id, $value, $currentUser->getId());
+            $period = $this->periodRepository->update($id, $value, $startDate, $currentUser->getId());
 
             TimelinePeriodUpdated::dispatch($id);
 

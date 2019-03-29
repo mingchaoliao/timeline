@@ -12,7 +12,6 @@ namespace App\Timeline\Domain\Services;
 use App\Events\TimelineCatalogDeleted;
 use App\Events\TimelineCatalogUpdated;
 use App\Timeline\Domain\Collections\CatalogCollection;
-use App\Timeline\Domain\Collections\CatalogIdCollection;
 use App\Timeline\Domain\Collections\TypeaheadCollection;
 use App\Timeline\Domain\Models\Catalog;
 use App\Timeline\Domain\Repositories\CatalogRepository;
@@ -104,6 +103,10 @@ class CatalogService
      */
     public function bulkCreate(array $values): CatalogCollection
     {
+        if (empty($values)) {
+            return new CatalogCollection();
+        }
+
         try {
             $currentUser = $this->userService->getCurrentUser();
 
@@ -172,7 +175,7 @@ class CatalogService
                 throw TimelineException::ofUnableToDeleteCatalog($id);
             }
 
-            $success =  $this->catalogRepository->delete($id);
+            $success = $this->catalogRepository->delete($id);
 
             TimelineCatalogDeleted::dispatch();
 
