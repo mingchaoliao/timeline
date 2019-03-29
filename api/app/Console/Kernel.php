@@ -5,6 +5,7 @@ namespace App\Console;
 use App\Jobs\CleanUnlinkedImages;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Illuminate\Support\Facades\Log;
 
 class Kernel extends ConsoleKernel
 {
@@ -30,6 +31,7 @@ class Kernel extends ConsoleKernel
         if(env('APP_BACKUP', false) === true) {
             $schedule->command('backup:clean')->daily()->at('01:00');
             $schedule->command('backup:run')->daily()->at('02:00');
+            Log::info('DB/storage backup complete');
         }
     }
 
