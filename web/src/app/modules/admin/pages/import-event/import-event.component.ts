@@ -24,14 +24,14 @@ export class ImportEventComponent implements OnInit {
   public percentage = 0;
 
   constructor(
-    private formBuilder: FormBuilder,
-    private common: CommonService,
-    private router: Router,
-    private periodService: PeriodService,
-    private catalogService: CatalogService,
-    private dateAttributeService: DateAttributeService,
-    private imageService: ImageService,
-    private eventService: EventService
+      private formBuilder: FormBuilder,
+      private common: CommonService,
+      private router: Router,
+      private periodService: PeriodService,
+      private catalogService: CatalogService,
+      private dateAttributeService: DateAttributeService,
+      private imageService: ImageService,
+      private eventService: EventService
   ) {
     this.importEventForm = formBuilder.group({
       'files': [null, []],
@@ -71,16 +71,16 @@ export class ImportEventComponent implements OnInit {
 
     if (!hasError) {
       this.common.getSpreadsheetData(spreadsheetFile).subscribe(
-        s => {
-          try {
-            this.eventsData = this.parseSpreadsheetData(s, photoFilesKvMap);
-          } catch (e) {
-            this.errorMessage = e.message;
+          s => {
+            try {
+              this.eventsData = this.parseSpreadsheetData(s, photoFilesKvMap);
+            } catch (e) {
+              this.errorMessage = e.message;
+            }
+          },
+          e => {
+            this.errorMessage = 'Failed to parse data in the spreadsheet';
           }
-        },
-        e => {
-          this.errorMessage = 'Failed to parse data in the spreadsheet';
-        }
       );
     }
 
@@ -90,11 +90,13 @@ export class ImportEventComponent implements OnInit {
     this.isUploading = true;
     const imageKvMap: any = {};
 
+    const imageDescriptionMap = this.getImageDescriptionMap(this.eventsData);
+
     const uploadImageObservers: Array<Observable<any>> = [];
     for (const file of this.files) {
       const fileName = file.name;
       if (this.common.isImageFile(fileName)) {
-        uploadImageObservers.push(this.imageService.upload(file));
+        uploadImageObservers.push(this.imageService.upload(file, imageDescriptionMap[fileName]));
       }
     }
 
@@ -124,66 +126,66 @@ export class ImportEventComponent implements OnInit {
     let numOfCompletedTasks = 0;
 
     concat(...uploadImageObservers).subscribe(
-      imageUploadReceipt => {
-        imageKvMap[imageUploadReceipt.originalName] = imageUploadReceipt.id;
-        this.percentage = Math.floor(++numOfCompletedTasks / totalNumOfTasks * 100);
-      },
-      e => this.handleError(e),
-      () => {
-        this.percentage = Math.floor(++numOfCompletedTasks / totalNumOfTasks * 100);
-        this.periodService.bulkCreate(periods).subscribe(
-          periods => {
-            periodKvMap = this.common.kvArrToMap(
-              periods,
-              'value',
-              'id'
-            );
-            this.percentage = Math.floor(++numOfCompletedTasks / totalNumOfTasks * 100);
-            this.dateAttributeService.bulkCreate(dateAttributes).subscribe(
-              dateAttributes => {
-                dateAttributeKvMap = this.common.kvArrToMap(dateAttributes, 'value', 'id');
+        imageUploadReceipt => {
+          imageKvMap[imageUploadReceipt.originalName] = imageUploadReceipt.id;
+          this.percentage = Math.floor(++numOfCompletedTasks / totalNumOfTasks * 100);
+        },
+        e => this.handleError(e),
+        () => {
+          this.percentage = Math.floor(++numOfCompletedTasks / totalNumOfTasks * 100);
+          this.periodService.bulkCreate(periods).subscribe(
+              periods => {
+                periodKvMap = this.common.kvArrToMap(
+                    periods,
+                    'value',
+                    'id'
+                );
                 this.percentage = Math.floor(++numOfCompletedTasks / totalNumOfTasks * 100);
-                this.catalogService.bulkCreate(catalogs).subscribe(
-                  catalogs => {
-                    catalogKvMap = this.common.kvArrToMap(catalogs, 'value', 'id');
-                    for (let i = 0; i < this.eventsData.length; i++) {
-                      if (this.eventsData[i]['startDateAttribute']) {
-                        this.eventsData[i]['startDateAttributeId'] = dateAttributeKvMap[this.eventsData[i]['startDateAttribute']];
-                      }
-                      if (this.eventsData[i]['endDateAttribute']) {
-                        this.eventsData[i]['endDateAttributeId'] = dateAttributeKvMap[this.eventsData[i]['endDateAttribute']];
-                      }
-                      if (this.eventsData[i]['period']) {
-                        this.eventsData[i]['periodId'] = periodKvMap[this.eventsData[i]['period']];
-                      }
-                      this.eventsData[i].imageIds = [];
-                      for (let j = 0; j < this.eventsData[i].images.length; j++) {
-                        this.eventsData[i].imageIds.push(imageKvMap[this.eventsData[i].images[j]['name']]);
-                      }
-                      this.eventsData[i].catalogIds = [];
-                      for (let j = 0; j < this.eventsData[i].catalogs.length; j++) {
-                        this.eventsData[i].catalogIds.push(catalogKvMap[this.eventsData[i].catalogs[j]]);
-                      }
-                      this.eventsData[i].catalogs = this.eventsData[i].catalogIds;
-                    }
-                    this.percentage = Math.floor(++numOfCompletedTasks / totalNumOfTasks * 100);
-                    this.eventService.bulkCreate(this.eventsData).subscribe(
-                      success => {
-                        this.percentage = Math.floor(++numOfCompletedTasks / totalNumOfTasks * 100);
-                        this.router.navigate(['/']);
-                      },
-                      e => this.handleError(e)
-                    );
-                  },
-                  e => this.handleError(e)
+                this.dateAttributeService.bulkCreate(dateAttributes).subscribe(
+                    dateAttributes => {
+                      dateAttributeKvMap = this.common.kvArrToMap(dateAttributes, 'value', 'id');
+                      this.percentage = Math.floor(++numOfCompletedTasks / totalNumOfTasks * 100);
+                      this.catalogService.bulkCreate(catalogs).subscribe(
+                          catalogs => {
+                            catalogKvMap = this.common.kvArrToMap(catalogs, 'value', 'id');
+                            for (let i = 0; i < this.eventsData.length; i++) {
+                              if (this.eventsData[i]['startDateAttribute']) {
+                                this.eventsData[i]['startDateAttributeId'] = dateAttributeKvMap[this.eventsData[i]['startDateAttribute']];
+                              }
+                              if (this.eventsData[i]['endDateAttribute']) {
+                                this.eventsData[i]['endDateAttributeId'] = dateAttributeKvMap[this.eventsData[i]['endDateAttribute']];
+                              }
+                              if (this.eventsData[i]['period']) {
+                                this.eventsData[i]['periodId'] = periodKvMap[this.eventsData[i]['period']];
+                              }
+                              this.eventsData[i].imageIds = [];
+                              for (let j = 0; j < this.eventsData[i].images.length; j++) {
+                                this.eventsData[i].imageIds.push(imageKvMap[this.eventsData[i].images[j]['name']]);
+                              }
+                              this.eventsData[i].catalogIds = [];
+                              for (let j = 0; j < this.eventsData[i].catalogs.length; j++) {
+                                this.eventsData[i].catalogIds.push(catalogKvMap[this.eventsData[i].catalogs[j]]);
+                              }
+                              this.eventsData[i].catalogs = this.eventsData[i].catalogIds;
+                            }
+                            this.percentage = Math.floor(++numOfCompletedTasks / totalNumOfTasks * 100);
+                            this.eventService.bulkCreate(this.eventsData).subscribe(
+                                success => {
+                                  this.percentage = Math.floor(++numOfCompletedTasks / totalNumOfTasks * 100);
+                                  this.router.navigate(['/']);
+                                },
+                                e => this.handleError(e)
+                            );
+                          },
+                          e => this.handleError(e)
+                      );
+                    },
+                    e => this.handleError(e)
                 );
               },
               e => this.handleError(e)
-            );
-          },
-          e => this.handleError(e)
-        );
-      }
+          );
+        }
     );
   }
 
@@ -309,5 +311,17 @@ export class ImportEventComponent implements OnInit {
 
   private makeError(col: string, row: number, message: string) {
     throw new Error(message + ' (at cell ' + col + row + ')');
+  }
+
+  private getImageDescriptionMap(eventsData: Array<any>) {
+    const map = {};
+
+    for (const data of eventsData) {
+      for (const image of data.images) {
+        map[image['name']] = image['description'];
+      }
+    }
+
+    return map;
   }
 }
