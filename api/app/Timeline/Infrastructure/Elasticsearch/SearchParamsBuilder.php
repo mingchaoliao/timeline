@@ -187,6 +187,9 @@ class SearchParamsBuilder
             $params['body']['sort'] = [
                 'startDateTo' => 'desc'
             ];
+            $params['body']['sort'] = [
+                'startDateStr' => 'desc'
+            ];
         }
 
         return $params;
