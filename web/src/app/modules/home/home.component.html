@@ -1,7 +1,29 @@
-<div class="container-fluid">
+<div class="container">
   <div class="row">
-    <div class="col p-0" style="height: calc(100vh - 135px);">
-      <div id="timeline" style="width: 100%; height: 100%;"></div>
+    <div class="col-12">
+      <ul class="timeline">
+        <li *ngFor="let hit of hits">
+          <p>
+            {{hit.startDate.getDisplayedDate(language.cultureLang)}}{{hit.startDateAttribute ? ' ' + hit.startDateAttribute : ''}} {{hit.endDate ? '~' : ''}} {{hit.endDate ? hit.endDate.getDisplayedDate(language.cultureLang) : ''}} {{hit.endDateAttribute}}
+          </p>
+          <div [innerHtml]="sanitizer.bypassSecurityTrustHtml(hit.content)"
+               *ngIf="hit.content">
+            loading ...
+          </div>
+          <div class="row mt-2">
+            <div class="col-lg-6 col-xs-12 text-center" *ngFor="let image of hit.images; let i = index;">
+              <div class="row">
+                <div class="col-12 event-image-container">
+                  <img class="hit-image"
+                       src="{{getImageUrl(image)}}"
+                       alt="Image {{ image }}">
+                  <p class="mt-2" style="font-size: 0.8rem;">{{hit.imageDescriptions[i]}}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </li>
+      </ul>
     </div>
   </div>
 </div>
