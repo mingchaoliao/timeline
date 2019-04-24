@@ -48,8 +48,9 @@ export class EventHit {
   private readonly _period: string;
   private readonly _catalogs: Array<string>;
   private readonly _images: Array<string>;
+  private readonly _imageDescriptions: Array<string>;
 
-  constructor(id: number, startDate: EventDate, startDateAttribute: string, endDate: EventDate, endDateAttribute: string, content: string, highlight: string, period: string, catalogs: Array<string>, images: Array<string>) {
+  constructor(id: number, startDate: EventDate, startDateAttribute: string, endDate: EventDate, endDateAttribute: string, content: string, highlight: string, period: string, catalogs: Array<string>, images: Array<string>, imageDescriptions: Array<string>) {
     this._id = id;
     this._startDate = startDate;
     this._startDateAttribute = startDateAttribute;
@@ -60,6 +61,7 @@ export class EventHit {
     this._period = period;
     this._catalogs = catalogs;
     this._images = images;
+    this._imageDescriptions = imageDescriptions;
   }
 
   get id(): number {
@@ -102,6 +104,10 @@ export class EventHit {
     return this._images;
   }
 
+  get imageDescriptions(): Array<string> {
+    return this._imageDescriptions;
+  }
+
   static fromJson(json: any): EventHit {
     if (json === null) {
       return null;
@@ -116,7 +122,8 @@ export class EventHit {
         json['highlight'],
         json['period'],
         json['catalogs'],
-        json['images']
+        json['images'],
+        json['imageDescriptions']
     );
   }
 

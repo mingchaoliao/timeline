@@ -53,6 +53,10 @@ class EventHit extends BaseModel
      * @var array
      */
     private $images;
+    /**
+     * @var array
+     */
+    private $imageDescriptions;
 
     /**
      * EventHit constructor.
@@ -66,8 +70,9 @@ class EventHit extends BaseModel
      * @param string|null $period
      * @param array $catalogs
      * @param array $images
+     * @param array $imageDescriptions
      */
-    public function __construct(EventId $id, EventDate $startDate, ?EventDate $endDate, ?string $startDateAttribute, ?string $endDateAttribute, string $content, ?string $highlight, ?string $period, array $catalogs, array $images)
+    public function __construct(EventId $id, EventDate $startDate, ?EventDate $endDate, ?string $startDateAttribute, ?string $endDateAttribute, string $content, ?string $highlight, ?string $period, array $catalogs, array $images, array $imageDescriptions)
     {
         $this->id = $id;
         $this->startDate = $startDate;
@@ -79,6 +84,7 @@ class EventHit extends BaseModel
         $this->period = $period;
         $this->catalogs = $catalogs;
         $this->images = $images;
+        $this->imageDescriptions = $imageDescriptions;
     }
 
     /**
@@ -161,6 +167,14 @@ class EventHit extends BaseModel
         return $this->images;
     }
 
+    /**
+     * @return array
+     */
+    public function getImageDescriptions(): array
+    {
+        return $this->imageDescriptions;
+    }
+
     public function toValueArray(): array
     {
         return [
@@ -173,7 +187,8 @@ class EventHit extends BaseModel
             'content' => $this->getContent(),
             'period' => $this->getPeriod(),
             'catalogs' => $this->getCatalogs(),
-            'images' => $this->getImages()
+            'images' => $this->getImages(),
+            'imageDescriptions' => $this->getImageDescriptions()
         ];
     }
 }

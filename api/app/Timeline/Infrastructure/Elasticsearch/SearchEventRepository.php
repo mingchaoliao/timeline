@@ -108,7 +108,8 @@ class SearchEventRepository implements SearchEventRepositoryInterface
                 $highlight ? implode(' ... ', $highlight['content']) . ' ...' : null,
                 $hit['period'],
                 $hit['catalogs'],
-                $hit['images']
+                $hit['images'],
+                $hit['imageDescriptions']
             );
         }, $hits));
     }
@@ -219,6 +220,9 @@ class SearchEventRepository implements SearchEventRepositoryInterface
                                 'type' => 'keyword'
                             ],
                             'images' => [
+                                'type' => 'keyword'
+                            ],
+                            'imageDescriptions' => [
                                 'type' => 'keyword'
                             ],
                             'content' => [

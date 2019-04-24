@@ -61,7 +61,7 @@ export class EventImageInputComponent
   }
 
   changeFile(event, index) {
-    const newImageFile = event.srcElement.files[0];
+    const newImageFile = event.target.files[0];
     this.imageUploadStatus[index] = 'Uploading';
     this.imageService.upload(newImageFile).subscribe(
       image => {
@@ -91,6 +91,9 @@ export class EventImageInputComponent
   }
 
   addImage() {
+    if (this.images.length && this.images[this.images.length - 1] === null) {
+      return;
+    }
     this.images.push(null);
   }
 

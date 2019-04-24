@@ -185,7 +185,7 @@ class SearchParamsBuilder
 
         if ($content === null) {
             $params['body']['sort'] = [
-                'startDateFrom' => 'desc'
+                'startDateTo' => 'desc'
             ];
         }
 

@@ -48,7 +48,7 @@ export class EventDate {
       } else if(this._format === EventDate.FORMAT_YEAR_MONTH) {
         return this._moment.format('YYYY年M月');
       }
-      return this._moment.format('YYYY年MM月D日');
+      return this._moment.format('YYYY年M月D日');
     }
 
     return this._date;
@@ -85,7 +85,7 @@ export class EventDate {
     if (this._format !== EventDate.FORMAT_YEAR_MONTH_DAY) {
       return null;
     }
-    return this._moment.day();
+    return this._moment.date();
   }
 }
 

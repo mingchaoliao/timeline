@@ -260,6 +260,9 @@ class Event extends BaseModel
             'content' => $this->getContent(),
             'images' => $this->getImageCollection()->map(function (Image $image) {
                 return $image->getPath();
+            })->toArray(),
+            'imageDescriptions' => $this->getImageCollection()->map(function (Image $image) {
+                return $image->getDescription();
             })->toArray()
         ];
 
