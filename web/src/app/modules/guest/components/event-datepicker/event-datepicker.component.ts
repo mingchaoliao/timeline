@@ -113,6 +113,7 @@ export class EventDatepickerComponent implements OnInit, ControlValueAccessor {
     let day = this.form.value['day'];
 
     if (!year) {
+      this.propagateChange(null);
       return null;
     }
     let rtn = String(year);
