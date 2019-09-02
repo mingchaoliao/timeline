@@ -30,8 +30,12 @@ class Kernel extends ConsoleKernel
         $schedule->job(CleanUnlinkedImages::class)->daily();
         if(env('APP_BACKUP', false) === true) {
             $schedule->command('backup:clean')->daily()->at('01:00');
-            $schedule->command('backup:run')->daily()->at('02:00');
-            Log::info('DB/storage backup complete');
+            $schedule->command('backup:run')
+                ->daily()
+                ->at('02:00')
+                ->after(function () {
+                    Log::info('DB/storage backup complete');
+                });
         }
     }
 

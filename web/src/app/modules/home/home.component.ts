@@ -1,74 +1,84 @@
 ///<reference path="../../../../node_modules/@angular/core/src/metadata/lifecycle_hooks.d.ts"/>
-import {AfterViewInit, Component, OnDestroy, OnInit} from '@angular/core';
-import {TimelineService} from '../core/shared/services/timeline.service';
-import {Notification} from '../core/shared/models/notification';
-import {NotificationEmitter} from '../core/shared/events/notificationEmitter';
-import {LanguageEmitter} from "../core/shared/events/languageEmitter";
-import {Language} from "../core/shared/models/language";
-import {Subscription} from "rxjs";
-
-declare var TL: any;
+import {Component, HostListener, OnInit} from '@angular/core';
+import {EventService} from '../core/shared/services/event.service';
+import {Language} from '../core/shared/models/language';
+import {LanguageEmitter} from '../core/shared/events/languageEmitter';
+import {DomSanitizer} from '@angular/platform-browser';
+import {Url} from "../core/shared/classes/url";
 
 @Component({
     selector: 'app-home',
     templateUrl: './home.component.html',
     styleUrls: ['./home.component.css']
 })
-export class HomeComponent implements OnInit, AfterViewInit, OnDestroy {
-    private _languageEmitterSubscription: Subscription;
-    private _timelineDataSubscription: Subscription;
-    private _timelineData: any;
+export class HomeComponent implements OnInit {
+    private _hits = [];
+    private _language: Language;
+    private _isLoading = true;
+    private _currentPage = 0;
+    private _maxPage = null;
 
-    constructor(
-        private timelineService: TimelineService
-    ) {
+    get sanitizer(): DomSanitizer {
+        return this._sanitizer;
+    }
+
+    get hits(): any[] {
+        return this._hits;
+    }
+
+    get language(): Language {
+        return this._language;
+    }
+
+    constructor(private _eventService: EventService, private _sanitizer: DomSanitizer) {
 
     }
 
-    ngOnInit() {
+    @HostListener('window:beforeunload', [])
+    beforeunload() {
+        window.scrollTo(0, 0);
     }
 
-    ngAfterViewInit(): void {
-        this.getTimeline(LanguageEmitter.currentLanguage);
-        this._languageEmitterSubscription = LanguageEmitter.emitter.subscribe((language: Language) => {
-            this.getTimeline(language);
-        });
+    @HostListener('window:scroll', [])
+    onWindowScroll() {
+        if (this._isLoading || (this._maxPage && this._currentPage >= this._maxPage)) {
+            return;
+        }
+        const scrollPosition = window.pageYOffset;
+        const windowSize = window.innerHeight;
+        const bodyHeight = document.body.offsetHeight;
+        const distanceToBottom = Math.max(bodyHeight - (scrollPosition + windowSize), 0);
+        if (distanceToBottom === 0) {
+            this.loadData();
+        }
     }
 
-    getTimeline(language: Language) {
-        if (this._timelineData) {
-            this.bootstrapTimeline(this._timelineData, language);
+    getImageUrl(image): string {
+        if (image['id']) {
+            return Url.getTempImage(image.path);
         } else {
-            this._timelineDataSubscription = this.timelineService.get().subscribe(
-                timeline => {
-                    this._timelineData = timeline;
-                    this.bootstrapTimeline(this._timelineData, language);
-                },
-                error => {
-                    console.log(error);
-                    NotificationEmitter.emit(Notification.error(error.error.message, 'Unable to retrieve events'));
-                }
-            );
+            return Url.getImage(image);
         }
     }
 
-    bootstrapTimeline(data: any, language: Language) {
-        const cultureLang = language.lang === 'en' ? 'en' : language.cultureLang;
+    loadData() {
+        this._isLoading = true;
+        this._eventService.search(null, null, null, null, this._currentPage + 1, 20).subscribe(
+            result => {
+                this._hits = this._hits.concat(result.hits);
+                this._isLoading = false;
+                this._currentPage++;
+                this._maxPage = Math.ceil(result.total / 20.0);
+            },
+            e => {
 
-        new TL.Timeline('timeline', data, {
-            language: cultureLang,
-            hash_bookmark: true,
-            script_path: 'assets/timeline'
-        });
+            }
+        );
     }
 
-    ngOnDestroy(): void {
-        if (this._timelineDataSubscription) {
-            this._timelineDataSubscription.unsubscribe();
-        }
-
-        if (this._languageEmitterSubscription) {
-            this._languageEmitterSubscription.unsubscribe();
-        }
+    ngOnInit(): void {
+        this._language = LanguageEmitter.currentLanguage;
+        LanguageEmitter.emitter.subscribe((language: Language) => this._language = language);
+        this.loadData();
     }
 }

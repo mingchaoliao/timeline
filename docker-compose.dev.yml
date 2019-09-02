@@ -2,12 +2,18 @@ version: '3.7'
 services:
   nginx:
     image: nginx:1.15.8-alpine
-    ports:
-      - 80:80
-      - 443:443
+    expose:
+      - 443
     depends_on:
       - api
     working_dir: /apidist
+    environment:
+      VIRTUAL_HOST: api.timeline.localhost
+      VIRTUAL_PORT: 443
+      VIRTUAL_PROTO: https
+    networks:
+      - nginx-proxy
+      - app
     volumes:
       - ./etc/development/nginx/conf.d:/etc/nginx/conf.d
       - ./etc/development/nginx/ssl:/etc/nginx/ssl
@@ -20,6 +26,8 @@ services:
     volumes:
       - ./api:/apidist
       - backup:/backup
+    networks:
+      - app
     depends_on:
       - mysql
       - elasticsearch
@@ -34,6 +42,8 @@ services:
       - ./api:/apidist
   queue:
     image: redis:5.0.3-alpine3.9
+    networks:
+      - app
     volumes:
       - queuedata1:/data
   horizon:
@@ -41,6 +51,8 @@ services:
     volumes:
       - ./api:/apidist
     command: php artisan horizon
+    networks:
+      - app
     depends_on:
       - api
   scheduler:
@@ -49,6 +61,8 @@ services:
       - ./api:/apidist
       - backup:/backup
     command: /usr/sbin/crond -f
+    networks:
+      - app
     depends_on:
       - api
       - mysql
@@ -63,6 +77,8 @@ services:
       - ./etc/development/docker/mysql.env
     ports:
       - 13306:3306
+    networks:
+      - app
     environment:
       MYSQL_RANDOM_ROOT_PASSWORD: 'yes'
       MYSQL_DATABASE: timeline
@@ -80,6 +96,8 @@ services:
     ports:
       - 9200:9200
       - 9300:9300
+    networks:
+      - app
     environment:
       discovery.type: single-node
   elastichq:
@@ -107,3 +125,8 @@ volumes:
     driver: local
   queuedata1:
     driver: local
+networks:
+  nginx-proxy:
+    external: true
+  app:
+    driver: bridge

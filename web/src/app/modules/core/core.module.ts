@@ -12,7 +12,6 @@ import {PeriodService} from './shared/services/period.service';
 import {CatalogService} from './shared/services/catalog.service';
 import {DateAttributeService} from './shared/services/dateAttribute.service';
 import {ImageService} from './shared/services/image.service';
-import {TimelineService} from './shared/services/timeline.service';
 import {NotificationComponent} from './components/notification/notification.component';
 import {ButtonComponent} from './components/button/button.component';
 import {AutofocusDirective} from './shared/directives/autofocus.directive';
@@ -47,8 +46,7 @@ import {TranslateModule} from "@ngx-translate/core";
     PeriodService,
     CatalogService,
     DateAttributeService,
-    ImageService,
-    TimelineService
+    ImageService
   ]
 })
 export class CoreModule {
