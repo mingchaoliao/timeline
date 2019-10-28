@@ -13,7 +13,7 @@ spec:
         component: horizon
     spec:
       volumes:
-        - name: storage
+        - name: app-storage
           persistentVolumeClaim:
             claimName: api-storage-pvc
         - name: backup
@@ -31,8 +31,8 @@ spec:
             - secretRef:
                 name: api-secret
           volumeMounts:
-            - name: storage
-              mountPath: /app/storage
+            - name: app-storage
+              mountPath: /app/storage/app
             - name: backup
               mountPath: /backup
             - name: api-env

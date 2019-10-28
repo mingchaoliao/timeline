@@ -18,9 +18,9 @@ spec:
               serviceName: api-cluster-ip-service
               servicePort: api-port
     - host: timeline.localhost
-        http:
-          paths:
-            - path: /
-              backend:
-                serviceName: web-cluster-ip-service
-                servicePort: web-port
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: web-cluster-ip-service
+              servicePort: web-port

@@ -13,7 +13,7 @@ spec:
         component: api
     spec:
       volumes:
-        - name: storage
+        - name: app-storage
           persistentVolumeClaim:
             claimName: api-storage-pvc
         - name: backup
@@ -29,17 +29,13 @@ spec:
         - name: api
           image: moail/timeline-api
           volumeMounts:
-            - name: storage
-              mountPath: /app/storage
+            - name: app-storage
+              mountPath: /app/storage/app
             - name: backup
               mountPath: /backup
             - name: api-env
               mountPath: /app/.env
               subPath: .env
-        - name: laravel-env-generator
-          image: moail/laravel-env-generator
-          args:
-            - --prefix=timeline_
         - name: nginx
           image: nginx:alpine
           volumeMounts:
