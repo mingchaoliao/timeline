@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-deployment
+spec:
+  selector:
+    matchLabels:
+      component: web
+  template:
+    metadata:
+      name: web-pod
+      labels:
+        component: web
+    spec:
+      volumes:
+        - name: config
+          configMap:
+            name: web-cm
+      containers:
+        - name: web
+          image: moail/timeline-web
+          volumeMounts:
+            - name: config
+              mountPath: /etc/nginx/conf.d

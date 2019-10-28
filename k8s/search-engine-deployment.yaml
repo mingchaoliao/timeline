@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: search-engine-deployment
+spec:
+  selector:
+    matchLabels:
+      component: search-engine
+  template:
+    metadata:
+      name: elasticsearch-pod
+      labels:
+        component: search-engine
+    spec:
+      volumes:
+        - name: es-storage
+          persistentVolumeClaim:
+            claimName: search-engine-pvc
+      containers:
+        - name: elasticsearch
+          image: moail/timeline-elasticsearch
+          env:
+            - name: discovery.type
+              value: single-node
+          volumeMounts:
+            - name: es-storage
+              mountPath: /usr/share/elasticsearch/data

@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-deployment
+spec:
+  selector:
+    matchLabels:
+      component: api
+  template:
+    metadata:
+      name: api-pod
+      labels:
+        component: api
+    spec:
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: api-storage-pvc
+        - name: backup
+          persistentVolumeClaim:
+            claimName: backup-pvc
+        - name: nginx-config
+          configMap:
+            name: api-nginx-cm
+        - name: api-env
+          configMap:
+            name: api-cm
+      containers:
+        - name: api
+          image: moail/timeline-api
+          volumeMounts:
+            - name: storage
+              mountPath: /app/storage
+            - name: backup
+              mountPath: /backup
+            - name: api-env
+              mountPath: /app/.env
+              subPath: .env
+        - name: laravel-env-generator
+          image: moail/laravel-env-generator
+          args:
+            - --prefix=timeline_
+        - name: nginx
+          image: nginx:alpine
+          volumeMounts:
+            - name: storage
+              mountPath: /app/storage
+              readOnly: true
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d

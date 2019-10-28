@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: horizon-deployment
+spec:
+  selector:
+    matchLabels:
+      component: horizon
+  template:
+    metadata:
+      name: horizon-pod
+      labels:
+        component: horizon
+    spec:
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: api-storage-pvc
+        - name: backup
+          persistentVolumeClaim:
+            claimName: backup-pvc
+        - name: api-env
+          configMap:
+            name: api-cm
+      containers:
+        - name: horizon
+          image: moail/timeline-api
+          envFrom:
+            - configMapRef:
+                name: api-cm
+            - secretRef:
+                name: api-secret
+          volumeMounts:
+            - name: storage
+              mountPath: /app/storage
+            - name: backup
+              mountPath: /backup
+            - name: api-env
+              mountPath: /app/.env
+              subPath: .env

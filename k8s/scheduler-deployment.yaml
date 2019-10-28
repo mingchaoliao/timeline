@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: scheduler-deployment
+spec:
+  selector:
+    matchLabels:
+      component: scheduler
+  template:
+    metadata:
+      name: scheduler-pod
+      labels:
+        component: scheduler
+    spec:
+      volumes:
+        - name: storage
+          persistentVolumeClaim:
+            claimName: api-storage-pvc
+        - name: backup
+          persistentVolumeClaim:
+            claimName: backup-pvc
+        - name: api-env
+          configMap:
+            name: api-cm
+      containers:
+        - name: scheduler
+          image: moail/timeline-api
+          envFrom:
+            - configMapRef:
+                name: api-cm
+            - secretRef:
+                name: api-secret
+          volumeMounts:
+            - name: storage
+              mountPath: /app/storage
+            - name: backup
+              mountPath: /backup
+            - name: api-env
+              mountPath: /app/.env
+              subPath: .env
