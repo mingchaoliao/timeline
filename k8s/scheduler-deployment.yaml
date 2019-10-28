@@ -13,7 +13,7 @@ spec:
         component: scheduler
     spec:
       volumes:
-        - name: app-storage
+        - name: api-storage
           persistentVolumeClaim:
             claimName: api-storage-pvc
         - name: backup
@@ -32,16 +32,11 @@ spec:
             - crond
           args:
             - -f
-          envFrom:
-            - configMapRef:
-                name: api-cm
-            - secretRef:
-                name: api-secret
           volumeMounts:
-            - name: app-storage
-              mountPath: /app/storage/app
+            - name: api-storage
+              mountPath: /api/storage/app
             - name: backup
               mountPath: /backup
             - name: api-env
-              mountPath: /app/.env
+              mountPath: /api/.env
               subPath: .env

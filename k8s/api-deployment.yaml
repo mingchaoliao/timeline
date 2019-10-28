@@ -13,7 +13,7 @@ spec:
         component: api
     spec:
       volumes:
-        - name: app-storage
+        - name: api-storage
           persistentVolumeClaim:
             claimName: api-storage-pvc
         - name: backup
@@ -32,18 +32,18 @@ spec:
             runAsGroup: 1500
             runAsUser: 1500
           volumeMounts:
-            - name: app-storage
-              mountPath: /app/storage/app
+            - name: api-storage
+              mountPath: /api/storage/app
             - name: backup
               mountPath: /backup
             - name: api-env
-              mountPath: /app/.env
+              mountPath: /api/.env
               subPath: .env
         - name: nginx
           image: nginx:alpine
           volumeMounts:
-            - name: storage
-              mountPath: /app/storage
+            - name: api-storage
+              mountPath: /api/storage/app
               readOnly: true
             - name: nginx-config
               mountPath: /etc/nginx/conf.d

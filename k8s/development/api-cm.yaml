@@ -16,7 +16,7 @@ data:
     LOG_CHANNEL: stack
 
     DB_CONNECTION: mysql
-    DB_HOST: mysql
+    DB_HOST: db-cluster-ip-service
     DB_PORT: 3306
     DB_DATABASE: timeline
     DB_USERNAME: timeline_user
@@ -26,11 +26,11 @@ data:
 
     TIMEZONE: America/New_York
 
-    ELASTICSEARCH_HOST: elasticsearch
+    ELASTICSEARCH_HOST: search-engine-cluster-ip-service
     ELASTICSEARCH_PORT: 9200
     ELASTICSEARCH_SCHEME: http
 
-    REDIS_HOST: queue
+    REDIS_HOST: queue-cluster-ip-service
     QUEUE_CONNECTION: redis
 
     JWT_SECRET: 9F8bu3XVifPfPIlkCd5TFwf2PxzOmEou
