@@ -25,6 +25,13 @@ spec:
       containers:
         - name: scheduler
           image: moail/timeline-api
+          securityContext:
+            runAsGroup: 0
+            runAsUser: 0
+          command:
+            - crond
+          args:
+            - -f
           envFrom:
             - configMapRef:
                 name: api-cm

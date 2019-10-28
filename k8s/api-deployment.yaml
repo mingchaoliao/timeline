@@ -28,6 +28,9 @@ spec:
       containers:
         - name: api
           image: moail/timeline-api
+          securityContext:
+            runAsGroup: 1500
+            runAsUser: 1500
           volumeMounts:
             - name: app-storage
               mountPath: /app/storage/app
