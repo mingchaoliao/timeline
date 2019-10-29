@@ -1,0 +1,59 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: scheduler-cronjob
+spec:
+  schedule: "* * * * *"
+  jobTemplate:
+    metadata:
+      name: scheduler-job
+    spec:
+      template:
+        metadata:
+          name: scheduler-pod
+        spec:
+          restartPolicy: Never
+          volumes:
+            - name: api-storage
+              persistentVolumeClaim:
+                claimName: api-storage-pvc
+            - name: backup
+              persistentVolumeClaim:
+                claimName: backup-pvc
+          containers:
+            - name: scheduler
+              image: moail/timeline-api
+              envFrom:
+                - configMapRef:
+                    name: api-cm
+                - secretRef:
+                    name: api-secret
+              env:
+                - name: DB_DATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      name: db-secret
+                      key: database
+                - name: DB_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: db-secret
+                      key: username
+                - name: DB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: db-secret
+                      key: password
+              securityContext:
+                runAsGroup: 1500
+                runAsUser: 1500
+              command:
+                - php
+              args:
+                - artisan
+                - schedule:run
+              volumeMounts:
+                - name: api-storage
+                  mountPath: /api/storage/app
+                - name: backup
+                  mountPath: /backup

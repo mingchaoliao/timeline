@@ -1,0 +1,5 @@
+FROM nginx:1.15.1-alpine
+COPY ./public /api/public
+
+WORKDIR /api
+RUN ln -s /api/storage/app/public /api/public/storage

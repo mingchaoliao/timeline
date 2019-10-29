@@ -19,12 +19,30 @@ spec:
         - name: backup
           persistentVolumeClaim:
             claimName: backup-pvc
-        - name: api-env
-          configMap:
-            name: api-cm
       containers:
         - name: horizon
           image: moail/timeline-api
+          envFrom:
+            - configMapRef:
+                name: api-cm
+            - secretRef:
+                name: api-secret
+          env:
+            - name: DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: database
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: db-secret
+                  key: password
           securityContext:
             runAsGroup: 1500
             runAsUser: 1500
@@ -38,6 +56,3 @@ spec:
               mountPath: /api/storage/app
             - name: backup
               mountPath: /backup
-            - name: api-env
-              mountPath: /api/.env
-              subPath: .env

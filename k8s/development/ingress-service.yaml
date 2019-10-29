@@ -7,17 +7,17 @@ metadata:
 spec:
   tls:
     - hosts:
-        - timeline.localhost
-        - api.timeline.localhost
+        - timeline.test
+        - api.timeline.test
   rules:
-    - host: api.timeline.localhost
+    - host: api.timeline.test
       http:
         paths:
           - path: /
             backend:
               serviceName: api-cluster-ip-service
               servicePort: api-port
-    - host: timeline.localhost
+    - host: timeline.test
       http:
         paths:
           - path: /

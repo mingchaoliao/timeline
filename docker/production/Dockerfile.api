@@ -30,7 +30,11 @@ USER root
 WORKDIR /api
 RUN chown tlmgr:tlmgr /api
 RUN mkdir -p /backup && chown tlmgr:tlmgr /backup
-COPY --chown=tlmgr:tlmgr . /api
 
 USER tlmgr
+COPY --chown=tlmgr:tlmgr ./composer.json /api/composer.json
+COPY --chown=tlmgr:tlmgr ./composer.lock /api/composer.lock
+RUN composer install --prefer-source --prefer-dist --no-dev --no-interaction --no-scripts --no-autoloader
+
+COPY --chown=tlmgr:tlmgr . /api
 RUN composer install --prefer-source --prefer-dist --no-dev --optimize-autoloader --no-interaction
