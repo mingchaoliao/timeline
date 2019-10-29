@@ -1,0 +1,13 @@
+FROM node:alpine
+RUN npm install -g @angular/cli
+
+WORKDIR /src
+
+COPY package.json /src
+COPY package-lock.json /src
+RUN npm install
+
+COPY . /src
+
+ENTRYPOINT ["ng"]
+CMD ["serve", "--port=80", "--host=0.0.0.0"]

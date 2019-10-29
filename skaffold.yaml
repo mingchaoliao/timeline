@@ -1,0 +1,33 @@
+apiVersion: skaffold/v1beta16
+kind: Config
+build:
+  local:
+    push: false
+  artifacts:
+    - image: moail/timeline-api
+      context: api
+      docker:
+        dockerfile: Dockerfile.skaffold.dev
+      sync:
+        infer:
+          - '**/*'
+    - image: moail/timeline-web
+      context: web
+      docker:
+        dockerfile: Dockerfile.skaffold.dev
+      sync:
+        infer:
+          - '**/*'
+deploy:
+  kubectl:
+    flags:
+      global:
+        - -n
+        - timeline
+      delete:
+        - --force
+        - --grace-period=0
+    manifests:
+      - k8s/development/namespace.yaml
+      - k8s/development/*.yaml
+      - k8s/*.yaml

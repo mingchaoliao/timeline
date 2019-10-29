@@ -26,7 +26,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command('horizon:snapshot')->everyFifteenMinutes();
+        $schedule->command('horizon:snapshot')->everyMinute();
         $schedule->job(CleanUnlinkedImages::class)->daily();
         if(env('APP_BACKUP', false) === true) {
             $schedule->command('backup:clean')->daily()->at('01:00');
