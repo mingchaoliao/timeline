@@ -22,10 +22,6 @@ RUN curl -sS https://getcomposer.org/installer | php \
 
 RUN adduser -h /home/tlmgr -s /bin/sh -u 1500 -g 1500 -D tlmgr tlmgr
 
-RUN apk add --update busybox-suid
-RUN rm -rf /etc/crontabs/root
-RUN echo '* * * * * php artisan schedule:run >> /dev/null 2>&1' | crontab -u tlmgr -
-
 USER root
 WORKDIR /api
 RUN chown tlmgr:tlmgr /api
