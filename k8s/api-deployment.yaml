@@ -57,6 +57,10 @@ spec:
               mountPath: /backup
         - name: nginx
           image: moail/timeline-api-nginx
+          readinessProbe:
+            httpGet:
+              path: /api
+              port: 80
           volumeMounts:
             - name: api-storage
               mountPath: /api/storage/app

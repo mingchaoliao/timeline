@@ -10,7 +10,7 @@
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
-
+Route::get('/', 'UtilController@healthCheck');
 
 Route::get('/event', 'EventController@get');
 Route::get('/event/search', 'EventController@search');

@@ -1,31 +1,6 @@
-FROM php:7.2.13-fpm-alpine3.8
+FROM moail/timeline-api
 
-RUN apk update && apk add build-base \
-  wget \
-  curl \
-  git \
-  grep \
-  zlib-dev \
-  zip \
-  mysql-client \
-  freetype-dev \
-  libjpeg-turbo-dev \
-  libpng-dev
-
-RUN docker-php-ext-install mysqli mbstring pdo pdo_mysql tokenizer pcntl zip
-RUN docker-php-ext-configure gd --with-gd --with-jpeg-dir=/usr/include/ --with-png-dir=/usr/include/
-RUN docker-php-ext-install gd
-
-RUN curl -sS https://getcomposer.org/installer | php \
-        && mv composer.phar /usr/local/bin/ \
-        && ln -s /usr/local/bin/composer.phar /usr/local/bin/composer
-
-RUN adduser -h /home/tlmgr -s /bin/sh -u 1500 -g 1500 -D tlmgr tlmgr
-
-USER root
-WORKDIR /api
-RUN chown tlmgr:tlmgr /api
-RUN mkdir -p /backup && chown tlmgr:tlmgr /backup
+RUN rm -rf /api/*
 
 USER tlmgr
 COPY --chown=tlmgr:tlmgr ./composer.json /api/composer.json

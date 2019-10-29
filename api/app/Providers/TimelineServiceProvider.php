@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Timeline\App\HealthCheckService;
 use App\Timeline\App\Validators\ValidatorFactory;
 use App\Timeline\Domain\Repositories\CatalogRepository;
 use App\Timeline\Domain\Repositories\DateAttributeRepository;
@@ -34,10 +35,12 @@ use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentImageR
 use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentPeriodRepository;
 use App\Timeline\Infrastructure\Persistence\Eloquent\Repositories\EloquentUserRepository;
 use App\Timeline\Infrastructure\Persistence\Filesystem\FSImageFileRepository;
+use Elasticsearch\Client;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Contracts\Validation\Factory;
+use Illuminate\Database\Connection;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -227,6 +230,15 @@ class TimelineServiceProvider extends ServiceProvider
                 resolve(\Illuminate\Contracts\Filesystem\Factory::class),
                 resolve(Kernel::class),
                 resolve(UserService::class)
+            );
+        });
+
+        $this->app->singleton(HealthCheckService::class, function () {
+            return new HealthCheckService(
+                resolve(Client::class),
+                resolve(SearchEventRepositoryInterface::class),
+                resolve(ConnectionInterface::class),
+                resolve(Kernel::class)
             );
         });
     }
