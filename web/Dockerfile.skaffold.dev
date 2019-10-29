@@ -10,4 +10,4 @@ RUN npm install
 COPY . /src
 
 ENTRYPOINT ["ng"]
-CMD ["serve", "--port=80", "--host=0.0.0.0"]
+CMD ["serve", "--port=80", "--host=0.0.0.0", "--disableHostCheck=true"]
