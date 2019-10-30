@@ -22,6 +22,18 @@ spec:
       containers:
         - name: horizon
           image: moail/timeline-api
+          readinessProbe:
+            exec:
+              command:
+                - php
+                - artisan
+                - check:health
+          livenessProbe:
+            exec:
+              command:
+                - php
+                - artisan
+                - check:health
           envFrom:
             - configMapRef:
                 name: api-cm

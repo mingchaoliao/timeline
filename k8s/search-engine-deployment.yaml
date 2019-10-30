@@ -18,6 +18,12 @@ spec:
             claimName: search-engine-pvc
       containers:
         - name: elasticsearch
+          readinessProbe:
+            tcpSocket:
+              port: 9200
+          livenessProbe:
+            tcpSocket:
+              port: 9200
           image: moail/timeline-elasticsearch
           env:
             - name: discovery.type

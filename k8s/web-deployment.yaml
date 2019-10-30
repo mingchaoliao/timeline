@@ -19,6 +19,14 @@ spec:
             name: web-cm
       containers:
         - name: web
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 80
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 80
           image: moail/timeline-web
           volumeMounts:
             - name: config

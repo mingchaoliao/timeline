@@ -61,6 +61,10 @@ spec:
             httpGet:
               path: /api
               port: 80
+          livenessProbe:
+            httpGet:
+              path: /api
+              port: 80
           volumeMounts:
             - name: api-storage
               mountPath: /api/storage/app

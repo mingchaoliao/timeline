@@ -18,6 +18,12 @@ spec:
             claimName: queue-pvc
       containers:
         - name: redis
+          readinessProbe:
+            tcpSocket:
+              port: 6379
+          livenessProbe:
+            tcpSocket:
+              port: 6379
           image: redis:alpine
           volumeMounts:
             - name: redis-storage

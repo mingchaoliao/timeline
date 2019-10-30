@@ -19,6 +19,12 @@ spec:
       containers:
         - name: mysql
           image: mysql:5.7
+          readinessProbe:
+            tcpSocket:
+              port: 3306
+          livenessProbe:
+            tcpSocket:
+              port: 3306
           args:
             - --disable-partition-engine-check
           env:
