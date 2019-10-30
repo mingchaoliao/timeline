@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: search-engine-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      component: search-engine
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchExpressions:
+              - key: component
+                operator: In
+                values:
+                  - api
+                  - horizon
+                  - scheduler
+      ports:
+        - port: 9200

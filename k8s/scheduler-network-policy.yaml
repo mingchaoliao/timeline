@@ -1,0 +1,10 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: scheduler-network-policy
+spec:
+  podSelector:
+    matchLabels:
+      component: scheduler
+  policyTypes:
+    - Ingress

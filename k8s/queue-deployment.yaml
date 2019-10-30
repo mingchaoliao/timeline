@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: queue-deployment
+spec:
+  selector:
+    matchLabels:
+      component: queue
+  template:
+    metadata:
+      name: redis-pod
+      labels:
+        component: queue
+    spec:
+      volumes:
+        - name: redis-storage
+          persistentVolumeClaim:
+            claimName: queue-pvc
+      containers:
+        - name: redis
+          readinessProbe:
+            tcpSocket:
+              port: 6379
+          livenessProbe:
+            tcpSocket:
+              port: 6379
+          image: redis:alpine
+          volumeMounts:
+            - name: redis-storage
+              mountPath: /data
