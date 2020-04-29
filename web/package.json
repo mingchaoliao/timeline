@@ -35,7 +35,7 @@
     "bootstrap": "^4.1.2",
     "core-js": "^2.5.4",
     "file-saver": "^2.0.1",
-    "jquery": "^3.3.1",
+    "jquery": "^3.5.0",
     "moment": "^2.24.0",
     "ngx-moment": "^3.3.0",
     "popper.js": "^1.14.3",
